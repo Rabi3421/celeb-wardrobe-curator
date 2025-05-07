@@ -1,12 +1,64 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "@/components/layout/PageLayout";
 import { blogPosts } from "@/data/mockData";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Heart, MessageSquare, Clock, Calendar, User, ArrowLeft, Share } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const BlogPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const post = blogPosts.find((post) => post.id === id);
+  const { toast } = useToast();
+  
+  const [likes, setLikes] = useState(0);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState<Array<{author: string, text: string, date: string}>>([]);
+
+  // Function to handle post like
+  const handleLike = () => {
+    if (!hasLiked) {
+      setLikes(likes + 1);
+      setHasLiked(true);
+      toast({
+        description: "Thanks for liking this article!",
+        duration: 2000,
+      });
+    } else {
+      setLikes(likes - 1);
+      setHasLiked(false);
+    }
+  };
+
+  // Function to handle comment submission
+  const handleCommentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (comment.trim()) {
+      const newComment = {
+        author: "You",
+        text: comment,
+        date: new Date().toLocaleDateString()
+      };
+      setComments([...comments, newComment]);
+      setComment("");
+      toast({
+        description: "Comment posted successfully!",
+        duration: 2000,
+      });
+    }
+  };
+
+  // Function to handle share
+  const handleShare = () => {
+    // In a real app, this would use the Web Share API
+    toast({
+      description: "Share link copied to clipboard!",
+      duration: 2000,
+    });
+  };
 
   if (!post) {
     return (
@@ -21,6 +73,11 @@ const BlogPost: React.FC = () => {
     );
   }
 
+  // Get related posts (just for example - in real app would use tags/categories)
+  const relatedPosts = blogPosts
+    .filter(p => p.id !== post.id && p.category === post.category)
+    .slice(0, 3);
+
   return (
     <PageLayout>
       <div className="container-custom py-8 md:py-16">
@@ -29,20 +86,7 @@ const BlogPost: React.FC = () => {
             to="/blog"
             className="text-sm font-medium text-primary-foreground hover:underline inline-flex items-center"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-1"
-            >
-              <path d="m15 18-6-6 6-6" />
-            </svg>
+            <ArrowLeft className="mr-1 h-4 w-4" />
             Back to Blog
           </Link>
         </div>
@@ -62,11 +106,12 @@ const BlogPost: React.FC = () => {
             <div className="flex items-center justify-center">
               <div className="flex items-center">
                 <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center mr-3">
-                  <span className="font-medium text-sm">
-                    {post.author.charAt(0)}
-                  </span>
+                  <User className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="font-medium text-sm">{post.author}</span>
+                <div className="text-left">
+                  <span className="font-medium text-sm block">{post.author}</span>
+                  <span className="text-xs text-muted-foreground">Fashion Editor</span>
+                </div>
               </div>
             </div>
           </header>
@@ -87,58 +132,131 @@ const BlogPost: React.FC = () => {
             ))}
           </div>
 
-          <div className="mt-12 border-t border-border pt-8 flex flex-col items-center">
-            <h3 className="font-serif text-xl font-medium mb-4">Share this article</h3>
-            <div className="flex space-x-4">
-              <button className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center transition-colors hover:bg-primary hover:text-primary-foreground">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                </svg>
-              </button>
-              <button className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center transition-colors hover:bg-primary hover:text-primary-foreground">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-                </svg>
-              </button>
-              <button className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center transition-colors hover:bg-primary hover:text-primary-foreground">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-                </svg>
-              </button>
+          {/* Article Engagement */}
+          <div className="flex items-center justify-between my-8 border-t border-b border-border py-4">
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleLike}
+                className="flex items-center space-x-1"
+              >
+                <Heart className={`h-5 w-5 ${hasLiked ? 'text-red-500 fill-red-500' : ''}`} />
+                <span>{likes}</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="flex items-center space-x-1"
+                onClick={() => document.getElementById('comments-section')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                <MessageSquare className="h-5 w-5" />
+                <span>{comments.length}</span>
+              </Button>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">5 min read</span>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleShare}
+              className="flex items-center space-x-1"
+            >
+              <Share className="h-5 w-5" />
+              <span>Share</span>
+            </Button>
+          </div>
+
+          {/* Author Bio */}
+          <div className="my-12 bg-secondary/50 rounded-xl p-6">
+            <div className="flex items-center">
+              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mr-4">
+                <User className="h-8 w-8 text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="font-serif text-lg font-medium">About {post.author}</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Fashion editor with over 10 years of experience in celebrity styling and trend analysis.
+                </p>
+              </div>
             </div>
           </div>
+
+          {/* Comments Section */}
+          <div id="comments-section" className="my-12">
+            <h3 className="font-serif text-xl font-medium mb-6">Comments ({comments.length})</h3>
+            
+            {/* Comment Form */}
+            <form onSubmit={handleCommentSubmit} className="mb-8">
+              <div className="mb-4">
+                <textarea
+                  placeholder="Leave a comment..."
+                  className="w-full p-4 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  rows={4}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                ></textarea>
+              </div>
+              <Button type="submit" className="btn-primary">
+                Post Comment
+              </Button>
+            </form>
+            
+            {/* Comments List */}
+            {comments.length > 0 ? (
+              <div className="space-y-6">
+                {comments.map((comment, index) => (
+                  <div key={index} className="bg-secondary/30 rounded-lg p-4">
+                    <div className="flex items-center mb-2">
+                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-2">
+                        <span className="text-xs font-medium">{comment.author[0]}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-sm">{comment.author}</span>
+                        <span className="text-xs text-muted-foreground ml-2">{comment.date}</span>
+                      </div>
+                    </div>
+                    <p className="text-sm">{comment.text}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-4">
+                Be the first to comment on this article
+              </p>
+            )}
+          </div>
+
+          {/* Related Articles */}
+          {relatedPosts.length > 0 && (
+            <div className="mt-16">
+              <h3 className="font-serif text-2xl font-medium mb-6 text-center">Related Articles</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {relatedPosts.map(relatedPost => (
+                  <Card key={relatedPost.id} className="overflow-hidden">
+                    <Link to={`/blog/${relatedPost.id}`} className="block">
+                      <div className="aspect-video overflow-hidden">
+                        <img 
+                          src={relatedPost.image} 
+                          alt={relatedPost.title}
+                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h4 className="font-serif font-medium text-lg line-clamp-2">{relatedPost.title}</h4>
+                        <div className="flex items-center mt-2 text-xs text-muted-foreground">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          <span>{relatedPost.date}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
         </article>
       </div>
     </PageLayout>
