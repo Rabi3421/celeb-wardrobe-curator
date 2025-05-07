@@ -1,10 +1,23 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const Navbar: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
   return (
     <nav className="sticky top-0 bg-white/80 backdrop-blur-md z-50 shadow-sm">
       <div className="container-custom py-4">
@@ -13,19 +26,39 @@ const Navbar: React.FC = () => {
             CelebrityPersona
           </Link>
           
-          <div className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-sm font-medium hover:text-primary-foreground">
-              Home
-            </Link>
-            <Link to="/celebrities" className="text-sm font-medium hover:text-primary-foreground">
-              Celebrities
-            </Link>
-            <Link to="/outfits" className="text-sm font-medium hover:text-primary-foreground">
-              Outfits
-            </Link>
-            <Link to="/blog" className="text-sm font-medium hover:text-primary-foreground">
-              Blog
-            </Link>
+          <div className="hidden md:block">
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <Link to="/">
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      Home
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/celebrities">
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      Celebrities
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/outfits">
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      Outfits
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/blog">
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      Blog
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
           
           <div className="relative hidden sm:block w-64">
@@ -36,10 +69,60 @@ const Navbar: React.FC = () => {
             />
           </div>
           
-          <button className="md:hidden">
-            <Search className="h-5 w-5" />
-          </button>
+          <div className="flex md:hidden">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Menu"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
+        
+        {/* Mobile menu */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t mt-4">
+            <div className="flex flex-col space-y-3">
+              <Link 
+                to="/" 
+                className="px-2 py-1 hover:bg-secondary rounded-md text-sm font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link 
+                to="/celebrities" 
+                className="px-2 py-1 hover:bg-secondary rounded-md text-sm font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Celebrities
+              </Link>
+              <Link 
+                to="/outfits" 
+                className="px-2 py-1 hover:bg-secondary rounded-md text-sm font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Outfits
+              </Link>
+              <Link 
+                to="/blog" 
+                className="px-2 py-1 hover:bg-secondary rounded-md text-sm font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Blog
+              </Link>
+              <div className="relative pt-2">
+                <Search className="absolute left-2.5 top-5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search celebrities, styles..."
+                  className="pl-9 rounded-full bg-secondary"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
