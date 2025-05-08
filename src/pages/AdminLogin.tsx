@@ -88,7 +88,7 @@ const AdminLogin: React.FC = () => {
           // Note: In a real app, this would be done through the server-side admin API
           const { error: adminUpdateError } = await supabase.auth.admin.updateUserById(
             authUser.user.id,
-            { email_confirmed: true }
+            { email_confirm: true }
           ).catch(() => {
             // Fallback for when admin API is not available (in development without admin keys)
             console.log('Unable to confirm email via admin API, proceeding anyway');
