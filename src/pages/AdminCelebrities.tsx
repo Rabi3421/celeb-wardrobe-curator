@@ -1,8 +1,7 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Celebrity } from "@/types/data";
-import { celebrities } from "@/data/mockData";
 import {
   Table,
   TableBody,
@@ -13,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Edit, Trash, Eye } from "lucide-react";
+import { Plus, Search, Edit, Trash, Eye, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -27,57 +26,211 @@ import {
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { toast } from "@/components/ui/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const AdminCelebrities: React.FC = () => {
-  const [celebrityList, setCelebrityList] = useState<Celebrity[]>(celebrities);
   const [searchTerm, setSearchTerm] = useState("");
   const [editCelebrity, setEditCelebrity] = useState<Celebrity | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [celebrityToDelete, setCelebrityToDelete] = useState<Celebrity | null>(null);
-
-  const categories = Array.from(new Set(celebrities.map(c => c.category)));
-  const styleTypes = Array.from(new Set(celebrities.map(c => c.styleType)));
+  const queryClient = useQueryClient();
 
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
 
+  // Fetch categories from Supabase
+  const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
+    queryKey: ['celebrityCategories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('name')
+        .eq('type', 'celebrity')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+      }
+      
+      return data.map(category => category.name);
+    }
+  });
+
+  // Fetch style types from Supabase
+  const { data: styleTypes = [], isLoading: isStyleTypesLoading } = useQuery({
+    queryKey: ['styleTypes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('name')
+        .eq('type', 'style')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching style types:', error);
+        throw error;
+      }
+      
+      return data.map(category => category.name);
+    }
+  });
+
+  // Fetch all celebrities from Supabase
+  const { data: celebrities = [], isLoading: isCelebritiesLoading } = useQuery({
+    queryKey: ['celebrities'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('celebrities')
+        .select(`
+          *,
+          outfits:outfits(count)
+        `)
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching celebrities:', error);
+        throw error;
+      }
+
+      return data.map(celebrity => ({
+        id: celebrity.id,
+        name: celebrity.name,
+        image: celebrity.image,
+        bio: celebrity.bio,
+        category: celebrity.category,
+        styleType: celebrity.style_type,
+        outfitCount: celebrity.outfits?.[0]?.count || 0
+      }));
+    }
+  });
+
+  // Add celebrity mutation
+  const addCelebrityMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const { data: newCelebrity, error } = await supabase
+        .from('celebrities')
+        .insert([{
+          name: data.name,
+          image: data.image,
+          bio: data.bio,
+          category: data.category,
+          style_type: data.styleType
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error adding celebrity:', error);
+        throw error;
+      }
+
+      return newCelebrity;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['celebrities'] });
+      toast({
+        title: "Celebrity added",
+        description: "New celebrity has been added successfully",
+      });
+      reset();
+    },
+    onError: (error) => {
+      console.error('Error adding celebrity:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add celebrity. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Update celebrity mutation
+  const updateCelebrityMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const { error } = await supabase
+        .from('celebrities')
+        .update({
+          name: data.name,
+          image: data.image,
+          bio: data.bio,
+          category: data.category,
+          style_type: data.styleType
+        })
+        .eq('id', data.id);
+
+      if (error) {
+        console.error('Error updating celebrity:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['celebrities'] });
+      toast({
+        title: "Celebrity updated",
+        description: "Celebrity has been updated successfully",
+      });
+      setEditCelebrity(null);
+      reset();
+    },
+    onError: (error) => {
+      console.error('Error updating celebrity:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update celebrity. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Delete celebrity mutation
+  const deleteCelebrityMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('celebrities')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting celebrity:', error);
+        throw error;
+      }
+
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['celebrities'] });
+      toast({
+        title: "Celebrity deleted",
+        description: "Celebrity has been removed successfully",
+      });
+      setCelebrityToDelete(null);
+      setDeleteDialogOpen(false);
+    },
+    onError: (error) => {
+      console.error('Error deleting celebrity:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete celebrity. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Filter celebrities based on search term
-  const filteredCelebrities = celebrityList.filter((celebrity) =>
+  const filteredCelebrities = celebrities.filter((celebrity) =>
     celebrity.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const onSubmit = (data: any) => {
     if (editCelebrity) {
-      // Update existing celebrity
-      const updated = celebrityList.map((c) =>
-        c.id === editCelebrity.id ? { ...c, ...data } : c
-      );
-      setCelebrityList(updated);
-      toast({
-        title: "Celebrity updated",
-        description: `${data.name} has been updated successfully`,
-      });
+      updateCelebrityMutation.mutate({ ...data, id: editCelebrity.id });
     } else {
-      // Add new celebrity
-      const newCelebrity = {
-        id: `celebrity-${Date.now()}`,
-        ...data,
-        outfitCount: 0,
-      };
-      setCelebrityList([...celebrityList, newCelebrity]);
-      toast({
-        title: "Celebrity added",
-        description: `${data.name} has been added successfully`,
-      });
+      addCelebrityMutation.mutate(data);
     }
-    reset();
-    setEditCelebrity(null);
   };
 
   const handleDelete = (celebrity: Celebrity) => {
@@ -87,13 +240,7 @@ const AdminCelebrities: React.FC = () => {
 
   const confirmDelete = () => {
     if (celebrityToDelete) {
-      setCelebrityList(celebrityList.filter((c) => c.id !== celebrityToDelete.id));
-      toast({
-        title: "Celebrity deleted",
-        description: `${celebrityToDelete.name} has been removed`,
-      });
-      setCelebrityToDelete(null);
-      setDeleteDialogOpen(false);
+      deleteCelebrityMutation.mutate(celebrityToDelete.id);
     }
   };
 
@@ -101,7 +248,9 @@ const AdminCelebrities: React.FC = () => {
     setEditCelebrity(celebrity);
     // Set form values
     Object.keys(celebrity).forEach((key) => {
-      setValue(key, celebrity[key as keyof Celebrity]);
+      if (key !== 'outfitCount') {
+        setValue(key as any, celebrity[key as keyof Celebrity]);
+      }
     });
   };
 
@@ -157,17 +306,24 @@ const AdminCelebrities: React.FC = () => {
 
                 <div className="grid gap-2">
                   <Label htmlFor="category">Category</Label>
-                  <select
-                    id="category"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                    {...register("category", { required: "Category is required" })}
-                    defaultValue={editCelebrity?.category || ""}
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
+                  {isCategoriesLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Loading categories...</span>
+                    </div>
+                  ) : (
+                    <select
+                      id="category"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      {...register("category", { required: "Category is required" })}
+                      defaultValue={editCelebrity?.category || ""}
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                  )}
                   {errors.category && (
                     <p className="text-sm text-red-500">
                       {errors.category.message as string}
@@ -177,17 +333,24 @@ const AdminCelebrities: React.FC = () => {
 
                 <div className="grid gap-2">
                   <Label htmlFor="styleType">Style Type</Label>
-                  <select
-                    id="styleType"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                    {...register("styleType", { required: "Style Type is required" })}
-                    defaultValue={editCelebrity?.styleType || ""}
-                  >
-                    <option value="">Select a style type</option>
-                    {styleTypes.map(styleType => (
-                      <option key={styleType} value={styleType}>{styleType}</option>
-                    ))}
-                  </select>
+                  {isStyleTypesLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Loading style types...</span>
+                    </div>
+                  ) : (
+                    <select
+                      id="styleType"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      {...register("styleType", { required: "Style Type is required" })}
+                      defaultValue={editCelebrity?.styleType || ""}
+                    >
+                      <option value="">Select a style type</option>
+                      {styleTypes.map(styleType => (
+                        <option key={styleType} value={styleType}>{styleType}</option>
+                      ))}
+                    </select>
+                  )}
                   {errors.styleType && (
                     <p className="text-sm text-red-500">
                       {errors.styleType.message as string}
@@ -211,7 +374,13 @@ const AdminCelebrities: React.FC = () => {
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit">
+                <Button 
+                  type="submit"
+                  disabled={addCelebrityMutation.isPending || updateCelebrityMutation.isPending}
+                >
+                  {(addCelebrityMutation.isPending || updateCelebrityMutation.isPending) && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   {editCelebrity ? "Update Celebrity" : "Add Celebrity"}
                 </Button>
               </DialogFooter>
@@ -245,7 +414,15 @@ const AdminCelebrities: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCelebrities.length === 0 ? (
+              {isCelebritiesLoading ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center h-32">
+                    <div className="flex justify-center items-center">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredCelebrities.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center h-32">
                     No celebrities found
@@ -287,8 +464,13 @@ const AdminCelebrities: React.FC = () => {
                           variant="outline"
                           className="text-red-500 hover:text-red-700"
                           onClick={() => handleDelete(celebrity)}
+                          disabled={deleteCelebrityMutation.isPending && celebrityToDelete?.id === celebrity.id}
                         >
-                          <Trash className="h-4 w-4" />
+                          {deleteCelebrityMutation.isPending && celebrityToDelete?.id === celebrity.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </TableCell>
@@ -310,11 +492,26 @@ const AdminCelebrities: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deleteCelebrityMutation.isPending}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Delete
+            <Button 
+              variant="destructive" 
+              onClick={confirmDelete}
+              disabled={deleteCelebrityMutation.isPending}
+            >
+              {deleteCelebrityMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,8 +1,7 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { BlogPost } from "@/types/data";
-import { blogPosts } from "@/data/mockData";
 import {
   Table,
   TableBody,
@@ -13,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Edit, Trash, Eye, FileText } from "lucide-react";
+import { Plus, Search, Edit, Trash, Eye, FileText, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,53 +25,195 @@ import {
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const AdminBlog: React.FC = () => {
-  const [postList, setPostList] = useState<BlogPost[]>(blogPosts);
   const [searchTerm, setSearchTerm] = useState("");
   const [editPost, setEditPost] = useState<BlogPost | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<BlogPost | null>(null);
+  const queryClient = useQueryClient();
 
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
 
-  // Get unique categories
-  const categories = Array.from(new Set(blogPosts.map(post => post.category)));
+  // Fetch blog posts from Supabase
+  const { data: blogPosts = [], isLoading } = useQuery({
+    queryKey: ['blogPosts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('date', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching blog posts:', error);
+        throw error;
+      }
+      
+      return data.map(post => ({
+        id: post.id,
+        title: post.title,
+        image: post.image,
+        excerpt: post.excerpt,
+        content: post.content,
+        author: post.author,
+        category: post.category,
+        date: post.date
+      }));
+    }
+  });
+
+  // Fetch categories from Supabase
+  const { data: categories = [] } = useQuery({
+    queryKey: ['blogCategories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('name')
+        .eq('type', 'blog')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching blog categories:', error);
+        return [];
+      }
+      
+      return data.map(category => category.name);
+    }
+  });
 
   // Filter posts based on search term
-  const filteredPosts = postList.filter((post) =>
+  const filteredPosts = blogPosts.filter((post) =>
     post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     post.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const onSubmit = (data: any) => {
-    const formattedDate = new Date().toISOString().split('T')[0];
-    
-    if (editPost) {
-      // Update existing post
-      const updated = postList.map((p) =>
-        p.id === editPost.id ? { ...p, ...data } : p
-      );
-      setPostList(updated);
-      toast({
-        title: "Blog post updated",
-        description: `${data.title} has been updated successfully`,
-      });
-    } else {
-      // Add new post
-      const newPost = {
-        id: `post-${Date.now()}`,
-        ...data,
-        date: data.date || formattedDate,
-      };
-      setPostList([...postList, newPost]);
+  // Add blog post mutation
+  const addPostMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const { data: newPost, error } = await supabase
+        .from('blog_posts')
+        .insert([{
+          title: data.title,
+          image: data.image,
+          excerpt: data.excerpt,
+          content: data.content,
+          author: data.author,
+          category: data.category,
+          date: data.date || new Date().toISOString().split('T')[0]
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error adding blog post:', error);
+        throw error;
+      }
+
+      return newPost;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
       toast({
         title: "Blog post added",
-        description: `${data.title} has been added successfully`,
+        description: "Your blog post has been added successfully",
+      });
+      reset();
+    },
+    onError: (error) => {
+      console.error('Error adding blog post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add blog post. Please try again.",
+        variant: "destructive",
       });
     }
-    reset();
-    setEditPost(null);
+  });
+
+  // Update blog post mutation
+  const updatePostMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const { error } = await supabase
+        .from('blog_posts')
+        .update({
+          title: data.title,
+          image: data.image,
+          excerpt: data.excerpt,
+          content: data.content,
+          author: data.author,
+          category: data.category,
+          date: data.date,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', data.id);
+
+      if (error) {
+        console.error('Error updating blog post:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
+      toast({
+        title: "Blog post updated",
+        description: "Your blog post has been updated successfully",
+      });
+      setEditPost(null);
+      reset();
+    },
+    onError: (error) => {
+      console.error('Error updating blog post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update blog post. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Delete blog post mutation
+  const deletePostMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('blog_posts')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting blog post:', error);
+        throw error;
+      }
+
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
+      toast({
+        title: "Blog post deleted",
+        description: "Your blog post has been removed successfully",
+      });
+      setPostToDelete(null);
+      setDeleteDialogOpen(false);
+    },
+    onError: (error) => {
+      console.error('Error deleting blog post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete blog post. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const onSubmit = (data: any) => {
+    if (editPost) {
+      updatePostMutation.mutate({ ...data, id: editPost.id });
+    } else {
+      addPostMutation.mutate(data);
+    }
   };
 
   const handleDelete = (post: BlogPost) => {
@@ -82,13 +223,7 @@ const AdminBlog: React.FC = () => {
 
   const confirmDelete = () => {
     if (postToDelete) {
-      setPostList(postList.filter((p) => p.id !== postToDelete.id));
-      toast({
-        title: "Blog post deleted",
-        description: `${postToDelete.title} has been removed`,
-      });
-      setPostToDelete(null);
-      setDeleteDialogOpen(false);
+      deletePostMutation.mutate(postToDelete.id);
     }
   };
 
@@ -96,7 +231,7 @@ const AdminBlog: React.FC = () => {
     setEditPost(post);
     // Set form values
     Object.keys(post).forEach((key) => {
-      setValue(key, post[key as keyof BlogPost]);
+      setValue(key as any, post[key as keyof BlogPost]);
     });
   };
 
@@ -232,7 +367,13 @@ const AdminBlog: React.FC = () => {
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit">
+                <Button 
+                  type="submit"
+                  disabled={addPostMutation.isPending || updatePostMutation.isPending}
+                >
+                  {(addPostMutation.isPending || updatePostMutation.isPending) && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   {editPost ? "Update Blog Post" : "Add Blog Post"}
                 </Button>
               </DialogFooter>
@@ -266,7 +407,15 @@ const AdminBlog: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredPosts.length === 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center h-32">
+                    <div className="flex justify-center items-center">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredPosts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center h-32">
                     No blog posts found
@@ -318,8 +467,13 @@ const AdminBlog: React.FC = () => {
                           variant="outline"
                           className="text-red-500 hover:text-red-700"
                           onClick={() => handleDelete(post)}
+                          disabled={deletePostMutation.isPending && postToDelete?.id === post.id}
                         >
-                          <Trash className="h-4 w-4" />
+                          {deletePostMutation.isPending && postToDelete?.id === post.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </TableCell>
@@ -341,11 +495,26 @@ const AdminBlog: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deletePostMutation.isPending}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Delete
+            <Button 
+              variant="destructive" 
+              onClick={confirmDelete}
+              disabled={deletePostMutation.isPending}
+            >
+              {deletePostMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
