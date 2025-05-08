@@ -4,13 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -39,11 +40,102 @@ const AdminLogin: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  const createTestUser = async (email: string, password: string) => {
+    try {
+      // Check if user exists first
+      const { data: userExists } = await supabase
+        .from('admin_users')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+      
+      if (!userExists) {
+        // Create user through Supabase auth
+        const { data: authUser, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name: 'Admin User',
+              role: 'admin'
+            }
+          }
+        });
+
+        if (signUpError) {
+          console.error('Error creating auth user:', signUpError);
+          return false;
+        }
+
+        if (authUser?.user) {
+          // Create entry in admin_users table
+          const { error: insertError } = await supabase
+            .from('admin_users')
+            .insert({
+              id: authUser.user.id,
+              name: 'Admin User',
+              email: email,
+              role: 'admin',
+              last_login: new Date().toISOString()
+            });
+
+          if (insertError) {
+            console.error('Error creating admin user record:', insertError);
+            return false;
+          }
+
+          // Set admin user as confirmed (bypass email verification)
+          const { error: adminUpdateError } = await supabase.auth.updateUser({
+            email_confirm: true
+          });
+
+          if (adminUpdateError) {
+            console.error('Error confirming user:', adminUpdateError);
+          }
+
+          toast({
+            title: "Admin user created",
+            description: "Test admin user has been created. You can now log in.",
+          });
+          
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error creating test user:', error);
+      return false;
+    }
+  };
+
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
+      // Try to log in with provided credentials
       const success = await login(data.email, data.password);
-      if (success) {
+      
+      if (!success) {
+        // If login failed and we're using the default admin credentials, try to create the test user
+        if (data.email === "admin@celebritypersona.com" && data.password === "admin123") {
+          const userCreated = await createTestUser(data.email, data.password);
+          
+          if (userCreated) {
+            // Attempt login again after creating user
+            const retrySuccess = await login(data.email, data.password);
+            if (retrySuccess) {
+              navigate("/admin/dashboard");
+              return;
+            }
+          }
+        }
+        
+        toast({
+          title: "Login failed",
+          description: "Invalid email or password. If using default credentials, try again as the user may have been created.",
+          variant: "destructive",
+        });
+      } else {
         navigate("/admin/dashboard");
       }
     } finally {

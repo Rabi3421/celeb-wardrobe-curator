@@ -73,12 +73,14 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log("Attempting to sign in with:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
+        console.error('Login error:', error);
         toast({
           title: "Login failed",
           description: error.message,

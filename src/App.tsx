@@ -52,41 +52,50 @@ const queryClient = new QueryClient({
   }
 });
 
-const App = () => (
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ScrollToTop />
-          <AdminAuthProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/celebrities" element={<Celebrities />} />
-              <Route path="/outfits" element={<Outfits />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/celebrity/:id" element={<CelebrityProfile />} />
-              <Route path="/outfit/:id" element={<OutfitDetail />} />
-              <Route path="/blog/:id" element={<BlogPost />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/celebrities" element={<AdminCelebrities />} />
-              <Route path="/admin/outfits" element={<AdminOutfits />} />
-              <Route path="/admin/blog" element={<AdminBlog />} />
-              <Route path="/admin/analytics" element={<AdminAnalytics />} />
-              <Route path="/admin/tags" element={<AdminTags />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AdminAuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </React.StrictMode>
-);
+const App = () => {
+  // Create the React element explicitly
+  return React.createElement(
+    QueryClientProvider, 
+    { client: queryClient },
+    React.createElement(
+      TooltipProvider, 
+      null,
+      React.createElement(Toaster, null),
+      React.createElement(Sonner, null),
+      React.createElement(
+        BrowserRouter, 
+        null,
+        React.createElement(ScrollToTop, null),
+        React.createElement(
+          AdminAuthProvider, 
+          null,
+          React.createElement(
+            Routes, 
+            null,
+            React.createElement(Route, { path: "/", element: React.createElement(Index, null) }),
+            React.createElement(Route, { path: "/celebrities", element: React.createElement(Celebrities, null) }),
+            React.createElement(Route, { path: "/outfits", element: React.createElement(Outfits, null) }),
+            React.createElement(Route, { path: "/blog", element: React.createElement(Blog, null) }),
+            React.createElement(Route, { path: "/celebrity/:id", element: React.createElement(CelebrityProfile, null) }),
+            React.createElement(Route, { path: "/outfit/:id", element: React.createElement(OutfitDetail, null) }),
+            React.createElement(Route, { path: "/blog/:id", element: React.createElement(BlogPost, null) }),
+            React.createElement(Route, { path: "/admin/login", element: React.createElement(AdminLogin, null) }),
+            React.createElement(Route, { path: "/admin/dashboard", element: React.createElement(AdminDashboard, null) }),
+            React.createElement(Route, { path: "/admin/celebrities", element: React.createElement(AdminCelebrities, null) }),
+            React.createElement(Route, { path: "/admin/outfits", element: React.createElement(AdminOutfits, null) }),
+            React.createElement(Route, { path: "/admin/blog", element: React.createElement(AdminBlog, null) }),
+            React.createElement(Route, { path: "/admin/analytics", element: React.createElement(AdminAnalytics, null) }),
+            React.createElement(Route, { path: "/admin/tags", element: React.createElement(AdminTags, null) }),
+            React.createElement(Route, { path: "/admin/settings", element: React.createElement(AdminSettings, null) }),
+            React.createElement(Route, { path: "/privacy", element: React.createElement(Privacy, null) }),
+            React.createElement(Route, { path: "/terms", element: React.createElement(Terms, null) }),
+            React.createElement(Route, { path: "/affiliate-disclosure", element: React.createElement(AffiliateDisclosure, null) }),
+            React.createElement(Route, { path: "*", element: React.createElement(NotFound, null) })
+          )
+        )
+      )
+    )
+  );
+};
 
 export default App;
