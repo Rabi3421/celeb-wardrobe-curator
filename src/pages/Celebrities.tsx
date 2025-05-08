@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Shuffle, Star } from "lucide-react";
+import { Celebrity } from "@/types/data";
 
 const Celebrities: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,14 +17,14 @@ const Celebrities: React.FC = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   
   // Filter celebrities based on search term and category
-  const filteredCelebrities = celebrities.filter(celebrity => {
+  const filteredCelebrities = celebrities.filter((celebrity: Celebrity) => {
     const matchesSearch = celebrity.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || celebrity.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   // Get unique categories
-  const categories = ["all", ...Array.from(new Set(celebrities.map(celeb => celeb.category)))];
+  const categories = ["all", ...Array.from(new Set(celebrities.map((celeb: Celebrity) => celeb.category)))];
   
   // Celebrity of the month
   const featuredCelebrity = celebrities[0]; // Just using the first one as an example

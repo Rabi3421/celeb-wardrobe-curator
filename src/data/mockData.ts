@@ -1,4 +1,3 @@
-
 // Mock data for development
 
 // Celebrity data
@@ -8,28 +7,36 @@ export const celebrities = [
     name: "Zendaya",
     image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
     outfitCount: 8,
-    bio: "Emmy Award-winning actress and fashion icon known for her bold style choices and statement outfits. From red carpet glamour to street style, Zendaya consistently delivers fashion inspiration."
+    bio: "Emmy Award-winning actress and fashion icon known for her bold style choices and statement outfits. From red carpet glamour to street style, Zendaya consistently delivers fashion inspiration.",
+    category: "actress",
+    styleType: "Avant-garde Elegance"
   },
   {
     id: "harry-styles",
     name: "Harry Styles",
     image: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
     outfitCount: 6,
-    bio: "Grammy-winning musician and fashion trendsetter known for breaking gender norms with his eclectic style. From floral suits to pearl necklaces, Harry's fashion choices are always conversation starters."
+    bio: "Grammy-winning musician and fashion trendsetter known for breaking gender norms with his eclectic style. From floral suits to pearl necklaces, Harry's fashion choices are always conversation starters.",
+    category: "musician",
+    styleType: "Gender-fluid Eclectic"
   },
   {
     id: "rihanna",
     name: "Rihanna",
     image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
     outfitCount: 12,
-    bio: "Multi-platinum artist, fashion designer, and entrepreneur known for her boundary-pushing style. Whether it's streetwear or haute couture, Rihanna's fashion influence is undeniable."
+    bio: "Multi-platinum artist, fashion designer, and entrepreneur known for her boundary-pushing style. Whether it's streetwear or haute couture, Rihanna's fashion influence is undeniable.",
+    category: "musician",
+    styleType: "Urban Luxe"
   },
   {
     id: "timothee-chalamet",
     name: "Timothée Chalamet",
     image: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
     outfitCount: 5,
-    bio: "Award-winning actor and style icon known for his modern take on classic menswear. With his slender frame and European flair, Timothée brings a fresh perspective to men's fashion."
+    bio: "Award-winning actor and style icon known for his modern take on classic menswear. With his slender frame and European flair, Timothée brings a fresh perspective to men's fashion.",
+    category: "actor",
+    styleType: "Modern Classic"
   }
 ];
 

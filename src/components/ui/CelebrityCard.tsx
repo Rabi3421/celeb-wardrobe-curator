@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
+import { Celebrity } from "@/types/data";
 
 interface CelebrityCardProps {
   id: string;

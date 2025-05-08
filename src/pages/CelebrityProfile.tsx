@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import PageLayout from "@/components/layout/PageLayout";
@@ -10,10 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Heart, Instagram, Star, Tag, Twitter, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Celebrity } from "@/types/data";
 
 const CelebrityProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const celebrity = celebrities.find(celeb => celeb.id === id);
+  const celebrity = celebrities.find(celeb => celeb.id === id) as Celebrity | undefined;
   const celebrityOutfits = outfits.filter(outfit => outfit.celebrityId === id);
   const { toast } = useToast();
   
@@ -94,7 +94,7 @@ const CelebrityProfile: React.FC = () => {
                 </div>
                 <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
                   <span className="text-sm text-muted-foreground">Style</span>
-                  <p className="font-medium">{celebrity.styleType || "Trendsetter"}</p>
+                  <p className="font-medium">{celebrity.styleType}</p>
                 </div>
                 <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
                   <span className="text-sm text-muted-foreground">Followers</span>
