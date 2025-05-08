@@ -9,7 +9,246 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      admin_users: {
+        Row: {
+          avatar: string | null
+          email: string
+          id: string
+          last_login: string | null
+          name: string
+          role: string
+        }
+        Insert: {
+          avatar?: string | null
+          email: string
+          id: string
+          last_login?: string | null
+          name: string
+          role?: string
+        }
+        Update: {
+          avatar?: string | null
+          email?: string
+          id?: string
+          last_login?: string | null
+          name?: string
+          role?: string
+        }
+        Relationships: []
+      }
+      affiliate_products: {
+        Row: {
+          affiliate_link: string
+          created_at: string
+          description: string | null
+          id: string
+          image: string
+          outfit_id: string
+          price: string
+          retailer: string
+          title: string
+        }
+        Insert: {
+          affiliate_link: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image: string
+          outfit_id: string
+          price: string
+          retailer: string
+          title: string
+        }
+        Update: {
+          affiliate_link?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string
+          outfit_id?: string
+          price?: string
+          retailer?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_products_outfit_id_fkey"
+            columns: ["outfit_id"]
+            isOneToOne: false
+            referencedRelation: "outfits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          author: string
+          category: string
+          content: string
+          created_at: string
+          date: string
+          excerpt: string
+          id: string
+          image: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author: string
+          category: string
+          content: string
+          created_at?: string
+          date: string
+          excerpt: string
+          id?: string
+          image: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          category?: string
+          content?: string
+          created_at?: string
+          date?: string
+          excerpt?: string
+          id?: string
+          image?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      celebrities: {
+        Row: {
+          bio: string
+          category: string
+          created_at: string
+          id: string
+          image: string
+          name: string
+          style_type: string
+          updated_at: string
+        }
+        Insert: {
+          bio: string
+          category: string
+          created_at?: string
+          id?: string
+          image: string
+          name: string
+          style_type: string
+          updated_at?: string
+        }
+        Update: {
+          bio?: string
+          category?: string
+          created_at?: string
+          id?: string
+          image?: string
+          name?: string
+          style_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      outfit_tags: {
+        Row: {
+          created_at: string
+          id: string
+          outfit_id: string
+          tag_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          outfit_id: string
+          tag_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          outfit_id?: string
+          tag_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outfit_tags_outfit_id_fkey"
+            columns: ["outfit_id"]
+            isOneToOne: false
+            referencedRelation: "outfits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outfits: {
+        Row: {
+          celebrity_id: string
+          created_at: string
+          date: string | null
+          description: string
+          full_description: string | null
+          id: string
+          image: string
+          occasion: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          celebrity_id: string
+          created_at?: string
+          date?: string | null
+          description: string
+          full_description?: string | null
+          id?: string
+          image: string
+          occasion?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          celebrity_id?: string
+          created_at?: string
+          date?: string | null
+          description?: string
+          full_description?: string | null
+          id?: string
+          image?: string
+          occasion?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outfits_celebrity_id_fkey"
+            columns: ["celebrity_id"]
+            isOneToOne: false
+            referencedRelation: "celebrities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
