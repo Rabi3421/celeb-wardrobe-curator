@@ -26,18 +26,41 @@ import {
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { toast } from "@/components/ui/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { 
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage 
+} from "@/components/ui/form";
 
 const AdminCelebrities: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [editCelebrity, setEditCelebrity] = useState<Celebrity | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [celebrityToDelete, setCelebrityToDelete] = useState<Celebrity | null>(null);
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      image: "",
+      bio: "",
+      category: "",
+      styleType: "",
+    }
+  });
 
   // Fetch categories from Supabase
   const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
@@ -134,7 +157,8 @@ const AdminCelebrities: React.FC = () => {
         title: "Celebrity added",
         description: "New celebrity has been added successfully",
       });
-      reset();
+      form.reset();
+      setFormDialogOpen(false);
     },
     onError: (error) => {
       console.error('Error adding celebrity:', error);
@@ -158,7 +182,7 @@ const AdminCelebrities: React.FC = () => {
           category: data.category,
           style_type: data.styleType
         })
-        .eq('id', data.id);
+        .eq('id', editCelebrity!.id);
 
       if (error) {
         console.error('Error updating celebrity:', error);
@@ -174,7 +198,8 @@ const AdminCelebrities: React.FC = () => {
         description: "Celebrity has been updated successfully",
       });
       setEditCelebrity(null);
-      reset();
+      form.reset();
+      setFormDialogOpen(false);
     },
     onError: (error) => {
       console.error('Error updating celebrity:', error);
@@ -227,7 +252,7 @@ const AdminCelebrities: React.FC = () => {
 
   const onSubmit = (data: any) => {
     if (editCelebrity) {
-      updateCelebrityMutation.mutate({ ...data, id: editCelebrity.id });
+      updateCelebrityMutation.mutate(data);
     } else {
       addCelebrityMutation.mutate(data);
     }
@@ -247,146 +272,36 @@ const AdminCelebrities: React.FC = () => {
   const handleEdit = (celebrity: Celebrity) => {
     setEditCelebrity(celebrity);
     // Set form values
-    Object.keys(celebrity).forEach((key) => {
-      if (key !== 'outfitCount') {
-        setValue(key as any, celebrity[key as keyof Celebrity]);
-      }
+    form.reset({
+      name: celebrity.name,
+      image: celebrity.image,
+      bio: celebrity.bio,
+      category: celebrity.category,
+      styleType: celebrity.styleType,
     });
+    setFormDialogOpen(true);
   };
+
+  const handleAddNew = () => {
+    setEditCelebrity(null);
+    form.reset({
+      name: "",
+      image: "",
+      bio: "",
+      category: "",
+      styleType: "",
+    });
+    setFormDialogOpen(true);
+  }
 
   return (
     <AdminLayout>
       <div className="flex justify-between items-center mb-6">
         <h1 className="font-serif text-2xl font-medium">Celebrities</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Celebrity
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[550px]">
-            <DialogHeader>
-              <DialogTitle>
-                {editCelebrity ? "Edit Celebrity" : "Add New Celebrity"}
-              </DialogTitle>
-              <DialogDescription>
-                Fill in the details for the celebrity profile.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    {...register("name", { required: "Name is required" })}
-                    defaultValue={editCelebrity?.name || ""}
-                  />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">
-                      {errors.name.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="image">Profile Image URL</Label>
-                  <Input
-                    id="image"
-                    {...register("image", { required: "Image URL is required" })}
-                    defaultValue={editCelebrity?.image || ""}
-                  />
-                  {errors.image && (
-                    <p className="text-sm text-red-500">
-                      {errors.image.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="category">Category</Label>
-                  {isCategoriesLoading ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Loading categories...</span>
-                    </div>
-                  ) : (
-                    <select
-                      id="category"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                      {...register("category", { required: "Category is required" })}
-                      defaultValue={editCelebrity?.category || ""}
-                    >
-                      <option value="">Select a category</option>
-                      {categories.map(category => (
-                        <option key={category} value={category}>{category}</option>
-                      ))}
-                    </select>
-                  )}
-                  {errors.category && (
-                    <p className="text-sm text-red-500">
-                      {errors.category.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="styleType">Style Type</Label>
-                  {isStyleTypesLoading ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Loading style types...</span>
-                    </div>
-                  ) : (
-                    <select
-                      id="styleType"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                      {...register("styleType", { required: "Style Type is required" })}
-                      defaultValue={editCelebrity?.styleType || ""}
-                    >
-                      <option value="">Select a style type</option>
-                      {styleTypes.map(styleType => (
-                        <option key={styleType} value={styleType}>{styleType}</option>
-                      ))}
-                    </select>
-                  )}
-                  {errors.styleType && (
-                    <p className="text-sm text-red-500">
-                      {errors.styleType.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="bio">Biography</Label>
-                  <textarea
-                    id="bio"
-                    className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                    {...register("bio", { required: "Bio is required" })}
-                    defaultValue={editCelebrity?.bio || ""}
-                  />
-                  {errors.bio && (
-                    <p className="text-sm text-red-500">
-                      {errors.bio.message as string}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <DialogFooter>
-                <Button 
-                  type="submit"
-                  disabled={addCelebrityMutation.isPending || updateCelebrityMutation.isPending}
-                >
-                  {(addCelebrityMutation.isPending || updateCelebrityMutation.isPending) && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {editCelebrity ? "Update Celebrity" : "Add Celebrity"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={handleAddNew}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Celebrity
+        </Button>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm p-6">
@@ -481,6 +396,157 @@ const AdminCelebrities: React.FC = () => {
           </Table>
         </div>
       </div>
+
+      {/* Celebrity Form Dialog */}
+      <Dialog open={formDialogOpen} onOpenChange={setFormDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editCelebrity ? "Edit Celebrity" : "Add New Celebrity"}
+            </DialogTitle>
+            <DialogDescription>
+              Fill in the details for the celebrity profile.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                rules={{ required: "Name is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="image"
+                rules={{ required: "Image URL is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Profile Image URL</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category"
+                rules={{ required: "Category is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      {isCategoriesLoading ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Loading categories...</span>
+                        </div>
+                      ) : (
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                          value={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map(category => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="styleType"
+                rules={{ required: "Style Type is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Style Type</FormLabel>
+                    <FormControl>
+                      {isStyleTypesLoading ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Loading style types...</span>
+                        </div>
+                      ) : (
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                          value={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a style type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {styleTypes.map(styleType => (
+                              <SelectItem key={styleType} value={styleType}>
+                                {styleType}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="bio"
+                rules={{ required: "Bio is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Biography</FormLabel>
+                    <FormControl>
+                      <textarea
+                        className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button 
+                  type="submit"
+                  disabled={addCelebrityMutation.isPending || updateCelebrityMutation.isPending}
+                >
+                  {(addCelebrityMutation.isPending || updateCelebrityMutation.isPending) && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {editCelebrity ? "Update Celebrity" : "Add Celebrity"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
