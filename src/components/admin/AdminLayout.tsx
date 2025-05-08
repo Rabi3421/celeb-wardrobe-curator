@@ -1,6 +1,22 @@
 
 import React, { useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { 
+  LayoutDashboard, 
+  Users, 
+  ShoppingBag, 
+  FileText, 
+  BarChart, 
+  Tag, 
+  Settings, 
+  LogOut, 
+  User 
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -9,27 +25,30 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout, isAuthenticated } = useAdminAuth();
   
   useEffect(() => {
-    const adminUser = localStorage.getItem("adminUser");
-    if (!adminUser) {
+    if (!isAuthenticated) {
       navigate("/admin/login");
     }
-  }, [navigate]);
+  }, [isAuthenticated, navigate]);
+
+  const navItems = [
+    { path: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
+    { path: "/admin/celebrities", label: "Celebrities", icon: <Users size={20} /> },
+    { path: "/admin/outfits", label: "Outfits", icon: <ShoppingBag size={20} /> },
+    { path: "/admin/blog", label: "Blog", icon: <FileText size={20} /> },
+    { path: "/admin/analytics", label: "Analytics", icon: <BarChart size={20} /> },
+    { path: "/admin/tags", label: "Tags & Categories", icon: <Tag size={20} /> },
+    { path: "/admin/settings", label: "Settings", icon: <Settings size={20} /> },
+  ];
 
   const handleLogout = () => {
-    localStorage.removeItem("adminUser");
+    logout();
     navigate("/admin/login");
   };
 
-  const navItems = [
-    { path: "/admin/dashboard", label: "Dashboard" },
-    { path: "/admin/outfits", label: "Outfits" },
-    { path: "/admin/celebrities", label: "Celebrities" },
-    { path: "/admin/blog", label: "Blog" },
-    { path: "/admin/analytics", label: "Analytics" },
-    { path: "/admin/tags", label: "Tags & Categories" },
-  ];
+  if (!isAuthenticated) return null;
 
   return (
     <div className="min-h-screen bg-secondary/50">
@@ -44,12 +63,35 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
                 View Site
               </Link>
-              <button
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2 cursor-pointer">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user?.avatar || "/placeholder.svg"} alt={user?.name || "User"} />
+                        <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium hidden md:inline">
+                        {user?.name}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Logged in as {user?.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleLogout}
-                className="text-sm font-medium text-primary-foreground hover:underline"
+                className="flex items-center gap-1"
               >
-                Logout
-              </button>
+                <LogOut size={16} />
+                <span className="hidden md:inline">Logout</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -63,12 +105,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`whitespace-nowrap px-5 py-2 text-sm font-medium rounded-full transition-colors ${
+                className={`whitespace-nowrap px-5 py-2 text-sm font-medium rounded-full transition-colors flex items-center gap-2 ${
                   location.pathname === item.path
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-secondary"
                 }`}
               >
+                {item.icon}
                 {item.label}
               </Link>
             ))}

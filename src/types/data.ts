@@ -55,6 +55,8 @@ export interface User {
   password: string;
   name: string;
   role: string;
+  avatar?: string;
+  lastLogin?: string;
 }
 
 // Analytics data type
@@ -77,4 +79,12 @@ export interface AnalyticsData {
     clicks: number;
     revenue: number;
   }>;
+}
+
+// Admin auth context type
+export interface AuthContextType {
+  user: User | null;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
+  isAuthenticated: boolean;
 }
