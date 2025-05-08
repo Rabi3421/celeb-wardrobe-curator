@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -41,41 +42,51 @@ const ScrollToTop = () => {
   return null;
 };
 
-const queryClient = new QueryClient();
+// Create a new QueryClient instance outside of the component
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1
+    }
+  }
+});
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
-        <AdminAuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/celebrities" element={<Celebrities />} />
-            <Route path="/outfits" element={<Outfits />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/celebrity/:id" element={<CelebrityProfile />} />
-            <Route path="/outfit/:id" element={<OutfitDetail />} />
-            <Route path="/blog/:id" element={<BlogPost />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/celebrities" element={<AdminCelebrities />} />
-            <Route path="/admin/outfits" element={<AdminOutfits />} />
-            <Route path="/admin/blog" element={<AdminBlog />} />
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
-            <Route path="/admin/tags" element={<AdminTags />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AdminAuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ScrollToTop />
+          <AdminAuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/celebrities" element={<Celebrities />} />
+              <Route path="/outfits" element={<Outfits />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/celebrity/:id" element={<CelebrityProfile />} />
+              <Route path="/outfit/:id" element={<OutfitDetail />} />
+              <Route path="/blog/:id" element={<BlogPost />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/celebrities" element={<AdminCelebrities />} />
+              <Route path="/admin/outfits" element={<AdminOutfits />} />
+              <Route path="/admin/blog" element={<AdminBlog />} />
+              <Route path="/admin/analytics" element={<AdminAnalytics />} />
+              <Route path="/admin/tags" element={<AdminTags />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AdminAuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </React.StrictMode>
 );
 
 export default App;
