@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Dress, Shoe, Mail, Handbag, Car, Bike } from "lucide-react";
+import { ShoppingBag, ShirtIcon, Palette, Briefcase, Car, Bike } from "lucide-react";
 
 interface CategoryCardProps {
   title: string;
@@ -13,19 +13,19 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ title, icon, link }) => {
   const renderIcon = () => {
     switch (icon) {
       case "dress":
-        return <Dress className="h-8 w-8" />;
+        return <ShirtIcon className="h-8 w-8" />;
       case "shoe":
-        return <Shoe className="h-8 w-8" />;
+        return <ShoppingBag className="h-8 w-8" />;
       case "makeup":
-        return <Mail className="h-8 w-8" />;
+        return <Palette className="h-8 w-8" />;
       case "handbag":
-        return <Handbag className="h-8 w-8" />;
+        return <Briefcase className="h-8 w-8" />;
       case "car":
         return <Car className="h-8 w-8" />;
       case "bike":
         return <Bike className="h-8 w-8" />;
       default:
-        return <Dress className="h-8 w-8" />;
+        return <ShirtIcon className="h-8 w-8" />;
     }
   };
 
