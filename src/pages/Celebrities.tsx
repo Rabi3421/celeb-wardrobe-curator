@@ -1,20 +1,33 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import CelebrityCard from "@/components/ui/CelebrityCard";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { celebrities } from "@/data/mockData";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Shuffle, Star } from "lucide-react";
+import { fetchCelebrities } from "@/services/api";
 import { Celebrity } from "@/types/data";
 
 const Celebrities: React.FC = () => {
+  const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const loadCelebrities = async () => {
+      setIsLoading(true);
+      const data = await fetchCelebrities();
+      setCelebrities(data);
+      setIsLoading(false);
+    };
+    
+    loadCelebrities();
+  }, []);
   
   // Filter celebrities based on search term and category
   const filteredCelebrities = celebrities.filter((celebrity: Celebrity) => {
@@ -40,9 +53,20 @@ const Celebrities: React.FC = () => {
 
   // Random celebrity recommendation
   const getRandomCelebrity = () => {
+    if (celebrities.length === 0) return null;
     const randomIndex = Math.floor(Math.random() * celebrities.length);
     return celebrities[randomIndex];
   };
+  
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="container-custom py-16 text-center">
+          <p className="text-muted-foreground">Loading celebrities...</p>
+        </div>
+      </PageLayout>
+    );
+  }
   
   return (
     <PageLayout>
@@ -69,35 +93,38 @@ const Celebrities: React.FC = () => {
 
       <div className="container-custom py-12">
         {/* Featured Celebrity */}
-        <div className="mb-12">
-          <SectionHeader title="Celebrity of the Month" />
-          <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-r from-pastel-pink to-pastel-peach">
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              <div className="p-6 md:p-8">
-                <CardHeader className="p-0 pb-6">
-                  <CardTitle className="text-2xl md:text-3xl">{featuredCelebrity.name}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <p className="mb-4">{featuredCelebrity.bio}</p>
-                  <div className="flex items-center space-x-4 mb-4">
-                    <Star className="text-yellow-400" />
-                    <span className="font-medium">Style Icon</span>
-                  </div>
-                  <Button className="bg-white text-primary-foreground hover:bg-white/90">
-                    View Profile
-                  </Button>
-                </CardContent>
+        {featuredCelebrity && (
+          <div className="mb-12">
+            <SectionHeader title="Celebrity of the Month" />
+            <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-r from-pastel-pink to-pastel-peach">
+              <div className="grid grid-cols-1 md:grid-cols-2">
+                <div className="p-6 md:p-8">
+                  <CardHeader className="p-0 pb-6">
+                    <CardTitle className="text-2xl md:text-3xl">{featuredCelebrity.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <p className="mb-4">{featuredCelebrity.bio}</p>
+                    <div className="flex items-center space-x-4 mb-4">
+                      <Star className="text-yellow-400" />
+                      <span className="font-medium">Style Icon</span>
+                    </div>
+                    <Button className="bg-white text-primary-foreground hover:bg-white/90"
+                      onClick={() => window.location.href = `/celebrity/${featuredCelebrity.id}`}>
+                      View Profile
+                    </Button>
+                  </CardContent>
+                </div>
+                <div className="relative h-64 md:h-auto">
+                  <img
+                    src={featuredCelebrity.image}
+                    alt={featuredCelebrity.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                </div>
               </div>
-              <div className="relative h-64 md:h-auto">
-                <img
-                  src={featuredCelebrity.image}
-                  alt={featuredCelebrity.name}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              </div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
+        )}
 
         {/* Categories Tabs */}
         <div className="mb-8">
@@ -125,7 +152,7 @@ const Celebrities: React.FC = () => {
               id={celebrity.id}
               name={celebrity.name}
               image={celebrity.image}
-              outfitCount={celebrity.outfitCount}
+              outfitCount={celebrity.outfitCount || 0}
             />
           ))}
         </div>
@@ -149,7 +176,7 @@ const Celebrities: React.FC = () => {
               <div className="mb-4 md:mb-0 md:mr-6">
                 <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary">
                   <img
-                    src={getRandomCelebrity().image}
+                    src={getRandomCelebrity()?.image || ''}
                     alt="Random Celebrity"
                     className="w-full h-full object-cover"
                   />
@@ -165,7 +192,12 @@ const Celebrities: React.FC = () => {
               </div>
               <Button 
                 className="bg-pastel-mint text-primary-foreground hover:bg-opacity-90"
-                onClick={() => window.location.href = `/celebrity/${getRandomCelebrity().id}`}
+                onClick={() => {
+                  const randomCeleb = getRandomCelebrity();
+                  if (randomCeleb) {
+                    window.location.href = `/celebrity/${randomCeleb.id}`;
+                  }
+                }}
               >
                 <Shuffle className="mr-2 h-4 w-4" />
                 Random Celebrity

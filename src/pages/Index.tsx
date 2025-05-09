@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import OutfitCard from "@/components/ui/OutfitCard";
 import CelebrityCard from "@/components/ui/CelebrityCard";
@@ -10,13 +9,42 @@ import CategoryCard from "@/components/ui/CategoryCard";
 import CelebritySpotlight from "@/components/ui/CelebritySpotlight";
 import SocialFeedCard from "@/components/ui/SocialFeedCard";
 import AffiliateProductCard from "@/components/ui/AffiliateProductCard";
-import { outfits, celebrities, blogPosts } from "@/data/mockData";
+import { fetchCelebrities, fetchOutfits, fetchBlogPosts, fetchAffiliateProducts } from "@/services/api";
+import { Celebrity, Outfit, BlogPost, AffiliateProduct } from "@/types/data";
 
 const Index: React.FC = () => {
+  const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
+  const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [affiliateProducts, setAffiliateProducts] = useState<AffiliateProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      const [celebritiesData, outfitsData, blogPostsData, productsData] = await Promise.all([
+        fetchCelebrities(),
+        fetchOutfits(),
+        fetchBlogPosts(),
+        fetchAffiliateProducts()
+      ]);
+
+      setCelebrities(celebritiesData);
+      setOutfits(outfitsData);
+      setBlogPosts(blogPostsData);
+      setAffiliateProducts(productsData);
+      setIsLoading(false);
+    };
+
+    fetchData();
+  }, []);
+
+  // Get featured data to display
   const featuredOutfits = outfits.slice(0, 6);
   const featuredCelebrities = celebrities.slice(0, 4);
   const recentBlogPosts = blogPosts.slice(0, 3);
 
+  // Keep the hardcoded testimonials for now, as they're not part of the core data model
   const testimonials = [
     {
       id: 1,
@@ -50,44 +78,22 @@ const Index: React.FC = () => {
     { title: "Bikes", icon: "bike", link: "/category/bikes" }
   ];
 
-  const spotlightCelebrity = {
-    id: "spotlight-1",
-    name: "Zendaya",
-    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
-    outfit: "Met Gala 2023 Red Carpet Look",
-    event: "Met Gala 2023",
-    description: "Zendaya stunned everyone at the Met Gala with this custom designer gown featuring intricate beadwork and a dramatic silhouette. The ensemble was completed with matching accessories and statement jewelry.",
-    products: [
-      {
-        image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
-        title: "Silver Statement Earrings",
-        price: "$49.99",
-        retailer: "Fashion Jewelry",
-        affiliateLink: "#"
-      },
-      {
-        image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
-        title: "Crystal Embellished Clutch",
-        price: "$79.99",
-        retailer: "Luxe Bags",
-        affiliateLink: "#"
-      },
-      {
-        image: "https://images.unsplash.com/photo-1581101767113-1677fc2beaa8?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
-        title: "Gold Ankle Strap Heels",
-        price: "$129.99",
-        retailer: "Elegant Steps",
-        affiliateLink: "#"
-      },
-      {
-        image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
-        title: "Sequin Evening Gown",
-        price: "$299.99",
-        retailer: "Glamour Gowns",
-        affiliateLink: "#"
-      }
-    ]
-  };
+  // Spotlight celebrity with sample products
+  const spotlightCelebrity = celebrities.length > 0 ? {
+    id: celebrities[0].id,
+    name: celebrities[0].name,
+    image: celebrities[0].image,
+    outfit: "Latest Fashion Statement",
+    event: "Recent Appearance",
+    description: celebrities[0].bio || "Stunning look from one of our favorite celebrities.",
+    products: affiliateProducts.slice(0, 4).map(product => ({
+      image: product.image,
+      title: product.title,
+      price: product.price,
+      retailer: product.retailer, 
+      affiliateLink: product.affiliateLink
+    }))
+  } : null;
 
   const socialPosts = [
     {
@@ -115,36 +121,16 @@ const Index: React.FC = () => {
     }
   ];
 
-  const shopTheLookProducts = [
-    {
-      image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
-      title: "Oversized Knit Sweater",
-      price: "$59.99",
-      retailer: "Urban Styles",
-      affiliateLink: "#"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1560243563-062bfc001d68?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
-      title: "Designer Inspired Sunglasses",
-      price: "$29.99",
-      retailer: "Shade House",
-      affiliateLink: "#"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1614252369475-531eba835eb1?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
-      title: "Leather Crossbody Bag",
-      price: "$79.99",
-      retailer: "Bag Haven",
-      affiliateLink: "#"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
-      title: "Gold Hoop Earrings",
-      price: "$19.99",
-      retailer: "Glam Jewelry",
-      affiliateLink: "#"
-    }
-  ];
+  // Display loading state if data is being fetched
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="container-custom py-16 text-center">
+          <p className="text-muted-foreground">Loading content...</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
@@ -224,7 +210,7 @@ const Index: React.FC = () => {
           viewAllLink="/shop"
         />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {shopTheLookProducts.map((product, index) => (
+          {affiliateProducts.slice(0, 4).map((product, index) => (
             <AffiliateProductCard
               key={index}
               image={product.image}
@@ -238,14 +224,16 @@ const Index: React.FC = () => {
       </section>
 
       {/* Celebrity Spotlight */}
-      <section className="py-16 bg-pastel-pink/30">
-        <div className="container-custom">
-          <h2 className="section-title text-center mb-10">
-            Celebrity Spotlight
-          </h2>
-          <CelebritySpotlight {...spotlightCelebrity} />
-        </div>
-      </section>
+      {spotlightCelebrity && (
+        <section className="py-16 bg-pastel-pink/30">
+          <div className="container-custom">
+            <h2 className="section-title text-center mb-10">
+              Celebrity Spotlight
+            </h2>
+            <CelebritySpotlight {...spotlightCelebrity} />
+          </div>
+        </section>
+      )}
 
       {/* Testimonials Section */}
       <section className="py-16 bg-pastel-lavender">

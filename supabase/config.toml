@@ -1,1 +1,5 @@
+
 project_id = "fbsnleznifhfoudaxxlt"
+
+[functions.import-mock-data]
+verify_jwt = false

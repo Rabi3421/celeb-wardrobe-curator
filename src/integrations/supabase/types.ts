@@ -148,6 +148,7 @@ export type Database = {
           id: string
           image: string
           name: string
+          outfitcount: number | null
           style_type: string
           updated_at: string
         }
@@ -158,6 +159,7 @@ export type Database = {
           id?: string
           image: string
           name: string
+          outfitcount?: number | null
           style_type: string
           updated_at?: string
         }
@@ -168,6 +170,7 @@ export type Database = {
           id?: string
           image?: string
           name?: string
+          outfitcount?: number | null
           style_type?: string
           updated_at?: string
         }
@@ -212,6 +215,7 @@ export type Database = {
           id: string
           image: string
           occasion: string | null
+          tags: string[] | null
           title: string
           updated_at: string
         }
@@ -224,6 +228,7 @@ export type Database = {
           id?: string
           image: string
           occasion?: string | null
+          tags?: string[] | null
           title: string
           updated_at?: string
         }
@@ -236,6 +241,7 @@ export type Database = {
           id?: string
           image?: string
           occasion?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
         }

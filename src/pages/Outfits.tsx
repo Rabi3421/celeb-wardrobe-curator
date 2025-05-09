@@ -1,19 +1,33 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import OutfitCard from "@/components/ui/OutfitCard";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { outfits } from "@/data/mockData";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Calendar, Heart, Tag } from "lucide-react";
+import { fetchOutfits } from "@/services/api";
+import { Outfit } from "@/types/data";
 
 const Outfits: React.FC = () => {
+  const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const loadOutfits = async () => {
+      setIsLoading(true);
+      const data = await fetchOutfits();
+      setOutfits(data);
+      setIsLoading(false);
+    };
+    
+    loadOutfits();
+  }, []);
   
   // Filter outfits based on search and category
   const filteredOutfits = outfits.filter(outfit => {
@@ -37,7 +51,17 @@ const Outfits: React.FC = () => {
   };
 
   // Featured outfit (could be based on any criteria)
-  const featuredOutfit = outfits[1]; // Just using one as an example
+  const featuredOutfit = outfits.length > 0 ? outfits[0] : null;
+  
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="container-custom py-16 text-center">
+          <p className="text-muted-foreground">Loading outfits...</p>
+        </div>
+      </PageLayout>
+    );
+  }
   
   return (
     <PageLayout>
@@ -65,53 +89,55 @@ const Outfits: React.FC = () => {
 
       <div className="container-custom py-12">
         {/* Featured Outfit */}
-        <div className="mb-12">
-          <SectionHeader title="Look of the Day" />
-          <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-r from-pastel-blue to-pastel-lavender">
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              <div className="relative aspect-[3/4] md:aspect-auto">
-                <img
-                  src={featuredOutfit.image}
-                  alt={featuredOutfit.title}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-6 md:p-8">
-                <CardHeader className="p-0 pb-4">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Tag className="h-4 w-4 text-primary-foreground" />
-                    <span className="text-sm font-medium">{featuredOutfit.occasion || "Casual"}</span>
-                  </div>
-                  <CardTitle className="text-2xl md:text-3xl">
-                    {featuredOutfit.title}
-                  </CardTitle>
-                  <CardDescription className="text-base">
-                    By {featuredOutfit.celebrity}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-0 pt-4">
-                  <p className="mb-6">{featuredOutfit.description}</p>
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Last Week</span>
+        {featuredOutfit && (
+          <div className="mb-12">
+            <SectionHeader title="Look of the Day" />
+            <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-r from-pastel-blue to-pastel-lavender">
+              <div className="grid grid-cols-1 md:grid-cols-2">
+                <div className="relative aspect-[3/4] md:aspect-auto">
+                  <img
+                    src={featuredOutfit.image}
+                    alt={featuredOutfit.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-6 md:p-8">
+                  <CardHeader className="p-0 pb-4">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Tag className="h-4 w-4 text-primary-foreground" />
+                      <span className="text-sm font-medium">{featuredOutfit.occasion || "Casual"}</span>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Heart className="h-4 w-4 text-red-500" />
-                      <span className="text-sm">3.2k Likes</span>
+                    <CardTitle className="text-2xl md:text-3xl">
+                      {featuredOutfit.title}
+                    </CardTitle>
+                    <CardDescription className="text-base">
+                      By {featuredOutfit.celebrity}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0 pt-4">
+                    <p className="mb-6">{featuredOutfit.description}</p>
+                    <div className="flex items-center space-x-4 mb-6">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">Last Week</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Heart className="h-4 w-4 text-red-500" />
+                        <span className="text-sm">3.2k Likes</span>
+                      </div>
                     </div>
-                  </div>
-                  <Button 
-                    className="bg-white text-primary-foreground hover:bg-white/90"
-                    onClick={() => window.location.href = `/outfit/${featuredOutfit.id}`}
-                  >
-                    View Details
-                  </Button>
-                </CardContent>
+                    <Button 
+                      className="bg-white text-primary-foreground hover:bg-white/90"
+                      onClick={() => window.location.href = `/outfit/${featuredOutfit.id}`}
+                    >
+                      View Details
+                    </Button>
+                  </CardContent>
+                </div>
               </div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
+        )}
 
         {/* Categories Tabs */}
         <div className="mb-8">

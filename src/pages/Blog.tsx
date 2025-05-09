@@ -1,18 +1,32 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import BlogPostCard from "@/components/ui/BlogPostCard";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { blogPosts } from "@/data/mockData";
+import { fetchBlogPosts } from "@/services/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, BookOpen, MessageSquare, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BlogPost } from "@/types/data";
 
 const Blog: React.FC = () => {
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const loadBlogPosts = async () => {
+      setIsLoading(true);
+      const data = await fetchBlogPosts();
+      setBlogPosts(data);
+      setIsLoading(false);
+    };
+    
+    loadBlogPosts();
+  }, []);
 
   // Get unique categories
   const categories = Array.from(new Set(blogPosts.map(post => post.category)));
@@ -31,6 +45,16 @@ const Blog: React.FC = () => {
       // In a real app, you would send this to your backend
     }
   };
+
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="container-custom py-16 text-center">
+          <p className="text-muted-foreground">Loading blog posts...</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
