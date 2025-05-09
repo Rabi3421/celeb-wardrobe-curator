@@ -44,7 +44,7 @@ export const celebrities = [
 export const outfits = [
   {
     id: "outfit-1",
-    image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
+    image:"/images/zendaya_red_carpet_look.avif",
     celebrityId: "zendaya",
     celebrity: "Zendaya",
     title: "Met Gala 2023 Red Carpet Look",
@@ -56,7 +56,7 @@ export const outfits = [
   },
   {
     id: "outfit-2",
-    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
+    image: "/images/Rihanna.jpeg",
     celebrityId: "rihanna",
     celebrity: "Rihanna",
     title: "NYC Street Style in Oversized Coat",
@@ -68,7 +68,7 @@ export const outfits = [
   },
   {
     id: "outfit-3",
-    image: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
+    image: "/images/Harry_Styles.jpeg",
     celebrityId: "harry-styles",
     celebrity: "Harry Styles",
     title: "Grammy Performance Flared Jumpsuit",

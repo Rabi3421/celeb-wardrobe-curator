@@ -149,7 +149,7 @@ const Index: React.FC = () => {
   return (
     <PageLayout>
       {/* Hero Banner */}
-      <section className="bg-gradient-to-r from-pastel-lavender to-pastel-blue py-12 md:py-20">
+      <section className="bg-gradient-to-r from-pastel-lavender to-pastel-blue py-12 md:py-20 animate-fade-slide-up">
         <div className="container-custom flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-8 md:mb-0">
             <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium mb-4">
@@ -169,9 +169,9 @@ const Index: React.FC = () => {
           </div>
           <div className="md:w-1/2 flex justify-center">
             <img
-              src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+              src="/images/hero_img.jpg"
               alt="Celebrity red carpet fashion"
-              className="rounded-2xl shadow-lg max-w-sm md:max-w-md object-cover h-[500px]"
+              className="rounded-2xl shadow-hero-glow max-w-sm md:max-w-md object-cover h-[500px] transform transition duration-500 hover:scale-105"
             />
           </div>
         </div>
