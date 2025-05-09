@@ -27,6 +27,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import AffiliateDisclosure from "./pages/AffiliateDisclosure";
 import NotFound from "./pages/NotFound";
+import Categories from "./pages/Categories";
 
 // Scroll to top component
 const ScrollToTop = () => {
@@ -79,6 +80,7 @@ const App = () => {
             React.createElement(Route, { path: "/celebrity/:id", element: React.createElement(CelebrityProfile, null) }),
             React.createElement(Route, { path: "/outfit/:id", element: React.createElement(OutfitDetail, null) }),
             React.createElement(Route, { path: "/blog/:id", element: React.createElement(BlogPost, null) }),
+            React.createElement(Route, { path: "/category/:category", element: React.createElement(Categories, null) }),
             React.createElement(Route, { path: "/admin/login", element: React.createElement(AdminLogin, null) }),
             React.createElement(Route, { path: "/admin/dashboard", element: React.createElement(AdminDashboard, null) }),
             React.createElement(Route, { path: "/admin/celebrities", element: React.createElement(AdminCelebrities, null) }),
