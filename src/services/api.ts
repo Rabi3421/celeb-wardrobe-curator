@@ -13,7 +13,16 @@ export async function fetchCelebrities(): Promise<Celebrity[]> {
     return [];
   }
   
-  return data || [];
+  // Map database fields to match our Celebrity type
+  return data?.map(item => ({
+    id: item.id,
+    name: item.name,
+    image: item.image,
+    outfitCount: item.outfitcount || 0,
+    bio: item.bio,
+    category: item.category,
+    styleType: item.style_type
+  })) || [];
 }
 
 export async function fetchCelebrityById(id: string): Promise<Celebrity | null> {
@@ -28,7 +37,16 @@ export async function fetchCelebrityById(id: string): Promise<Celebrity | null> 
     return null;
   }
   
-  return data;
+  // Map database fields to match our Celebrity type
+  return data ? {
+    id: data.id,
+    name: data.name,
+    image: data.image,
+    outfitCount: data.outfitcount || 0,
+    bio: data.bio,
+    category: data.category,
+    styleType: data.style_type
+  } : null;
 }
 
 // Outfit APIs
@@ -46,9 +64,17 @@ export async function fetchOutfits(): Promise<Outfit[]> {
   }
   
   // Transform the data to match the expected format
-  return data.map((outfit) => ({
-    ...outfit,
-    celebrity: outfit.celebrities?.name || "Unknown Celebrity"
+  return data?.map(outfit => ({
+    id: outfit.id,
+    image: outfit.image,
+    celebrityId: outfit.celebrity_id,
+    celebrity: outfit.celebrities?.name || "Unknown Celebrity",
+    title: outfit.title,
+    description: outfit.description,
+    fullDescription: outfit.full_description,
+    occasion: outfit.occasion,
+    date: outfit.date,
+    tags: outfit.tags
   })) || [];
 }
 
@@ -69,8 +95,16 @@ export async function fetchOutfitById(id: string): Promise<Outfit | null> {
   
   // Transform the data to match the expected format
   return data ? {
-    ...data,
-    celebrity: data.celebrities?.name || "Unknown Celebrity"
+    id: data.id,
+    image: data.image,
+    celebrityId: data.celebrity_id,
+    celebrity: data.celebrities?.name || "Unknown Celebrity",
+    title: data.title,
+    description: data.description,
+    fullDescription: data.full_description,
+    occasion: data.occasion,
+    date: data.date,
+    tags: data.tags
   } : null;
 }
 
@@ -114,7 +148,17 @@ export async function fetchAffiliateProducts(): Promise<AffiliateProduct[]> {
     return [];
   }
   
-  return data || [];
+  // Transform the data to match the expected format
+  return data?.map(product => ({
+    id: product.id,
+    outfitId: product.outfit_id,
+    image: product.image,
+    title: product.title,
+    price: product.price,
+    retailer: product.retailer,
+    affiliateLink: product.affiliate_link,
+    description: product.description || ""
+  })) || [];
 }
 
 export async function fetchAffiliateProductsByOutfitId(outfitId: string): Promise<AffiliateProduct[]> {
@@ -128,5 +172,15 @@ export async function fetchAffiliateProductsByOutfitId(outfitId: string): Promis
     return [];
   }
   
-  return data || [];
+  // Transform the data to match the expected format
+  return data?.map(product => ({
+    id: product.id,
+    outfitId: product.outfit_id,
+    image: product.image,
+    title: product.title,
+    price: product.price,
+    retailer: product.retailer,
+    affiliateLink: product.affiliate_link,
+    description: product.description || ""
+  })) || [];
 }
