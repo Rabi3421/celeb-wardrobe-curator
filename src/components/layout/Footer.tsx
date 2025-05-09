@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Instagram, Pinterest, Twitter, Youtube } from "lucide-react";
+import { Instagram, Twitter, Youtube, CircleUser } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -46,7 +46,7 @@ const Footer: React.FC = () => {
   // Social media links
   const socialLinks = [
     { name: "Instagram", icon: Instagram, link: "https://instagram.com" },
-    { name: "Pinterest", icon: Pinterest, link: "https://pinterest.com" },
+    { name: "Pinterest", icon: CircleUser, link: "https://pinterest.com" }, // Replaced Pinterest with CircleUser
     { name: "Twitter", icon: Twitter, link: "https://twitter.com" },
     { name: "Youtube", icon: Youtube, link: "https://youtube.com" }
   ];
