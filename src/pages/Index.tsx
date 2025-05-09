@@ -1,11 +1,16 @@
+
 import React from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import OutfitCard from "@/components/ui/OutfitCard";
 import CelebrityCard from "@/components/ui/CelebrityCard";
 import BlogPostCard from "@/components/ui/BlogPostCard";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { outfits, celebrities, blogPosts } from "@/data/mockData";
 import TestimonialCard from "@/components/ui/TestimonialCard";
+import CategoryCard from "@/components/ui/CategoryCard";
+import CelebritySpotlight from "@/components/ui/CelebritySpotlight";
+import SocialFeedCard from "@/components/ui/SocialFeedCard";
+import AffiliateProductCard from "@/components/ui/AffiliateProductCard";
+import { outfits, celebrities, blogPosts } from "@/data/mockData";
 
 const Index: React.FC = () => {
   const featuredOutfits = outfits.slice(0, 6);
@@ -36,43 +41,150 @@ const Index: React.FC = () => {
     }
   ];
 
+  const categories = [
+    { title: "Dresses", icon: "dress", link: "/category/dresses" },
+    { title: "Shoes", icon: "shoe", link: "/category/shoes" },
+    { title: "Makeup", icon: "makeup", link: "/category/makeup" },
+    { title: "Handbags", icon: "handbag", link: "/category/handbags" },
+    { title: "Cars", icon: "car", link: "/category/cars" },
+    { title: "Bikes", icon: "bike", link: "/category/bikes" }
+  ];
+
+  const spotlightCelebrity = {
+    id: "spotlight-1",
+    name: "Zendaya",
+    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80",
+    outfit: "Met Gala 2023 Red Carpet Look",
+    event: "Met Gala 2023",
+    description: "Zendaya stunned everyone at the Met Gala with this custom designer gown featuring intricate beadwork and a dramatic silhouette. The ensemble was completed with matching accessories and statement jewelry.",
+    products: [
+      {
+        image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+        title: "Silver Statement Earrings",
+        price: "$49.99",
+        retailer: "Fashion Jewelry",
+        affiliateLink: "#"
+      },
+      {
+        image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+        title: "Crystal Embellished Clutch",
+        price: "$79.99",
+        retailer: "Luxe Bags",
+        affiliateLink: "#"
+      },
+      {
+        image: "https://images.unsplash.com/photo-1581101767113-1677fc2beaa8?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+        title: "Gold Ankle Strap Heels",
+        price: "$129.99",
+        retailer: "Elegant Steps",
+        affiliateLink: "#"
+      },
+      {
+        image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+        title: "Sequin Evening Gown",
+        price: "$299.99",
+        retailer: "Glamour Gowns",
+        affiliateLink: "#"
+      }
+    ]
+  };
+
+  const socialPosts = [
+    {
+      platform: "instagram" as const,
+      username: "@celebritypersona",
+      content: "Check out Emma Stone's stunning Oscar gown and affordable alternatives on our website! #OscarFashion",
+      image: "https://images.unsplash.com/photo-1546536133-d1b07a9c768e?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+      date: "2 hours ago",
+      link: "https://instagram.com"
+    },
+    {
+      platform: "twitter" as const,
+      username: "@celebritypersona",
+      content: "Just added: Ryan Gosling's premiere look breakdown with all the details about his custom suit. RT if you want to see more men's fashion!",
+      date: "5 hours ago",
+      link: "https://twitter.com"
+    },
+    {
+      platform: "instagram" as const,
+      username: "@celebritypersona",
+      content: "Breaking down Margot Robbie's street style - swipe to see all the affordable alternatives! #StreetStyle #GetTheLook",
+      image: "https://images.unsplash.com/photo-1599039628218-eac5d51a4c85?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+      date: "1 day ago",
+      link: "https://instagram.com"
+    }
+  ];
+
+  const shopTheLookProducts = [
+    {
+      image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+      title: "Oversized Knit Sweater",
+      price: "$59.99",
+      retailer: "Urban Styles",
+      affiliateLink: "#"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1560243563-062bfc001d68?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+      title: "Designer Inspired Sunglasses",
+      price: "$29.99",
+      retailer: "Shade House",
+      affiliateLink: "#"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1614252369475-531eba835eb1?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+      title: "Leather Crossbody Bag",
+      price: "$79.99",
+      retailer: "Bag Haven",
+      affiliateLink: "#"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+      title: "Gold Hoop Earrings",
+      price: "$19.99",
+      retailer: "Glam Jewelry",
+      affiliateLink: "#"
+    }
+  ];
+
   return (
     <PageLayout>
       {/* Hero Banner */}
-      <section className="relative bg-pastel-lavender">
-        <div className="container-custom py-10 md:py-16 lg:py-24 flex flex-col md:flex-row items-center">
-          <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
+      <section className="bg-gradient-to-r from-pastel-lavender to-pastel-blue py-12 md:py-20">
+        <div className="container-custom flex flex-col md:flex-row items-center">
+          <div className="md:w-1/2 mb-8 md:mb-0">
             <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium mb-4">
               Discover Celebrity Style & Shop Similar Looks
             </h1>
-            <p className="text-muted-foreground mb-6 md:text-lg">
-              Your ultimate destination for celebrity fashion inspiration and affordable alternatives.
+            <p className="text-muted-foreground mb-8 md:text-lg max-w-lg">
+              Your ultimate destination for celebrity fashion inspiration with affordable alternatives you can shop right now.
             </p>
             <div className="flex space-x-4">
-              <button className="btn-primary">Explore Outfits</button>
-              <button className="border border-primary-foreground text-primary-foreground rounded-full px-6 py-2.5 font-medium transition-all hover:bg-primary-foreground hover:text-white">
-                Browse Celebrities
+              <button className="btn-primary flex items-center">
+                Explore Celebrity Looks
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
               </button>
             </div>
           </div>
           <div className="md:w-1/2 flex justify-center">
             <img
-              src="https://images.unsplash.com/photo-1649972904349-6e44c42644a7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-              alt="Celebrity fashion"
-              className="rounded-2xl shadow-lg max-w-xs md:max-w-sm"
+              src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+              alt="Celebrity red carpet fashion"
+              className="rounded-2xl shadow-lg max-w-sm md:max-w-md object-cover h-[500px]"
             />
           </div>
         </div>
       </section>
 
-      {/* Latest Outfits Section */}
+      {/* Trending Looks Section */}
       <section className="container-custom py-16">
         <SectionHeader
-          title="Latest Celebrity Outfits"
+          title="This Week's Star Styles"
           viewAllLink="/outfits"
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {featuredOutfits.map((outfit) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {featuredOutfits.slice(0, 3).map((outfit) => (
             <OutfitCard
               key={outfit.id}
               id={outfit.id}
@@ -86,110 +198,52 @@ const Index: React.FC = () => {
         </div>
       </section>
 
-      {/* Popular Celebrities Section */}
-      <section className="bg-secondary py-16">
+      {/* Categories Section */}
+      <section className="py-16 bg-secondary">
         <div className="container-custom">
-          <SectionHeader
-            title="Popular Celebrities"
-            viewAllLink="/celebrities"
-          />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {featuredCelebrities.map((celebrity) => (
-              <CelebrityCard
-                key={celebrity.id}
-                id={celebrity.id}
-                name={celebrity.name}
-                image={celebrity.image}
-                outfitCount={celebrity.outfitCount}
+          <h2 className="section-title text-center mb-10">
+            Explore by Category
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {categories.map((category, index) => (
+              <CategoryCard
+                key={index}
+                title={category.title}
+                icon={category.icon}
+                link={category.link}
               />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Shop the Look Section */}
       <section className="container-custom py-16">
-        <h2 className="section-title text-center mx-auto mb-12">
-          Why Choose CelebrityPersona
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-pastel-pink rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-primary-foreground"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="m9 12 2 2 4-4" />
-              </svg>
-            </div>
-            <h3 className="font-serif font-medium text-xl mb-2">Authentic Looks</h3>
-            <p className="text-muted-foreground">
-              Verified celebrity outfits with detailed information about the occasion and styling.
-            </p>
-          </div>
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-pastel-blue rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-primary-foreground"
-              >
-                <circle cx="12" cy="12" r="8" />
-                <path d="M12 2v2" />
-                <path d="M12 20v2" />
-                <path d="m4.93 4.93 1.41 1.41" />
-                <path d="m17.66 17.66 1.41 1.41" />
-                <path d="M2 12h2" />
-                <path d="M20 12h2" />
-                <path d="m6.34 17.66-1.41 1.41" />
-                <path d="m19.07 4.93-1.41 1.41" />
-              </svg>
-            </div>
-            <h3 className="font-serif font-medium text-xl mb-2">Affordable Alternatives</h3>
-            <p className="text-muted-foreground">
-              Shop similar styles across different price points from trusted retailers.
-            </p>
-          </div>
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-pastel-peach rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-primary-foreground"
-              >
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-                <path d="M3 9h18" />
-                <path d="M9 21V9" />
-              </svg>
-            </div>
-            <h3 className="font-serif font-medium text-xl mb-2">Fashion Insights</h3>
-            <p className="text-muted-foreground">
-              Expert fashion analysis and styling tips from industry professionals.
-            </p>
-          </div>
+        <SectionHeader
+          title="Shop the Celeb Look"
+          viewAllLink="/shop"
+        />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {shopTheLookProducts.map((product, index) => (
+            <AffiliateProductCard
+              key={index}
+              image={product.image}
+              title={product.title}
+              price={product.price}
+              retailer={product.retailer}
+              affiliateLink={product.affiliateLink}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Celebrity Spotlight */}
+      <section className="py-16 bg-pastel-pink/30">
+        <div className="container-custom">
+          <h2 className="section-title text-center mb-10">
+            Celebrity Spotlight
+          </h2>
+          <CelebritySpotlight {...spotlightCelebrity} />
         </div>
       </section>
 
@@ -214,36 +268,58 @@ const Index: React.FC = () => {
       </section>
 
       {/* Blog Section */}
-      <section className="bg-secondary py-16">
+      <section className="container-custom py-16">
+        <SectionHeader
+          title="Fashion Blog"
+          viewAllLink="/blog"
+        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {recentBlogPosts.map((post) => (
+            <BlogPostCard
+              key={post.id}
+              id={post.id}
+              title={post.title}
+              excerpt={post.excerpt}
+              image={post.image}
+              date={post.date}
+              category={post.category}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Social Feed Section */}
+      <section className="py-16 bg-secondary">
         <div className="container-custom">
           <SectionHeader
-            title="Fashion Blog"
-            viewAllLink="/blog"
+            title="Our Social Feed"
+            viewAllLink="https://instagram.com"
+            viewAllText="Follow Us"
           />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {recentBlogPosts.map((post) => (
-              <BlogPostCard
-                key={post.id}
-                id={post.id}
-                title={post.title}
-                excerpt={post.excerpt}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {socialPosts.map((post, index) => (
+              <SocialFeedCard
+                key={index}
+                platform={post.platform}
+                username={post.username}
+                content={post.content}
                 image={post.image}
                 date={post.date}
-                category={post.category}
+                link={post.link}
               />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Newsletter Section */}
+      {/* Join the Fashion Circle Section */}
       <section className="container-custom py-16">
-        <div className="bg-pastel-pink rounded-2xl p-8 md:p-12 text-center">
+        <div className="bg-gradient-to-r from-pastel-pink to-pastel-peach rounded-2xl p-8 md:p-12 text-center">
           <h2 className="font-serif text-2xl md:text-3xl font-medium mb-4">
-            Stay Updated with Celebrity Fashion
+            Join the Fashion Circle
           </h2>
           <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Subscribe to our newsletter for the latest celebrity outfit inspirations and exclusive style guides.
+            Be the first to receive celebrity style alerts, exclusive guides on how to recreate the looks, and special discounts from our partners.
           </p>
           <form className="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
             <input
@@ -256,6 +332,9 @@ const Index: React.FC = () => {
               Subscribe
             </button>
           </form>
+          <p className="text-xs text-muted-foreground mt-4">
+            By subscribing, you agree to our Privacy Policy and consent to receive updates from CelebrityPersona.
+          </p>
         </div>
       </section>
     </PageLayout>
