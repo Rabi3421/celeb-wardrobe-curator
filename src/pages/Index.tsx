@@ -1,4 +1,3 @@
-
 import React from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import OutfitCard from "@/components/ui/OutfitCard";
@@ -6,11 +5,36 @@ import CelebrityCard from "@/components/ui/CelebrityCard";
 import BlogPostCard from "@/components/ui/BlogPostCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { outfits, celebrities, blogPosts } from "@/data/mockData";
+import TestimonialCard from "@/components/ui/TestimonialCard";
 
 const Index: React.FC = () => {
   const featuredOutfits = outfits.slice(0, 6);
   const featuredCelebrities = celebrities.slice(0, 4);
   const recentBlogPosts = blogPosts.slice(0, 3);
+
+  const testimonials = [
+    {
+      id: 1,
+      name: "Emma Thompson",
+      role: "Fashion Enthusiast",
+      avatar: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80",
+      quote: "CelebrityPersona completely transformed how I approach my personal style. Now I can easily find affordable alternatives to my favorite celebrity outfits!"
+    },
+    {
+      id: 2,
+      name: "Michael Rodriguez",
+      role: "Style Blogger",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80",
+      quote: "As a style blogger, this platform has become my go-to resource for researching celebrity fashion trends and finding budget-friendly options for my readers."
+    },
+    {
+      id: 3,
+      name: "Sophia Chen",
+      role: "Personal Shopper",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80",
+      quote: "The detailed breakdown of each outfit and similar alternatives at different price points makes this an invaluable tool for my clients who want celebrity-inspired looks."
+    }
+  ];
 
   return (
     <PageLayout>
@@ -165,6 +189,26 @@ const Index: React.FC = () => {
             <p className="text-muted-foreground">
               Expert fashion analysis and styling tips from industry professionals.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-16 bg-pastel-lavender">
+        <div className="container-custom">
+          <h2 className="section-title text-center mx-auto mb-10">
+            What Our Users Say
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial) => (
+              <TestimonialCard
+                key={testimonial.id}
+                name={testimonial.name}
+                role={testimonial.role}
+                avatar={testimonial.avatar}
+                quote={testimonial.quote}
+              />
+            ))}
           </div>
         </div>
       </section>
