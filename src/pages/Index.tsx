@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
+import SEO from "@/components/SEO/SEO";
 import OutfitCard from "@/components/ui/OutfitCard";
 import CelebrityCard from "@/components/ui/CelebrityCard";
 import BlogPostCard from "@/components/ui/BlogPostCard";
@@ -121,10 +122,28 @@ const Index: React.FC = () => {
     }
   ];
 
+  // Create JSON-LD structured data for the homepage
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "CelebrityPersona",
+    "url": window.location.origin,
+    "description": "Your ultimate destination for celebrity fashion inspiration with affordable alternatives you can shop right now.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${window.location.origin}/search?q={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   // Display loading state if data is being fetched
   if (isLoading) {
     return (
       <PageLayout>
+        <SEO />
         <div className="container-custom py-16 text-center">
           <p className="text-muted-foreground">Loading content...</p>
         </div>
@@ -134,6 +153,13 @@ const Index: React.FC = () => {
 
   return (
     <PageLayout>
+      <SEO
+        title="CelebrityPersona | Discover Celebrity Style & Shop Similar Looks"
+        description="Your ultimate destination for celebrity fashion inspiration with affordable alternatives you can shop right now."
+        ogImage="/images/hero_img.jpg"
+        keywords="celebrity fashion, affordable celebrity style, shop celebrity looks, celebrity outfits, fashion inspiration"
+        jsonLd={jsonLd}
+      />
       {/* Hero Banner */}
       <section className="bg-gradient-to-r from-pastel-lavender to-pastel-blue py-12 md:py-20 animate-fade-slide-up">
         <div className="container-custom flex flex-col md:flex-row items-center">

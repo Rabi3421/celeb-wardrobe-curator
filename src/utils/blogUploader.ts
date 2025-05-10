@@ -8,12 +8,16 @@ export const uploadBlogPost = async () => {
       .from('blog_posts')
       .insert({
         title: newBlogPost.title,
+        slug: newBlogPost.slug || convertToSlug(newBlogPost.title),
         excerpt: newBlogPost.excerpt,
         content: newBlogPost.content,
         image: newBlogPost.image,
         date: newBlogPost.date,
         category: newBlogPost.category,
-        author: newBlogPost.author
+        author: newBlogPost.author,
+        keywords: newBlogPost.keywords ? newBlogPost.keywords.join(', ') : '',
+        meta_description: newBlogPost.metaDescription || newBlogPost.excerpt,
+        structured_data: JSON.stringify(newBlogPost.structuredData || {})
       })
       .select();
     
@@ -27,6 +31,14 @@ export const uploadBlogPost = async () => {
     console.error("Exception during blog post upload:", error);
     return { success: false, error };
   }
+};
+
+// Helper function to convert title to SEO-friendly slug
+const convertToSlug = (text: string) => {
+  return text
+    .toLowerCase()
+    .replace(/[^\w ]+/g, '')
+    .replace(/ +/g, '-');
 };
 
 // Usage example (can be called from another component or admin page)

@@ -1,8 +1,12 @@
+
+# Allow crawling of all content for major search engines
 User-agent: Googlebot
 Allow: /
+Disallow: /admin/
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin/
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +16,7 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://www.celebritypersona.com/sitemap.xml

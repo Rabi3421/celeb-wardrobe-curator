@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "@/components/layout/PageLayout";
@@ -7,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageSquare, Clock, Calendar, User, ArrowLeft, Share } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import SEO from "@/components/SEO/SEO";
 
 const BlogPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -63,6 +63,10 @@ const BlogPost: React.FC = () => {
   if (!post) {
     return (
       <PageLayout>
+        <SEO 
+          title="Blog Post Not Found | CelebrityPersona" 
+          description="The blog post you're looking for could not be found."
+        />
         <div className="container-custom py-16 text-center">
           <h2 className="font-serif text-2xl mb-4">Blog post not found</h2>
           <p className="text-muted-foreground">
@@ -73,13 +77,55 @@ const BlogPost: React.FC = () => {
     );
   }
 
+  // Create JSON-LD structured data for the blog post
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "image": post.image,
+    "datePublished": post.date,
+    "dateModified": post.date,
+    "author": {
+      "@type": "Person",
+      "name": post.author
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "CelebrityPersona",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.celebritypersona.com/logo.png"
+      }
+    },
+    "description": post.excerpt,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": window.location.href
+    }
+  };
+
   // Get related posts (just for example - in real app would use tags/categories)
   const relatedPosts = blogPosts
     .filter(p => p.id !== post.id && p.category === post.category)
     .slice(0, 3);
 
+  // Keywords for the blog post based on title and category
+  const keywords = `${post.title}, ${post.category}, celebrity fashion, ${post.author}, fashion blog`;
+
   return (
     <PageLayout>
+      <SEO 
+        title={`${post.title} | CelebrityPersona`}
+        description={post.excerpt}
+        ogTitle={post.title}
+        ogDescription={post.excerpt}
+        ogImage={post.image}
+        ogType="article"
+        twitterCard="summary_large_image"
+        twitterImage={post.image}
+        keywords={keywords}
+        jsonLd={jsonLd}
+      />
       <div className="container-custom py-8 md:py-16">
         <div className="mb-6">
           <Link
@@ -119,7 +165,7 @@ const BlogPost: React.FC = () => {
           <figure className="mb-8 rounded-2xl overflow-hidden">
             <img
               src={post.image}
-              alt={post.title}
+              alt={`${post.title} - Fashion inspiration from ${post.category}`}
               className="w-full h-auto object-cover"
             />
           </figure>
@@ -240,7 +286,7 @@ const BlogPost: React.FC = () => {
                       <div className="aspect-video overflow-hidden">
                         <img 
                           src={relatedPost.image} 
-                          alt={relatedPost.title}
+                          alt={`${relatedPost.title} - Related fashion article`}
                           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                         />
                       </div>

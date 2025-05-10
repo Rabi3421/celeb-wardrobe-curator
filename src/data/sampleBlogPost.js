@@ -1,7 +1,8 @@
 
-// Sample blog post data
+// Sample blog post data with enhanced SEO metadata
 export const newBlogPost = {
   title: "10 Fashion Moments That Defined Zendaya's Style Evolution in 2025",
+  slug: "zendaya-style-evolution-fashion-moments-2025",
   excerpt: "From red carpet glamour to street style chic, explore how Zendaya continues to push fashion boundaries and set trends in 2025.",
   content: `
 # 10 Fashion Moments That Defined Zendaya's Style Evolution in 2025
@@ -80,5 +81,18 @@ With the remainder of 2025 still ahead, fashion enthusiasts worldwide eagerly an
   image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
   date: "2025-05-10",
   category: "Celebrity Style",
-  author: "Fashion Editor"
+  author: "Fashion Editor",
+  keywords: ["Zendaya", "fashion", "style evolution", "celebrity style", "red carpet", "sustainable fashion", "2025 fashion trends"],
+  metaDescription: "Discover how Zendaya's 10 most iconic fashion moments of 2025 redefined style boundaries and set new trends in celebrity fashion.",
+  structuredData: {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "10 Fashion Moments That Defined Zendaya's Style Evolution in 2025",
+    "image": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "datePublished": "2025-05-10",
+    "author": {
+      "@type": "Person",
+      "name": "Fashion Editor"
+    }
+  }
 };
