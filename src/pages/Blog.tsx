@@ -10,6 +10,7 @@ import { Calendar, BookOpen, MessageSquare, ChevronDown, Loader2 } from "lucide-
 import { cn } from "@/lib/utils";
 import { BlogPost } from "@/types/data";
 import { useToast } from "@/hooks/use-toast";
+import SampleBlogUploader from "@/components/admin/SampleBlogUploader";
 
 const Blog: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
@@ -90,6 +91,13 @@ const Blog: React.FC = () => {
   return (
     <PageLayout>
       <div className="container-custom py-12">
+        {/* Sample Blog Uploader (Only visible when no blog posts are available) */}
+        {blogPosts.length === 0 && (
+          <div className="mb-6">
+            <SampleBlogUploader />
+          </div>
+        )}
+
         {/* Hero Section */}
         <div className="relative mb-12 overflow-hidden rounded-3xl bg-gradient-to-r from-pastel-blue to-pastel-lavender">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 md:p-12">
