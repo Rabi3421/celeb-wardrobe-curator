@@ -1,21 +1,55 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Instagram, Twitter, Youtube, CircleUser } from "lucide-react";
+import { Instagram, Twitter, Youtube, CircleUser, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { subscribeToNewsletter } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 const Footer: React.FC = () => {
   const [email, setEmail] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically handle the subscription logic
-    console.log("Subscribed with:", email);
-    setEmail("");
-    // You could add toast notification here
+    
+    if (!email.trim()) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSubscribing(true);
+    
+    try {
+      const result = await subscribeToNewsletter(email, "footer");
+      
+      toast({
+        title: result.success ? "Success" : "Error",
+        description: result.message,
+        variant: result.success ? "default" : "destructive"
+      });
+      
+      if (result.success) {
+        setEmail("");
+      }
+    } catch (error) {
+      console.error("Error during subscription:", error);
+      toast({
+        title: "Subscription Error",
+        description: "An error occurred during subscription. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
   // Categories for the footer
@@ -142,18 +176,26 @@ const Footer: React.FC = () => {
                   placeholder="Your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
                   className={cn(
                     "bg-gray-800 border-gray-700 text-white placeholder:text-gray-400",
                     "focus:border-pastel-pink focus:ring-pastel-pink"
                   )}
+                  disabled={isSubscribing}
                 />
               </div>
               <Button 
                 type="submit" 
                 className="w-full bg-pastel-pink hover:bg-pastel-pink/90 text-primary-foreground"
+                disabled={isSubscribing}
               >
-                Subscribe
+                {isSubscribing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Subscribing...
+                  </>
+                ) : (
+                  "Subscribe"
+                )}
               </Button>
             </form>
           </div>

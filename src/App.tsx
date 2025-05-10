@@ -23,6 +23,7 @@ import AdminBlog from "./pages/AdminBlog";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminTags from "./pages/AdminTags";
 import AdminSettings from "./pages/AdminSettings";
+import AdminNewsletterSubscribers from "./pages/AdminNewsletterSubscribers";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import AffiliateDisclosure from "./pages/AffiliateDisclosure";
@@ -89,6 +90,7 @@ const App = () => {
             React.createElement(Route, { path: "/admin/analytics", element: React.createElement(AdminAnalytics, null) }),
             React.createElement(Route, { path: "/admin/tags", element: React.createElement(AdminTags, null) }),
             React.createElement(Route, { path: "/admin/settings", element: React.createElement(AdminSettings, null) }),
+            React.createElement(Route, { path: "/admin/newsletter", element: React.createElement(AdminNewsletterSubscribers, null) }),
             React.createElement(Route, { path: "/privacy", element: React.createElement(Privacy, null) }),
             React.createElement(Route, { path: "/terms", element: React.createElement(Terms, null) }),
             React.createElement(Route, { path: "/affiliate-disclosure", element: React.createElement(AffiliateDisclosure, null) }),

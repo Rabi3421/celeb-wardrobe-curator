@@ -3,19 +3,21 @@ import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import BlogPostCard from "@/components/ui/BlogPostCard";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { fetchBlogPosts } from "@/services/api";
+import { fetchBlogPosts, subscribeToNewsletter } from "@/services/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, BookOpen, MessageSquare, ChevronDown } from "lucide-react";
+import { Calendar, BookOpen, MessageSquare, ChevronDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BlogPost } from "@/types/data";
+import { useToast } from "@/hooks/use-toast";
 
 const Blog: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
   
   useEffect(() => {
     const loadBlogPosts = async () => {
@@ -37,12 +39,41 @@ const Blog: React.FC = () => {
   // Initial posts to show
   const initialPostsCount = 3;
   
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      setSubscribed(true);
-      setEmail("");
-      // In a real app, you would send this to your backend
+    
+    if (!email.trim()) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSubscribing(true);
+    
+    try {
+      const result = await subscribeToNewsletter(email, "blog_page");
+      
+      toast({
+        title: result.success ? "Success" : "Error",
+        description: result.message,
+        variant: result.success ? "default" : "destructive"
+      });
+      
+      if (result.success) {
+        setEmail("");
+      }
+    } catch (error) {
+      console.error("Error during subscription:", error);
+      toast({
+        title: "Subscription Error",
+        description: "An error occurred during subscription. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubscribing(false);
     }
   };
 
@@ -229,31 +260,35 @@ const Blog: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
-                  {subscribed ? (
-                    <div className="bg-white/80 rounded-lg p-4 inline-flex items-center">
-                      <MessageSquare className="text-green-500 mr-2 h-5 w-5" />
-                      <p className="text-green-700">Thank you for subscribing!</p>
+                  <form onSubmit={handleSubscribe} className="space-y-4">
+                    <div className="flex max-w-md flex-col sm:flex-row gap-2">
+                      <input
+                        type="email"
+                        placeholder="Your email address"
+                        className="flex-1 rounded-lg border border-border bg-white/90 px-4 py-2"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={isSubscribing}
+                      />
+                      <button 
+                        type="submit" 
+                        className="btn-primary whitespace-nowrap"
+                        disabled={isSubscribing}
+                      >
+                        {isSubscribing ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Subscribing...
+                          </>
+                        ) : (
+                          "Subscribe"
+                        )}
+                      </button>
                     </div>
-                  ) : (
-                    <form onSubmit={handleSubscribe} className="space-y-4">
-                      <div className="flex max-w-md flex-col sm:flex-row gap-2">
-                        <input
-                          type="email"
-                          placeholder="Your email address"
-                          className="flex-1 rounded-lg border border-border bg-white/90 px-4 py-2"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                        />
-                        <button type="submit" className="btn-primary whitespace-nowrap">
-                          Subscribe
-                        </button>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        We respect your privacy. Unsubscribe at any time.
-                      </p>
-                    </form>
-                  )}
+                    <p className="text-xs text-muted-foreground">
+                      We respect your privacy. Unsubscribe at any time.
+                    </p>
+                  </form>
                 </CardContent>
               </div>
               <div 

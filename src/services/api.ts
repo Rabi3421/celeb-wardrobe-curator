@@ -184,3 +184,54 @@ export async function fetchAffiliateProductsByOutfitId(outfitId: string): Promis
     description: product.description || ""
   })) || [];
 }
+
+// Newsletter Subscription API
+export async function subscribeToNewsletter(email: string, source: string = "footer"): Promise<{success: boolean, message: string}> {
+  try {
+    // Validate email format
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      return { 
+        success: false, 
+        message: "Please enter a valid email address." 
+      };
+    }
+
+    // Check if email already exists
+    const { data: existingSubscriber } = await supabase
+      .from("newsletter_subscribers")
+      .select("id")
+      .eq("email", email)
+      .single();
+
+    if (existingSubscriber) {
+      return { 
+        success: true, 
+        message: "You're already subscribed to our newsletter!" 
+      };
+    }
+
+    // Insert new subscriber
+    const { error } = await supabase
+      .from("newsletter_subscribers")
+      .insert([{ email, source }]);
+
+    if (error) {
+      console.error("Error subscribing to newsletter:", error);
+      return { 
+        success: false, 
+        message: "An error occurred while subscribing. Please try again." 
+      };
+    }
+
+    return { 
+      success: true, 
+      message: "Thank you for subscribing to our newsletter!" 
+    };
+  } catch (error) {
+    console.error("Exception during newsletter subscription:", error);
+    return { 
+      success: false, 
+      message: "An unexpected error occurred. Please try again later." 
+    };
+  }
+}
