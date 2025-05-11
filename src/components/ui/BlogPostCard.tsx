@@ -9,6 +9,7 @@ interface BlogPostCardProps {
   image: string;
   date: string;
   category: string;
+  slug?: string;
 }
 
 const BlogPostCard: React.FC<BlogPostCardProps> = ({
@@ -18,10 +19,13 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   image,
   date,
   category,
+  slug,
 }) => {
+  const postLink = slug ? `/blog/${slug}` : `/blog/${id}`;
+  
   return (
-    <div className="outfit-card h-full flex flex-col animate-fade-in">
-      <Link to={`/blog/${id}`}>
+    <article className="outfit-card h-full flex flex-col animate-fade-in">
+      <Link to={postLink}>
         <div className="relative aspect-video overflow-hidden">
           <img
             src={image}
@@ -33,12 +37,12 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
       </Link>
       <div className="p-4 flex flex-col flex-grow">
         <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-          <span>{date}</span>
+          <time dateTime={new Date(date).toISOString()}>{date}</time>
           <span className="bg-pastel-blue px-2 py-0.5 rounded-full">
             {category}
           </span>
         </div>
-        <Link to={`/blog/${id}`}>
+        <Link to={postLink}>
           <h2 className="font-serif font-medium text-xl line-clamp-2">
             {title}
           </h2>
@@ -52,7 +56,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
           </div>
         </Link>
       </div>
-    </div>
+    </article>
   );
 };
 

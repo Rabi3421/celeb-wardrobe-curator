@@ -2,10 +2,25 @@
 import { supabase } from "@/integrations/supabase/client";
 import { newBlogPost } from "@/data/sampleBlogPost";
 import { wamiqaGabbiArticle } from "@/data/wamiqa-gabbi-article";
+import { tiktokFashionArticle } from "@/data/tiktok-fashion-article";
 
-export const uploadBlogPost = async (postType: 'sample' | 'wamiqa' = 'sample') => {
+export type PostType = 'sample' | 'wamiqa' | 'tiktok';
+
+export const uploadBlogPost = async (postType: PostType = 'sample') => {
   try {
-    const selectedPost = postType === 'wamiqa' ? wamiqaGabbiArticle : newBlogPost;
+    let selectedPost;
+    
+    switch(postType) {
+      case 'wamiqa':
+        selectedPost = wamiqaGabbiArticle;
+        break;
+      case 'tiktok':
+        selectedPost = tiktokFashionArticle;
+        break;
+      case 'sample':
+      default:
+        selectedPost = newBlogPost;
+    }
     
     const { data, error } = await supabase
       .from('blog_posts')

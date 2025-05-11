@@ -14,9 +14,25 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# Allow crawling for Pinterest
+User-agent: Pinterest
+Allow: /
+
+# Allow Google Image crawler
+User-agent: Googlebot-Image
+Allow: /
+
+# Allow Google Mobile crawler
+User-agent: Googlebot-Mobile
+Allow: /
+
+# Standard rule for all other bots
 User-agent: *
 Allow: /
 Disallow: /admin/
 
-# Sitemap location
+# Sitemap locations
 Sitemap: https://www.celebritypersona.com/sitemap.xml
+
+# Add other language/regional sitemaps if applicable
+# Sitemap: https://www.celebritypersona.com/en-us/sitemap.xml

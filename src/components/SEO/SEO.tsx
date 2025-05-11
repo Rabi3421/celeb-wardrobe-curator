@@ -14,8 +14,11 @@ interface SEOProps {
   twitterTitle?: string;
   twitterDescription?: string;
   twitterImage?: string;
-  jsonLd?: Record<string, any>;
+  jsonLd?: Record<string, any> | Array<Record<string, any>>;
   keywords?: string;
+  author?: string;
+  datePublished?: string;
+  dateModified?: string;
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -32,6 +35,9 @@ const SEO: React.FC<SEOProps> = ({
   twitterImage,
   jsonLd,
   keywords,
+  author,
+  datePublished,
+  dateModified,
 }) => {
   const siteUrl = window.location.origin;
   const currentUrl = canonical || window.location.href;
@@ -43,6 +49,7 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="description" content={description} />
       {keywords && <meta name="keywords" content={keywords} />}
       <link rel="canonical" href={currentUrl} />
+      {author && <meta name="author" content={author} />}
       
       {/* Open Graph Tags */}
       <meta property="og:url" content={currentUrl} />
@@ -59,11 +66,23 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:description" content={twitterDescription || ogDescription || description} />
       {twitterImage && <meta name="twitter:image" content={twitterImage} />}
       
+      {/* Article Specific Meta */}
+      {datePublished && <meta property="article:published_time" content={datePublished} />}
+      {dateModified && <meta property="article:modified_time" content={dateModified} />}
+      
       {/* JSON-LD Structured Data */}
-      {jsonLd && (
-        <script type="application/ld+json">
-          {JSON.stringify(jsonLd)}
-        </script>
+      {jsonLd && Array.isArray(jsonLd) ? (
+        jsonLd.map((data, index) => (
+          <script key={`jsonld-${index}`} type="application/ld+json">
+            {JSON.stringify(data)}
+          </script>
+        ))
+      ) : (
+        jsonLd && (
+          <script type="application/ld+json">
+            {JSON.stringify(jsonLd)}
+          </script>
+        )
       )}
     </Helmet>
   );

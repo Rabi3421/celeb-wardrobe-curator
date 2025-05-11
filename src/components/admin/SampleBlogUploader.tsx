@@ -2,10 +2,11 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FileUp, Loader2, PlusCircle } from "lucide-react";
-import { uploadBlogPost } from "@/utils/blogUploader";
+import { uploadBlogPost, PostType } from "@/utils/blogUploader";
 import { toast } from "@/components/ui/use-toast";
 import { newBlogPost } from "@/data/sampleBlogPost";
 import { wamiqaGabbiArticle } from "@/data/wamiqa-gabbi-article";
+import { tiktokFashionArticle } from "@/data/tiktok-fashion-article";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
@@ -16,33 +17,46 @@ import {
 
 const SampleBlogUploader: React.FC = () => {
   const queryClient = useQueryClient();
-  const [postType, setPostType] = useState<'sample' | 'wamiqa'>('sample');
+  const [postType, setPostType] = useState<PostType>('sample');
 
   const uploadMutation = useMutation({
     mutationFn: () => uploadBlogPost(postType),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
       toast({
-        title: `${postType === 'wamiqa' ? 'Wamiqa Gabbi article' : 'Sample blog post'} uploaded`,
-        description: `The ${postType === 'wamiqa' ? 'Wamiqa Gabbi article' : 'sample blog post'} has been added successfully`,
+        title: `${getArticleTitle(postType)} uploaded`,
+        description: `The ${getArticleTitle(postType)} has been added successfully`,
       });
     },
     onError: (error) => {
-      console.error(`Error uploading ${postType === 'wamiqa' ? 'Wamiqa Gabbi article' : 'sample blog post'}:`, error);
+      console.error(`Error uploading ${getArticleTitle(postType)}:`, error);
       toast({
         title: "Error",
-        description: `Failed to upload ${postType === 'wamiqa' ? 'Wamiqa Gabbi article' : 'sample blog post'}. Please try again.`,
+        description: `Failed to upload ${getArticleTitle(postType)}. Please try again.`,
         variant: "destructive",
       });
     }
   });
 
+  const getArticleTitle = (type: PostType): string => {
+    switch(type) {
+      case 'wamiqa':
+        return 'Wamiqa Gabbi article';
+      case 'tiktok':
+        return 'TikTok Fashion Trends article';
+      case 'sample':
+      default:
+        return 'sample blog post';
+    }
+  };
+
   const articleOptions = [
-    { value: 'sample', title: newBlogPost.title, type: 'sample' as const },
-    { value: 'wamiqa', title: wamiqaGabbiArticle.title, type: 'wamiqa' as const }
+    { value: 'sample', title: newBlogPost.title, type: 'sample' as PostType },
+    { value: 'wamiqa', title: wamiqaGabbiArticle.title, type: 'wamiqa' as PostType },
+    { value: 'tiktok', title: tiktokFashionArticle.title, type: 'tiktok' as PostType }
   ];
 
-  const handleSelectArticle = (type: 'sample' | 'wamiqa') => {
+  const handleSelectArticle = (type: PostType) => {
     setPostType(type);
   };
 
@@ -56,7 +70,7 @@ const SampleBlogUploader: React.FC = () => {
         
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-2">
           <div className="text-sm font-medium">
-            Selected: {postType === 'wamiqa' ? 'Wamiqa Gabbi Article' : 'Zendaya Sample Post'}
+            Selected: {getArticleTitle(postType)}
           </div>
           
           <div className="flex items-center gap-2">
