@@ -20,7 +20,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
@@ -274,88 +273,86 @@ const AdminTags: React.FC = () => {
               <TabsTrigger value="blogCategories">Blog Categories</TabsTrigger>
               <TabsTrigger value="outfitTags">Outfit Tags</TabsTrigger>
             </TabsList>
-          </Tabs>
-        </CardHeader>
-        
-        <CardContent>
-          <TabsContent value={activeTab} className="mt-0">
-            <div className="flex gap-4 mb-6">
-              <div className="flex-1">
-                <Input
-                  placeholder={`Add new ${activeTab.slice(0, -1)}...`}
-                  value={newTagName}
-                  onChange={(e) => setNewTagName(e.target.value)}
-                />
-              </div>
-              {editingTag ? (
-                <div className="flex gap-2">
-                  <Button onClick={handleUpdateTag}>Update</Button>
-                  <Button variant="outline" onClick={() => {
-                    setEditingTag(null);
-                    setNewTagName("");
-                  }}>
-                    Cancel
-                  </Button>
+          
+            <div className="mt-4">
+              <div className="flex gap-4 mb-6">
+                <div className="flex-1">
+                  <Input
+                    placeholder={`Add new ${activeTab.slice(0, -1)}...`}
+                    value={newTagName}
+                    onChange={(e) => setNewTagName(e.target.value)}
+                  />
                 </div>
-              ) : (
-                <Button onClick={handleAddTag}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add {activeTab.slice(0, -1)}
-                </Button>
-              )}
-            </div>
+                {editingTag ? (
+                  <div className="flex gap-2">
+                    <Button onClick={handleUpdateTag}>Update</Button>
+                    <Button variant="outline" onClick={() => {
+                      setEditingTag(null);
+                      setNewTagName("");
+                    }}>
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button onClick={handleAddTag}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add {activeTab.slice(0, -1)}
+                  </Button>
+                )}
+              </div>
 
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Usage Count</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {getCurrentList().length === 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={3} className="text-center h-32">
-                        No {activeTab} found
-                      </TableCell>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Usage Count</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ) : (
-                    getCurrentList().map((tag) => (
-                      <TableRow key={tag.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Tag className="h-4 w-4 text-muted-foreground" />
-                            <span>{tag.name}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{tag.count}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button size="sm" variant="outline" onClick={() => handleEditTag(tag)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-red-500 hover:text-red-700"
-                              onClick={() => handleDeleteClick(tag)}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </div>
+                  </TableHeader>
+                  <TableBody>
+                    {getCurrentList().length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center h-32">
+                          No {activeTab} found
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    ) : (
+                      getCurrentList().map((tag) => (
+                        <TableRow key={tag.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Tag className="h-4 w-4 text-muted-foreground" />
+                              <span>{tag.name}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{tag.count}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button size="sm" variant="outline" onClick={() => handleEditTag(tag)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-red-500 hover:text-red-700"
+                                onClick={() => handleDeleteClick(tag)}
+                              >
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
-          </TabsContent>
-        </CardContent>
+          </Tabs>
+        </CardHeader>
       </Card>
 
       {/* Delete Confirmation Dialog */}
