@@ -1,23 +1,26 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { newBlogPost } from "@/data/sampleBlogPost";
+import { wamiqaGabbiArticle } from "@/data/wamiqa-gabbi-article";
 
-export const uploadBlogPost = async () => {
+export const uploadBlogPost = async (postType: 'sample' | 'wamiqa' = 'sample') => {
   try {
+    const selectedPost = postType === 'wamiqa' ? wamiqaGabbiArticle : newBlogPost;
+    
     const { data, error } = await supabase
       .from('blog_posts')
       .insert({
-        title: newBlogPost.title,
-        slug: newBlogPost.slug || convertToSlug(newBlogPost.title),
-        excerpt: newBlogPost.excerpt,
-        content: newBlogPost.content,
-        image: newBlogPost.image,
-        date: newBlogPost.date,
-        category: newBlogPost.category,
-        author: newBlogPost.author,
-        keywords: newBlogPost.keywords ? newBlogPost.keywords.join(', ') : '',
-        meta_description: newBlogPost.metaDescription || newBlogPost.excerpt,
-        structured_data: JSON.stringify(newBlogPost.structuredData || {})
+        title: selectedPost.title,
+        slug: selectedPost.slug || convertToSlug(selectedPost.title),
+        excerpt: selectedPost.excerpt,
+        content: selectedPost.content,
+        image: selectedPost.image,
+        date: selectedPost.date,
+        category: selectedPost.category,
+        author: selectedPost.author,
+        keywords: selectedPost.keywords ? (typeof selectedPost.keywords === 'string' ? selectedPost.keywords : selectedPost.keywords.join(', ')) : '',
+        meta_description: selectedPost.metaDescription || selectedPost.excerpt,
+        structured_data: JSON.stringify(selectedPost.structuredData || {})
       })
       .select();
     
