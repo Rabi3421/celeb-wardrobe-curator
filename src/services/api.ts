@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Celebrity, Outfit, BlogPost, AffiliateProduct } from "@/types/data";
 
@@ -120,6 +121,7 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
   
   if (!data || data.length === 0) {
     console.log("No blog posts found, returning sample data");
+    const currentDate = new Date().toISOString();
     // Return sample blog posts if no data is found
     return [
       {
@@ -130,7 +132,10 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
         image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3",
         date: new Date().toISOString(),
         category: "Celebrity Style",
-        author: "Fashion Editor"
+        author: "Fashion Editor",
+        created_at: currentDate,
+        updated_at: currentDate,
+        slug: "zendaya-red-carpet-evolution"
       },
       {
         id: "sample-2",
@@ -140,7 +145,10 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
         image: "https://images.unsplash.com/photo-1516762689617-e1cffcef479d?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3",
         date: new Date().toISOString(),
         category: "Sustainability",
-        author: "Eco Fashion Writer"
+        author: "Eco Fashion Writer",
+        created_at: currentDate,
+        updated_at: currentDate,
+        slug: "sustainable-fashion-celebrity-wardrobes"
       },
       {
         id: "sample-3",
@@ -150,7 +158,10 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
         image: "https://images.unsplash.com/photo-1618932260643-eee4a2f652a6?q=80&w=1980&auto=format&fit=crop&ixlib=rb-4.0.3",
         date: new Date().toISOString(),
         category: "Red Carpet",
-        author: "Met Gala Specialist"
+        author: "Met Gala Specialist",
+        created_at: currentDate,
+        updated_at: currentDate,
+        slug: "met-gala-2025-iconic-looks"
       }
     ];
   }

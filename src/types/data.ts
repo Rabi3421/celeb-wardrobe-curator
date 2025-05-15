@@ -1,3 +1,4 @@
+
 // Celebrity type
 export interface Celebrity {
   id: string;
@@ -47,7 +48,10 @@ export interface BlogPost {
   author: string;
   created_at: string;
   updated_at: string;
-  slug?: string; // Add slug as an optional property
+  slug?: string; // Slug is optional to support both new and legacy posts
+  meta_description?: string; // Adding optional SEO fields
+  structured_data?: string;
+  keywords?: string;
 }
 
 // User type

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { BlogPost } from "@/types/data";
@@ -62,7 +61,12 @@ const AdminBlog: React.FC = () => {
         author: post.author,
         category: post.category,
         date: post.date,
-        slug: post.slug
+        created_at: post.created_at,
+        updated_at: post.updated_at,
+        slug: post.slug || '', // Ensure slug exists, defaulting to empty string if not
+        meta_description: post.meta_description,
+        structured_data: post.structured_data,
+        keywords: post.keywords
       }));
     }
   });
