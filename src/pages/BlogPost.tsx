@@ -109,6 +109,13 @@ const BlogPost: React.FC = () => {
     .filter(p => p.id !== post.id && p.category === post.category)
     .slice(0, 3);
 
+  // Related topics based on the post category
+  const relatedTopics = [
+    { name: post?.category || "Fashion", slug: (post?.category || "fashion").toLowerCase().replace(/ /g, "-") },
+    { name: "Red Carpet", slug: "red-carpet" },
+    { name: "Celebrity Style", slug: "celebrity-style" }
+  ];
+
   // Keywords for the blog post based on title and category
   const keywords = `${post.title}, ${post.category}, celebrity fashion, ${post.author}, fashion blog`;
 
@@ -273,6 +280,22 @@ const BlogPost: React.FC = () => {
                 Be the first to comment on this article
               </p>
             )}
+          </div>
+
+          {/* Add this section before the Related Articles section */}
+          <div className="my-10">
+            <h3 className="font-serif text-lg font-medium mb-4">Related Topics</h3>
+            <div className="flex flex-wrap gap-2">
+              {relatedTopics.map((topic, index) => (
+                <Link
+                  key={index}
+                  to={`/blog/topic/${topic.slug}`}
+                  className="bg-secondary px-3 py-1 rounded-full text-sm hover:bg-primary hover:text-white transition-colors"
+                >
+                  {topic.name}
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Related Articles */}

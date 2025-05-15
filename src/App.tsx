@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -29,6 +28,8 @@ import Terms from "./pages/Terms";
 import AffiliateDisclosure from "./pages/AffiliateDisclosure";
 import NotFound from "./pages/NotFound";
 import Categories from "./pages/Categories";
+import BlogTopics from "./pages/BlogTopics";
+import BlogTopic from "./pages/BlogTopic";
 
 // Scroll to top component
 const ScrollToTop = () => {
@@ -54,44 +55,48 @@ const queryClient = new QueryClient({
   }
 });
 
-const App = () => {
+function App() {
   // Using JSX syntax instead of createElement
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ScrollToTop />
-          <AdminAuthProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/celebrities" element={<Celebrities />} />
-              <Route path="/outfits" element={<Outfits />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/celebrity/:id" element={<CelebrityProfile />} />
-              <Route path="/outfit/:id" element={<OutfitDetail />} />
-              <Route path="/blog/:id" element={<BlogPost />} />
-              <Route path="/category/:category" element={<Categories />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/celebrities" element={<AdminCelebrities />} />
-              <Route path="/admin/outfits" element={<AdminOutfits />} />
-              <Route path="/admin/blog" element={<AdminBlog />} />
-              <Route path="/admin/analytics" element={<AdminAnalytics />} />
-              <Route path="/admin/tags" element={<AdminTags />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
-              <Route path="/admin/newsletter" element={<AdminNewsletterSubscribers />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AdminAuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <div className="app">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <ScrollToTop />
+            <AdminAuthProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/celebrities" element={<Celebrities />} />
+                <Route path="/outfits" element={<Outfits />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/celebrity/:id" element={<CelebrityProfile />} />
+                <Route path="/outfit/:id" element={<OutfitDetail />} />
+                <Route path="/blog/:id" element={<BlogPost />} />
+                <Route path="/category/:category" element={<Categories />} />
+                <Route path="/blog/topics" element={<BlogTopics />} />
+                <Route path="/blog/topic/:slug" element={<BlogTopic />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/celebrities" element={<AdminCelebrities />} />
+                <Route path="/admin/outfits" element={<AdminOutfits />} />
+                <Route path="/admin/blog" element={<AdminBlog />} />
+                <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                <Route path="/admin/tags" element={<AdminTags />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
+                <Route path="/admin/newsletter" element={<AdminNewsletterSubscribers />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AdminAuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </div>
   );
-};
+}
 
 export default App;

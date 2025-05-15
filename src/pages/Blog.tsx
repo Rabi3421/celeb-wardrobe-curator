@@ -1,16 +1,17 @@
-
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import PageLayout from "@/components/layout/PageLayout";
 import BlogPostCard from "@/components/ui/BlogPostCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { fetchBlogPosts, subscribeToNewsletter } from "@/services/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, BookOpen, MessageSquare, ChevronDown, Loader2 } from "lucide-react";
+import { Calendar, BookOpen, MessageSquare, ChevronDown, Loader2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BlogPost } from "@/types/data";
 import { useToast } from "@/hooks/use-toast";
 import SampleBlogUploader from "@/components/admin/SampleBlogUploader";
+import TopicCard from "@/components/ui/TopicCard";
 
 const Blog: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
