@@ -1,15 +1,14 @@
-
 import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import CelebrityCard from "@/components/ui/CelebrityCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Shuffle, Star } from "lucide-react";
+import { Search, Shuffle } from "lucide-react";
 import { fetchCelebrities } from "@/services/api";
 import { Celebrity } from "@/types/data";
+import CelebritySpotlight from "@/components/ui/CelebritySpotlight";
 
 const Celebrities: React.FC = () => {
   const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
@@ -41,6 +40,24 @@ const Celebrities: React.FC = () => {
   
   // Celebrity of the month
   const featuredCelebrity = celebrities[0]; // Just using the first one as an example
+  
+  // Mock data for the spotlight section
+  const spotlightProducts = featuredCelebrity ? [
+    {
+      image: "https://images.unsplash.com/photo-1560343090-f0409e92791a?q=80&w=1000&auto=format&fit=crop",
+      title: "Designer Handbag",
+      price: "$1,250",
+      retailer: "Luxury Brand",
+      affiliateLink: "#"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1000&auto=format&fit=crop",
+      title: "Statement Necklace",
+      price: "$450",
+      retailer: "Jewelry Co",
+      affiliateLink: "#"
+    }
+  ] : [];
   
   // Handle "Load More" button click
   const handleLoadMore = () => {
@@ -96,33 +113,15 @@ const Celebrities: React.FC = () => {
         {featuredCelebrity && (
           <div className="mb-12">
             <SectionHeader title="Celebrity of the Month" />
-            <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-r from-pastel-pink to-pastel-peach">
-              <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="p-6 md:p-8">
-                  <CardHeader className="p-0 pb-6">
-                    <CardTitle className="text-2xl md:text-3xl">{featuredCelebrity.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <p className="mb-4">{featuredCelebrity.bio}</p>
-                    <div className="flex items-center space-x-4 mb-4">
-                      <Star className="text-yellow-400" />
-                      <span className="font-medium">Style Icon</span>
-                    </div>
-                    <Button className="bg-white text-primary-foreground hover:bg-white/90"
-                      onClick={() => window.location.href = `/celebrity/${featuredCelebrity.id}`}>
-                      View Profile
-                    </Button>
-                  </CardContent>
-                </div>
-                <div className="relative h-64 md:h-auto">
-                  <img
-                    src={featuredCelebrity.image}
-                    alt={featuredCelebrity.name}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-            </Card>
+            <CelebritySpotlight
+              id={featuredCelebrity.id}
+              name={featuredCelebrity.name}
+              image={featuredCelebrity.image}
+              outfit="Red Carpet Statement Look"
+              event="Fashion Week Front Row"
+              description={featuredCelebrity.bio || "A trendsetting style icon known for bold fashion choices and setting seasonal trends. This celebrity's distinctive looks are always the talk of the fashion industry."}
+              products={spotlightProducts}
+            />
           </div>
         )}
 
