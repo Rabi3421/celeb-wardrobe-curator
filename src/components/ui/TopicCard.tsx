@@ -20,9 +20,13 @@ const TopicCard: React.FC<TopicCardProps> = ({
   description
 }) => {
   return (
-    <Link to={`/blog/topic/${slug}`} aria-label={`View all ${name} articles`}>
+    <Link 
+      to={`/blog/topic/${slug}`} 
+      aria-label={`View all ${name} articles`}
+      className="block h-full transition-transform hover:scale-102 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+    >
       <Card 
-        className="group hover:shadow-lg transition-all overflow-hidden cursor-pointer h-full"
+        className="group hover:shadow-lg transition-all overflow-hidden cursor-pointer h-full border-primary/10"
       >
         <div 
           className={cn(

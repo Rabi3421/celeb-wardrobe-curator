@@ -1,4 +1,3 @@
-
 // Celebrity type
 export interface Celebrity {
   id: string;
@@ -46,6 +45,9 @@ export interface BlogPost {
   date: string;
   category: string;
   author: string;
+  created_at: string;
+  updated_at: string;
+  slug?: string; // Add slug as an optional property
 }
 
 // User type

@@ -12,7 +12,7 @@ import { BlogPost } from "@/types/data";
 import { useToast } from "@/hooks/use-toast";
 import SampleBlogUploader from "@/components/admin/SampleBlogUploader";
 import TopicCard from "@/components/ui/TopicCard";
-import SEO from "@/components/SEO";
+import SEO from "@/components/SEO/SEO";
 
 const Blog: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
