@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import OutfitCard from "@/components/ui/OutfitCard";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Calendar, Heart, Tag } from "lucide-react";
+import { Search, Calendar, Heart, Tag, Palette, ShoppingBag, Bookmark } from "lucide-react";
 import { fetchOutfits } from "@/services/api";
 import { Outfit } from "@/types/data";
 import { useToast } from "@/hooks/use-toast";
@@ -210,38 +209,111 @@ const Outfits: React.FC = () => {
           </div>
         )}
 
-        {/* Style Tips Section */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Seasonal Trends</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Stay updated with the latest seasonal fashion trends inspired by your favorite celebrities.
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Style Inspirations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Find your personal style inspiration from our collection of celebrity outfits.
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Shopping Guides</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Discover where to buy similar items to create your favorite celebrity-inspired looks.
-              </p>
-            </CardContent>
-          </Card>
+        {/* Enhanced Style Tips Section */}
+        <div className="mt-16">
+          <SectionHeader title="Fashion Resources & Tips" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Seasonal Trends Card */}
+            <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
+              <div className="bg-pastel-peach h-36 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 flex items-end p-4">
+                  <Palette className="h-8 w-8 text-white group-hover:scale-110 transition-transform" />
+                </div>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-lg group-hover:text-primary transition-colors">Seasonal Trends</CardTitle>
+                <CardDescription>Spring/Summer 2025</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 mb-4">
+                  <li className="flex items-center">
+                    <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
+                    <span className="text-sm">Oversized silhouettes continue to dominate</span>
+                  </li>
+                  <li className="flex items-center">
+                    <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
+                    <span className="text-sm">Bold color blocking in unexpected combinations</span>
+                  </li>
+                  <li className="flex items-center">
+                    <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
+                    <span className="text-sm">Sustainable fabrics from celebrity-backed brands</span>
+                  </li>
+                </ul>
+                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-white transition-colors">
+                  Explore Trends
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Style Inspirations Card */}
+            <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
+              <div className="bg-pastel-lavender h-36 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 flex items-end p-4">
+                  <Bookmark className="h-8 w-8 text-white group-hover:scale-110 transition-transform" />
+                </div>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-lg group-hover:text-primary transition-colors">Style Inspirations</CardTitle>
+                <CardDescription>Find your personal aesthetic</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {["Minimalist", "Bohemian", "Streetwear", "Y2K", "Classic"].map((style) => (
+                    <span 
+                      key={style}
+                      className="text-xs px-2 py-1 rounded-full bg-secondary hover:bg-primary hover:text-white cursor-pointer transition-colors"
+                    >
+                      {style}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Discover which celebrity's style aligns with your personal aesthetic and build your wardrobe accordingly.
+                </p>
+                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-white transition-colors">
+                  Find Your Style Match
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Shopping Guides Card */}
+            <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
+              <div className="bg-pastel-blue h-36 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 flex items-end p-4">
+                  <ShoppingBag className="h-8 w-8 text-white group-hover:scale-110 transition-transform" />
+                </div>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-lg group-hover:text-primary transition-colors">Shopping Guides</CardTitle>
+                <CardDescription>Celebrity-inspired collections</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Zendaya's Red Carpet Look</span>
+                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                      <Heart className="h-4 w-4 text-muted-foreground hover:text-red-500 transition-colors" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Rihanna's Street Style</span>
+                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                      <Heart className="h-4 w-4 text-muted-foreground hover:text-red-500 transition-colors" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Timothée's Casual Edit</span>
+                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                      <Heart className="h-4 w-4 text-muted-foreground hover:text-red-500 transition-colors" />
+                    </Button>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-white transition-colors">
+                  View All Guides
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </PageLayout>
