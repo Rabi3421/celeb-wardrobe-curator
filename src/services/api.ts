@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Celebrity, Outfit, BlogPost, AffiliateProduct } from "@/types/data";
 
@@ -119,7 +118,44 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
     return [];
   }
   
-  return data || [];
+  if (!data || data.length === 0) {
+    console.log("No blog posts found, returning sample data");
+    // Return sample blog posts if no data is found
+    return [
+      {
+        id: "sample-1",
+        title: "Zendaya's Red Carpet Evolution: From Disney Star to Fashion Icon",
+        excerpt: "Tracking the style evolution of Zendaya from her early Disney days to becoming one of fashion's most influential celebrities.",
+        content: "Full content about Zendaya's fashion evolution...",
+        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3",
+        date: new Date().toISOString(),
+        category: "Celebrity Style",
+        author: "Fashion Editor"
+      },
+      {
+        id: "sample-2",
+        title: "The Rise of Sustainable Fashion in Celebrity Wardrobes",
+        excerpt: "How A-list celebrities are championing sustainable and ethical fashion on and off the red carpet.",
+        content: "Full content about sustainable fashion trends...",
+        image: "https://images.unsplash.com/photo-1516762689617-e1cffcef479d?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3",
+        date: new Date().toISOString(),
+        category: "Sustainability",
+        author: "Eco Fashion Writer"
+      },
+      {
+        id: "sample-3",
+        title: "Met Gala 2025: Breaking Down the Most Iconic Looks",
+        excerpt: "A detailed analysis of the most talked-about celebrity outfits from this year's Met Gala.",
+        content: "Full content about Met Gala fashion...",
+        image: "https://images.unsplash.com/photo-1618932260643-eee4a2f652a6?q=80&w=1980&auto=format&fit=crop&ixlib=rb-4.0.3",
+        date: new Date().toISOString(),
+        category: "Red Carpet",
+        author: "Met Gala Specialist"
+      }
+    ];
+  }
+  
+  return data;
 }
 
 export async function fetchBlogPostById(id: string): Promise<BlogPost | null> {

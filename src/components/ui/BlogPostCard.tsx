@@ -36,10 +36,10 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
 
   return (
     <article className="outfit-card h-full flex flex-col rounded-lg shadow-sm overflow-hidden bg-white animate-fade-in">
-      <Link to={postLink}>
+      <Link to={postLink} className="block">
         <div className="relative aspect-video overflow-hidden">
           <img
-            src={image}
+            src={image || "/placeholder.svg"}
             alt={`${title} - Celebrity fashion article featuring ${category}`}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             loading="lazy"
