@@ -19,6 +19,7 @@ interface SEOProps {
   author?: string;
   datePublished?: string;
   dateModified?: string;
+  noIndex?: boolean;
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -38,6 +39,7 @@ const SEO: React.FC<SEOProps> = ({
   author,
   datePublished,
   dateModified,
+  noIndex = false,
 }) => {
   const siteUrl = window.location.origin;
   const currentUrl = canonical || window.location.href;
@@ -51,7 +53,7 @@ const SEO: React.FC<SEOProps> = ({
       <link rel="canonical" href={currentUrl} />
       {author && <meta name="author" content={author} />}
       
-      {/* Open Graph Tags */}
+      {/* Open Graph Tags for better social sharing */}
       <meta property="og:url" content={currentUrl} />
       <meta property="og:type" content={ogType} />
       <meta property="og:title" content={ogTitle || title} />
@@ -69,6 +71,9 @@ const SEO: React.FC<SEOProps> = ({
       {/* Article Specific Meta */}
       {datePublished && <meta property="article:published_time" content={datePublished} />}
       {dateModified && <meta property="article:modified_time" content={dateModified} />}
+      
+      {/* No index directive if specified */}
+      {noIndex && <meta name="robots" content="noindex, nofollow" />}
       
       {/* JSON-LD Structured Data */}
       {jsonLd && Array.isArray(jsonLd) ? (

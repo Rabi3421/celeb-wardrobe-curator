@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
+import { Calendar, User } from "lucide-react";
 
 interface BlogPostCardProps {
   id: string;
@@ -10,6 +11,7 @@ interface BlogPostCardProps {
   date: string;
   category: string;
   slug?: string;
+  author?: string;
 }
 
 const BlogPostCard: React.FC<BlogPostCardProps> = ({
@@ -20,16 +22,25 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   date,
   category,
   slug,
+  author = "Celebrity Persona"
 }) => {
+  // Use slug if available, otherwise fallback to ID for SEO-friendly URLs
   const postLink = slug ? `/blog/${slug}` : `/blog/${id}`;
   
+  // Format the date for better readability and SEO
+  const formattedDate = new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
   return (
     <article className="outfit-card h-full flex flex-col rounded-lg shadow-sm overflow-hidden bg-white animate-fade-in">
       <Link to={postLink}>
         <div className="relative aspect-video overflow-hidden">
           <img
             src={image}
-            alt={title}
+            alt={`${title} - Celebrity fashion article featuring ${category}`}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             loading="lazy"
           />
@@ -37,24 +48,33 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
       </Link>
       <div className="p-4 flex flex-col flex-grow">
         <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-          <time dateTime={new Date(date).toISOString()}>{date}</time>
+          <div className="flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            <time dateTime={new Date(date).toISOString()} className="ml-1">
+              {formattedDate}
+            </time>
+          </div>
           <span className="bg-pastel-blue px-2 py-0.5 rounded-full">
             {category}
           </span>
         </div>
         <Link to={postLink}>
-          <h2 className="font-serif font-medium text-xl line-clamp-2">
+          <h2 className="font-serif font-medium text-xl line-clamp-2 hover:text-primary transition-colors">
             {title}
           </h2>
           <p className="text-muted-foreground text-sm mt-2 line-clamp-3 flex-grow">
             {excerpt}
           </p>
-          <div className="mt-3">
-            <span className="text-sm font-medium text-primary-foreground hover:underline">
-              Read more →
-            </span>
-          </div>
         </Link>
+        <div className="flex justify-between items-center mt-3">
+          <div className="flex items-center text-xs text-muted-foreground">
+            <User className="h-3 w-3 mr-1" />
+            <span>{author}</span>
+          </div>
+          <Link to={postLink} className="text-sm font-medium text-primary-foreground hover:underline">
+            Read more →
+          </Link>
+        </div>
       </div>
     </article>
   );

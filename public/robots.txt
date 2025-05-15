@@ -34,5 +34,7 @@ Disallow: /admin/
 # Sitemap locations
 Sitemap: https://www.celebritypersona.com/sitemap.xml
 
-# Add other language/regional sitemaps if applicable
-# Sitemap: https://www.celebritypersona.com/en-us/sitemap.xml
+# Add category and blog sitemaps
+Sitemap: https://www.celebritypersona.com/sitemap-blog.xml
+Sitemap: https://www.celebritypersona.com/sitemap-celebrities.xml
+Sitemap: https://www.celebritypersona.com/sitemap-outfits.xml
