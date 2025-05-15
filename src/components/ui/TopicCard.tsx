@@ -9,16 +9,18 @@ interface TopicCardProps {
   count: number;
   slug: string;
   image?: string;
+  description?: string;
 }
 
 const TopicCard: React.FC<TopicCardProps> = ({
   name,
   count,
   slug,
-  image
+  image,
+  description
 }) => {
   return (
-    <Link to={`/blog/topic/${slug}`}>
+    <Link to={`/blog/topic/${slug}`} aria-label={`View all ${name} articles`}>
       <Card 
         className="group hover:shadow-lg transition-all overflow-hidden cursor-pointer h-full"
       >
@@ -39,6 +41,9 @@ const TopicCard: React.FC<TopicCardProps> = ({
             <span className="text-xs mt-1 inline-block opacity-80">
               {count} {count === 1 ? 'post' : 'posts'}
             </span>
+            {description && (
+              <p className="text-xs mt-2 opacity-80 line-clamp-2">{description}</p>
+            )}
           </div>
         </div>
       </Card>

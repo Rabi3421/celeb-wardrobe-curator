@@ -12,6 +12,7 @@ import { BlogPost } from "@/types/data";
 import { useToast } from "@/hooks/use-toast";
 import SampleBlogUploader from "@/components/admin/SampleBlogUploader";
 import TopicCard from "@/components/ui/TopicCard";
+import SEO from "@/components/SEO";
 
 const Blog: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
@@ -41,6 +42,52 @@ const Blog: React.FC = () => {
   // Initial posts to show
   const initialPostsCount = 3;
   
+  // Topics data with SEO-friendly descriptions
+  const popularTopics = [
+    { 
+      name: "Red Carpet", 
+      count: 12, 
+      slug: "red-carpet", 
+      image: "https://images.unsplash.com/photo-1612539342151-6ce47c936370",
+      description: "Explore glamorous red carpet looks from your favorite celebrities"
+    },
+    { 
+      name: "Street Style", 
+      count: 18, 
+      slug: "street-style", 
+      image: "https://images.unsplash.com/photo-1516763296043-f676c1105999",
+      description: "Casual and trendy everyday outfits spotted on celebrities"
+    },
+    { 
+      name: "Met Gala", 
+      count: 8, 
+      slug: "met-gala", 
+      image: "https://images.unsplash.com/photo-1561989954-c1ff94667d80",
+      description: "Stunning and avant-garde looks from fashion's biggest night"
+    },
+    { 
+      name: "Fashion Week", 
+      count: 24, 
+      slug: "fashion-week", 
+      image: "https://images.unsplash.com/photo-1588117305388-c2631a279f82",
+      description: "Runway inspirations and front-row celebrity styles"
+    },
+    { 
+      name: "Award Shows", 
+      count: 10, 
+      slug: "award-shows", 
+      image: "https://images.unsplash.com/photo-1555895423-09d2a58db62e",
+      description: "Elegant ensembles from Oscars, Grammys, and more" 
+    },
+    { 
+      name: "Summer Looks", 
+      count: 14, 
+      slug: "summer-looks", 
+      image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c",
+      description: "Hot weather fashion inspiration from the stars"
+    }
+  ];
+
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -310,24 +357,61 @@ const Blog: React.FC = () => {
           </Card>
         </div>
 
-        {/* Topic Exploration */}
-        <div>
-          <SectionHeader title="Popular Topics" />
+        {/* Topic Exploration - Updated Section */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="section-title">Popular Topics</h2>
+            <Link
+              to="/blog/topics"
+              className="text-sm font-medium text-primary-foreground hover:underline"
+              aria-label="View all blog topics"
+            >
+              View All →
+            </Link>
+          </div>
+          
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {["Red Carpet", "Street Style", "Met Gala", "Movie Premieres", "Fashion Week", "Award Shows"].map((topic, index) => (
-              <Card 
+            {popularTopics.map((topic, index) => (
+              <TopicCard 
                 key={index} 
-                className="group hover:shadow-lg transition-all overflow-hidden"
-              >
-                <div className="aspect-square w-full bg-secondary/50 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <h3 className="font-serif text-lg font-medium text-center px-2">
-                    {topic}
-                  </h3>
-                </div>
-              </Card>
+                name={topic.name}
+                count={topic.count}
+                slug={topic.slug}
+                image={topic.image}
+                description={topic.description}
+              />
             ))}
           </div>
         </div>
+
+        {/* Add schema.org structured data for better SEO */}
+        <SEO
+          title="Celebrity Fashion Blog | Style Insights & Trends"
+          description="Discover the latest celebrity fashion trends, style tips, and red carpet looks on our blog. Get inspired by your favorite celebrities' outfits."
+          keywords="celebrity fashion, style trends, red carpet looks, fashion blog"
+          jsonLd={{
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            "name": "Celebrity Fashion Blog",
+            "description": "Celebrity fashion insights, trends, and style inspiration",
+            "url": window.location.href,
+            "publisher": {
+              "@type": "Organization",
+              "name": "CelebrityPersona",
+              "logo": {
+                "@type": "ImageObject",
+                "url": `${window.location.origin}/logo.png`
+              }
+            },
+            "blogPost": blogPosts.slice(0, 10).map(post => ({
+              "@type": "BlogPosting",
+              "headline": post.title,
+              "description": post.excerpt,
+              "datePublished": post.date,
+              "image": post.image
+            }))
+          }}
+        />
       </div>
     </PageLayout>
   );
