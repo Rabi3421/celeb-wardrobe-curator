@@ -63,10 +63,10 @@ const AdminBlog: React.FC = () => {
         date: post.date,
         created_at: post.created_at,
         updated_at: post.updated_at,
-        slug: post.slug || '', // Ensure slug exists, defaulting to empty string if not
-        meta_description: post.meta_description,
-        structured_data: post.structured_data,
-        keywords: post.keywords
+        slug: post.slug || '', // Default to empty string if slug is null
+        meta_description: post.meta_description || '', // Default to empty string if null
+        structured_data: post.structured_data || '', // Default to empty string if null
+        keywords: post.keywords || '' // Default to empty string if null
       }));
     }
   });

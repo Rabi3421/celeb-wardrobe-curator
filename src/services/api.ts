@@ -135,7 +135,10 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
         author: "Fashion Editor",
         created_at: currentDate,
         updated_at: currentDate,
-        slug: "zendaya-red-carpet-evolution"
+        slug: "zendaya-red-carpet-evolution",
+        meta_description: "Explore Zendaya's fashion evolution from Disney star to red carpet fashion icon - see her most memorable looks and style transformation.",
+        structured_data: "{}",
+        keywords: "Zendaya, red carpet, fashion evolution, celebrity style"
       },
       {
         id: "sample-2",
@@ -148,7 +151,10 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
         author: "Eco Fashion Writer",
         created_at: currentDate,
         updated_at: currentDate,
-        slug: "sustainable-fashion-celebrity-wardrobes"
+        slug: "sustainable-fashion-celebrity-wardrobes",
+        meta_description: "Discover how celebrities are embracing sustainable and ethical fashion choices both on and off the red carpet.",
+        structured_data: "{}",
+        keywords: "sustainable fashion, eco-friendly, celebrity wardrobes, ethical fashion"
       },
       {
         id: "sample-3",
@@ -161,7 +167,10 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
         author: "Met Gala Specialist",
         created_at: currentDate,
         updated_at: currentDate,
-        slug: "met-gala-2025-iconic-looks"
+        slug: "met-gala-2025-iconic-looks",
+        meta_description: "Explore and analyze the most stunning and conversation-starting celebrity outfits from the 2025 Met Gala.",
+        structured_data: "{}",
+        keywords: "Met Gala 2025, red carpet looks, celebrity fashion, iconic outfits"
       }
     ];
   }

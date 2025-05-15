@@ -90,6 +90,10 @@ export type Database = {
           excerpt: string
           id: string
           image: string
+          keywords: string | null
+          meta_description: string | null
+          slug: string | null
+          structured_data: string | null
           title: string
           updated_at: string
         }
@@ -102,6 +106,10 @@ export type Database = {
           excerpt: string
           id?: string
           image: string
+          keywords?: string | null
+          meta_description?: string | null
+          slug?: string | null
+          structured_data?: string | null
           title: string
           updated_at?: string
         }
@@ -114,6 +122,10 @@ export type Database = {
           excerpt?: string
           id?: string
           image?: string
+          keywords?: string | null
+          meta_description?: string | null
+          slug?: string | null
+          structured_data?: string | null
           title?: string
           updated_at?: string
         }
