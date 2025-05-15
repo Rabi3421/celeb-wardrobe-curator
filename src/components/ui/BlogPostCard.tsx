@@ -24,7 +24,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   const postLink = slug ? `/blog/${slug}` : `/blog/${id}`;
   
   return (
-    <article className="outfit-card h-full flex flex-col animate-fade-in">
+    <article className="outfit-card h-full flex flex-col rounded-lg shadow-sm overflow-hidden bg-white animate-fade-in">
       <Link to={postLink}>
         <div className="relative aspect-video overflow-hidden">
           <img

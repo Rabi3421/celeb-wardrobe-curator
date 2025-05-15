@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Calendar, Heart, Tag } from "lucide-react";
 import { fetchOutfits } from "@/services/api";
 import { Outfit } from "@/types/data";
+import { useToast } from "@/hooks/use-toast";
 
 const Outfits: React.FC = () => {
   const [outfits, setOutfits] = useState<Outfit[]>([]);
@@ -17,17 +18,29 @@ const Outfits: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
   
   useEffect(() => {
     const loadOutfits = async () => {
       setIsLoading(true);
-      const data = await fetchOutfits();
-      setOutfits(data);
-      setIsLoading(false);
+      try {
+        const data = await fetchOutfits();
+        console.log("Fetched outfits:", data);
+        setOutfits(data);
+      } catch (error) {
+        console.error("Error loading outfits:", error);
+        toast({
+          title: "Error loading outfits",
+          description: "Could not load the outfits. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     loadOutfits();
-  }, []);
+  }, [toast]);
   
   // Filter outfits based on search and category
   const filteredOutfits = outfits.filter(outfit => {
@@ -47,6 +60,9 @@ const Outfits: React.FC = () => {
     // Simulate loading delay
     setTimeout(() => {
       setIsLoadingMore(false);
+      toast({
+        description: "All outfits have been loaded!",
+      });
     }, 1000);
   };
 
@@ -119,7 +135,7 @@ const Outfits: React.FC = () => {
                     <div className="flex items-center space-x-4 mb-6">
                       <div className="flex items-center space-x-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">Last Week</span>
+                        <span className="text-sm">{featuredOutfit.date ? new Date(featuredOutfit.date).toLocaleDateString() : "Recent"}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Heart className="h-4 w-4 text-red-500" />
@@ -144,15 +160,15 @@ const Outfits: React.FC = () => {
           <Tabs defaultValue="all" className="w-full">
             <div className="flex justify-between items-center mb-6">
               <h2 className="section-title mb-0">Browse By Occasion</h2>
-              <TabsList className="bg-transparent">
+              <TabsList className="bg-transparent overflow-x-auto">
                 {occasions.map((occasion) => (
                   <TabsTrigger
                     key={occasion}
                     value={occasion}
                     onClick={() => setSelectedCategory(occasion)}
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground capitalize"
                   >
-                    {occasion.charAt(0).toUpperCase() + occasion.slice(1)}
+                    {occasion}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -161,30 +177,38 @@ const Outfits: React.FC = () => {
         </div>
 
         {/* Outfit Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {filteredOutfits.map((outfit) => (
-            <OutfitCard
-              key={outfit.id}
-              id={outfit.id}
-              image={outfit.image}
-              celebrity={outfit.celebrity}
-              celebrityId={outfit.celebrityId}
-              title={outfit.title}
-              description={outfit.description}
-            />
-          ))}
-        </div>
+        {filteredOutfits.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {filteredOutfits.map((outfit) => (
+              <OutfitCard
+                key={outfit.id}
+                id={outfit.id}
+                image={outfit.image}
+                celebrity={outfit.celebrity}
+                celebrityId={outfit.celebrityId}
+                title={outfit.title}
+                description={outfit.description}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="py-12 text-center">
+            <p className="text-muted-foreground">No outfits found matching your search criteria.</p>
+          </div>
+        )}
 
         {/* Load More Button */}
-        <div className="flex justify-center mt-12">
-          <Button 
-            onClick={handleLoadMore} 
-            disabled={isLoadingMore}
-            className="btn-primary"
-          >
-            {isLoadingMore ? "Loading..." : "Load More"}
-          </Button>
-        </div>
+        {filteredOutfits.length > 0 && (
+          <div className="flex justify-center mt-12">
+            <Button 
+              onClick={handleLoadMore} 
+              disabled={isLoadingMore}
+              className="btn-primary"
+            >
+              {isLoadingMore ? "Loading..." : "Load More"}
+            </Button>
+          </div>
+        )}
 
         {/* Style Tips Section */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -20,7 +20,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
   description,
 }) => {
   return (
-    <div className="outfit-card animate-fade-in">
+    <div className="outfit-card rounded-lg shadow-sm overflow-hidden bg-white animate-fade-in">
       <Link to={`/outfit/${id}`}>
         <div className="relative aspect-[3/4] overflow-hidden">
           <img
