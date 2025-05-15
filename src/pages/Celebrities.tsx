@@ -9,6 +9,7 @@ import { Search, Shuffle } from "lucide-react";
 import { fetchCelebrities } from "@/services/api";
 import { Celebrity } from "@/types/data";
 import CelebritySpotlight from "@/components/ui/CelebritySpotlight";
+import { Card } from "@/components/ui/card";
 
 const Celebrities: React.FC = () => {
   const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
