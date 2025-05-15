@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { BlogPost } from "@/types/data";
+import SampleBlogUploader from "@/components/admin/SampleBlogUploader";
 import {
   Table,
   TableBody,
@@ -27,6 +28,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { convertToSlug, generateMetaDescription, generateStructuredData } from "@/utils/blogUploader";
 
 const AdminBlog: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,7 +61,8 @@ const AdminBlog: React.FC = () => {
         content: post.content,
         author: post.author,
         category: post.category,
-        date: post.date
+        date: post.date,
+        slug: post.slug
       }));
     }
   });
@@ -92,16 +95,34 @@ const AdminBlog: React.FC = () => {
   // Add blog post mutation
   const addPostMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Generate slug if not provided
+      const slug = data.slug || convertToSlug(data.title);
+      
+      // Generate meta description
+      const metaDescription = generateMetaDescription(data.excerpt);
+      
+      // Generate structured data
+      const postData = {
+        ...data,
+        slug,
+        date: data.date || new Date().toISOString().split('T')[0]
+      };
+      const structuredData = generateStructuredData(postData);
+      
       const { data: newPost, error } = await supabase
         .from('blog_posts')
         .insert([{
           title: data.title,
+          slug: slug,
           image: data.image,
           excerpt: data.excerpt,
           content: data.content,
           author: data.author,
           category: data.category,
-          date: data.date || new Date().toISOString().split('T')[0]
+          date: data.date || new Date().toISOString().split('T')[0],
+          meta_description: metaDescription,
+          structured_data: JSON.stringify(structuredData),
+          keywords: `${data.category}, celebrity fashion, ${data.author}, style trends`
         }])
         .select()
         .single();
@@ -134,16 +155,34 @@ const AdminBlog: React.FC = () => {
   // Update blog post mutation
   const updatePostMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Generate slug if not provided
+      const slug = data.slug || convertToSlug(data.title);
+      
+      // Generate meta description
+      const metaDescription = generateMetaDescription(data.excerpt);
+      
+      // Generate structured data
+      const postData = {
+        ...data,
+        slug,
+        date: data.date || new Date().toISOString().split('T')[0]
+      };
+      const structuredData = generateStructuredData(postData);
+
       const { error } = await supabase
         .from('blog_posts')
         .update({
           title: data.title,
+          slug: slug,
           image: data.image,
           excerpt: data.excerpt,
           content: data.content,
           author: data.author,
           category: data.category,
           date: data.date,
+          meta_description: metaDescription,
+          structured_data: JSON.stringify(structuredData),
+          keywords: `${data.category}, celebrity fashion, ${data.author}, style trends`,
           updated_at: new Date().toISOString()
         })
         .eq('id', data.id);
@@ -276,6 +315,19 @@ const AdminBlog: React.FC = () => {
                 </div>
 
                 <div className="grid gap-2">
+                  <Label htmlFor="slug">Slug (SEO-friendly URL)</Label>
+                  <Input
+                    id="slug"
+                    {...register("slug")}
+                    defaultValue={editPost?.slug || ""}
+                    placeholder="Leave blank to auto-generate from title"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    The slug is the URL-friendly version of the title. Leave blank to auto-generate.
+                  </p>
+                </div>
+
+                <div className="grid gap-2">
                   <Label htmlFor="image">Featured Image URL</Label>
                   <Input
                     id="image"
@@ -382,6 +434,9 @@ const AdminBlog: React.FC = () => {
         </Dialog>
       </div>
 
+      {/* Sample Blog Uploader Component */}
+      <SampleBlogUploader />
+
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex items-center mb-6">
           <div className="relative flex-1">
@@ -451,7 +506,7 @@ const AdminBlog: React.FC = () => {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button size="sm" variant="outline" asChild>
-                          <a href={`/blog/${post.id}`} target="_blank" rel="noopener noreferrer">
+                          <a href={`/blog/${post.slug || post.id}`} target="_blank" rel="noopener noreferrer">
                             <Eye className="h-4 w-4" />
                           </a>
                         </Button>
