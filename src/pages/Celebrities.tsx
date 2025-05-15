@@ -10,10 +10,14 @@ import { fetchCelebrities } from "@/services/api";
 import { Celebrity } from "@/types/data";
 import CelebritySpotlight from "@/components/ui/CelebritySpotlight";
 import { Card } from "@/components/ui/card";
+import { useSearchParams } from "react-router-dom";
 
 const Celebrities: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSearchTerm = searchParams.get("search") || "";
+  
   const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,6 +32,21 @@ const Celebrities: React.FC = () => {
     
     loadCelebrities();
   }, []);
+  
+  // Update search params when search term changes
+  const updateSearchParams = (newSearchTerm: string) => {
+    if (newSearchTerm) {
+      setSearchParams({ search: newSearchTerm });
+    } else {
+      setSearchParams({});
+    }
+  };
+
+  // Handle search form submission
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateSearchParams(searchTerm);
+  };
   
   // Filter celebrities based on search term and category
   const filteredCelebrities = celebrities.filter((celebrity: Celebrity) => {
@@ -97,7 +116,7 @@ const Celebrities: React.FC = () => {
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
             Explore your favorite celebrities' fashion styles, outfits, and trends. Get inspired by the most iconic looks from red carpets to street style.
           </p>
-          <div className="relative max-w-md mx-auto">
+          <form onSubmit={handleSearchSubmit} className="relative max-w-md mx-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder="Search celebrities..."
@@ -105,7 +124,13 @@ const Celebrities: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-6 rounded-full"
             />
-          </div>
+            <Button 
+              type="submit"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full px-4"
+            >
+              Search
+            </Button>
+          </form>
         </div>
       </div>
 

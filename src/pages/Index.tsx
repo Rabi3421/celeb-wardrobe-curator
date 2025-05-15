@@ -12,6 +12,10 @@ import SocialFeedCard from "@/components/ui/SocialFeedCard";
 import AffiliateProductCard from "@/components/ui/AffiliateProductCard";
 import { fetchCelebrities, fetchOutfits, fetchBlogPosts, fetchAffiliateProducts } from "@/services/api";
 import { Celebrity, Outfit, BlogPost, AffiliateProduct } from "@/types/data";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Index: React.FC = () => {
   const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
@@ -19,6 +23,8 @@ const Index: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [affiliateProducts, setAffiliateProducts] = useState<AffiliateProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -139,6 +145,14 @@ const Index: React.FC = () => {
     }
   };
 
+  // Handle search submission
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/celebrities?search=${encodeURIComponent(searchTerm)}`);
+    }
+  };
+
   // Display loading state if data is being fetched
   if (isLoading) {
     return (
@@ -170,8 +184,27 @@ const Index: React.FC = () => {
             <p className="text-muted-foreground mb-8 md:text-lg max-w-lg">
               Your ultimate destination for celebrity fashion inspiration with affordable alternatives you can shop right now.
             </p>
+            <form onSubmit={handleSearch} className="relative max-w-md mb-6">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              <Input 
+                type="text"
+                placeholder="Search celebrities, styles..."
+                className="pl-10 pr-20 py-6 rounded-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Button 
+                type="submit" 
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full px-4"
+              >
+                Search
+              </Button>
+            </form>
             <div className="flex space-x-4">
-              <button className="btn-primary flex items-center">
+              <button 
+                className="btn-primary flex items-center"
+                onClick={() => navigate('/celebrities')}
+              >
                 Explore Celebrity Looks
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
