@@ -54,6 +54,23 @@ const Outfits: React.FC = () => {
     loadOutfits();
   }, [toast]);
   
+  // Handler functions for the resource cards
+  const handleExploreTrends = () => {
+    setShowTrendsDialog(true);
+  };
+  
+  const handleFindStyleMatch = () => {
+    setShowStyleMatchDialog(true);
+  };
+  
+  const handleViewAllGuides = () => {
+    setShowGuidesDialog(true);
+  };
+  
+  const handleStyleSelection = (style: string) => {
+    setSelectedStyle(style);
+  };
+
   // Filter outfits based on search and category
   const filteredOutfits = outfits.filter(outfit => {
     const matchesSearch = outfit.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
