@@ -1,6 +1,6 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Search, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,6 +17,16 @@ import { Button } from "@/components/ui/button";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/celebrities?search=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchTerm("");
+    }
+  };
 
   return (
     <nav className="sticky top-0 bg-white/80 backdrop-blur-md z-50 shadow-sm">
@@ -62,11 +72,15 @@ const Navbar: React.FC = () => {
           </div>
           
           <div className="relative hidden sm:block w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search celebrities, styles..."
-              className="pl-9 rounded-full bg-secondary"
-            />
+            <form onSubmit={handleSearch}>
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search celebrities, styles..."
+                className="pl-9 rounded-full bg-secondary"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </form>
           </div>
           
           <div className="flex md:hidden">
@@ -114,11 +128,15 @@ const Navbar: React.FC = () => {
                 Blog
               </Link>
               <div className="relative pt-2">
-                <Search className="absolute left-2.5 top-5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search celebrities, styles..."
-                  className="pl-9 rounded-full bg-secondary"
-                />
+                <form onSubmit={handleSearch}>
+                  <Search className="absolute left-2.5 top-5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search celebrities, styles..."
+                    className="pl-9 rounded-full bg-secondary"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </form>
               </div>
             </div>
           </div>
