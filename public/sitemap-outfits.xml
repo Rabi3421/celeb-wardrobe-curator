@@ -1,0 +1,39 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <!-- Outfit Detail Pages -->
+  <url>
+    <loc>https://www.celebritypersona.com/outfit/met-gala-ethereal-gown</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1618932260643-eee4a2f652a6</image:loc>
+      <image:title>Zendaya's Met Gala Ethereal Gown</image:title>
+      <image:caption>Get Zendaya's Met Gala look for less</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/outfit/parisian-street-style</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1492562080023-ab3db95bfbce</image:loc>
+      <image:title>Timothée Chalamet's Parisian Street Style</image:title>
+      <image:caption>Get Timothée Chalamet's street style look for less</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/outfit/bold-award-show-ensemble</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1622495546323-5dac33dedb50</image:loc>
+      <image:title>Rihanna's Bold Award Show Ensemble</image:title>
+      <image:caption>Get Rihanna's award show look for less</image:caption>
+    </image:image>
+  </url>
+</urlset>

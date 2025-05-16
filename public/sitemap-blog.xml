@@ -1,0 +1,61 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  <!-- Blog Posts -->
+  <url>
+    <loc>https://www.celebritypersona.com/blog/celebrity-festival-fashion-guide</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/blog/festival-fashion-guide.jpg</image:loc>
+      <image:title>Celebrity Festival Fashion Guide</image:title>
+    </image:image>
+    <news:news>
+      <news:publication>
+        <news:name>CelebrityPersona</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2025-05-01</news:publication_date>
+      <news:title>Celebrity Festival Fashion Guide: Get The Look For Less</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/blog/oscars-red-carpet-analysis</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/blog/oscars-fashion.jpg</image:loc>
+      <image:title>Oscars Red Carpet Analysis</image:title>
+    </image:image>
+    <news:news>
+      <news:publication>
+        <news:name>CelebrityPersona</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2025-03-15</news:publication_date>
+      <news:title>Oscars Red Carpet Analysis: The Best Dressed Celebrities</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/blog/celebrity-street-style-trends</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/blog/street-style-trends.jpg</image:loc>
+      <image:title>Celebrity Street Style Trends</image:title>
+    </image:image>
+    <news:news>
+      <news:publication>
+        <news:name>CelebrityPersona</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2025-04-20</news:publication_date>
+      <news:title>Celebrity Street Style Trends You Need To Know For 2025</news:title>
+    </news:news>
+  </url>
+</urlset>

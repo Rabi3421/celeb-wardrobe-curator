@@ -58,9 +58,10 @@ Disallow: /account
 Crawl-delay: 2
 
 # Sitemap locations
-Sitemap: https://www.celebritypersona.com/sitemap.xml
+Sitemap: https://www.celebritypersona.com/sitemap-index.xml
 
-# Category-specific sitemaps
+# Individual sitemaps
+Sitemap: https://www.celebritypersona.com/sitemap.xml
 Sitemap: https://www.celebritypersona.com/sitemap-blog.xml
 Sitemap: https://www.celebritypersona.com/sitemap-celebrities.xml
 Sitemap: https://www.celebritypersona.com/sitemap-outfits.xml

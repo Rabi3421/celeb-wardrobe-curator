@@ -1,0 +1,50 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <!-- Celebrity Pages -->
+  <url>
+    <loc>https://www.celebritypersona.com/celebrity/zendaya</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/celebrities/zendaya.jpg</image:loc>
+      <image:title>Zendaya's Fashion Style</image:title>
+      <image:caption>Explore Zendaya's fashion choices and shop similar styles</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/celebrity/timothee-chalamet</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/celebrities/timothee-chalamet.jpg</image:loc>
+      <image:title>Timothée Chalamet's Fashion Style</image:title>
+      <image:caption>Explore Timothée Chalamet's fashion choices and shop similar styles</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/celebrity/rihanna</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/celebrities/rihanna.jpg</image:loc>
+      <image:title>Rihanna's Fashion Style</image:title>
+      <image:caption>Explore Rihanna's fashion choices and shop similar styles</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/celebrity/harry-styles</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/celebrities/harry-styles.jpg</image:loc>
+      <image:title>Harry Styles' Fashion Style</image:title>
+      <image:caption>Explore Harry Styles' fashion choices and shop similar styles</image:caption>
+    </image:image>
+  </url>
+</urlset>
