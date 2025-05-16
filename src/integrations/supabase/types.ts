@@ -152,6 +152,42 @@ export type Database = {
         }
         Relationships: []
       }
+      category_items: {
+        Row: {
+          affiliate_link: string | null
+          category_name: string
+          created_at: string
+          description: string | null
+          id: string
+          image: string
+          price: string | null
+          retailer: string | null
+          title: string
+        }
+        Insert: {
+          affiliate_link?: string | null
+          category_name: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image: string
+          price?: string | null
+          retailer?: string | null
+          title: string
+        }
+        Update: {
+          affiliate_link?: string | null
+          category_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string
+          price?: string | null
+          retailer?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       celebrities: {
         Row: {
           bio: string

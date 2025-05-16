@@ -29,8 +29,11 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ title, icon, link }) => {
     }
   };
 
+  // Update the link to point to the CategoryDetail page
+  const categoryPath = `/category/${title.toLowerCase()}`;
+
   return (
-    <Link to={link} className="block">
+    <Link to={categoryPath} className="block">
       <div className="category-card bg-white rounded-xl p-6 text-center shadow-md hover:shadow-lg transition-all duration-300 h-full">
         <div className="bg-pastel-lavender rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
           {renderIcon()}

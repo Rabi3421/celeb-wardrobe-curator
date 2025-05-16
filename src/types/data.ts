@@ -1,4 +1,3 @@
-
 // Celebrity type
 export interface Celebrity {
   id: string;
@@ -93,4 +92,15 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+}
+
+export interface CategoryItem {
+  id: string;
+  categoryName: string;
+  title: string;
+  description: string;
+  image: string;
+  price: string;
+  retailer: string;
+  affiliateLink: string;
 }

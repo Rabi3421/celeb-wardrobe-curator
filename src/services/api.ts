@@ -1,6 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { Celebrity, Outfit, BlogPost, AffiliateProduct } from "@/types/data";
+import { Celebrity, Outfit, BlogPost, AffiliateProduct, CategoryItem } from "@/types/data";
 
 // Celebrity APIs
 export async function fetchCelebrities(): Promise<Celebrity[]> {
@@ -238,6 +237,30 @@ export async function fetchAffiliateProductsByOutfitId(outfitId: string): Promis
     retailer: product.retailer,
     affiliateLink: product.affiliate_link,
     description: product.description || ""
+  })) || [];
+}
+
+// Category Items APIs
+export async function fetchCategoryItems(categoryName: string): Promise<CategoryItem[]> {
+  const { data, error } = await supabase
+    .from("category_items")
+    .select("*")
+    .eq("category_name", categoryName.toLowerCase());
+  
+  if (error) {
+    console.error(`Error fetching items for category ${categoryName}:`, error);
+    return [];
+  }
+  
+  return data?.map(item => ({
+    id: item.id,
+    categoryName: item.category_name,
+    title: item.title,
+    description: item.description || "",
+    image: item.image,
+    price: item.price || "",
+    retailer: item.retailer || "",
+    affiliateLink: item.affiliate_link || ""
   })) || [];
 }
 
