@@ -1,10 +1,30 @@
 
 import React from "react";
 import PageLayout from "@/components/layout/PageLayout";
+import SEO from "@/components/SEO/SEO";
 
 const AffiliateDisclosure: React.FC = () => {
+  // Create structured data for the page
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Affiliate Disclosure - CelebrityPersona",
+    "description": "Learn about how we use affiliate links and our relationships with retailers and brands on CelebrityPersona.",
+    "url": `${window.location.origin}/affiliate-disclosure`,
+    "mainEntity": {
+      "@type": "WebPageElement",
+      "mainContentOfPage": "Affiliate Disclosure"
+    }
+  };
+
   return (
     <PageLayout>
+      <SEO 
+        title="Affiliate Disclosure - CelebrityPersona"
+        description="Learn about how we use affiliate links and our relationships with retailers and brands on CelebrityPersona."
+        canonical={`${window.location.origin}/affiliate-disclosure`}
+        jsonLd={jsonLd}
+      />
       <div className="container-custom py-12">
         <h1 className="font-serif text-3xl font-medium mb-8">Affiliate Disclosure</h1>
         <div className="prose max-w-none">

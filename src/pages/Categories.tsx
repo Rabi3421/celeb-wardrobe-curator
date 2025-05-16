@@ -8,6 +8,7 @@ import { outfits } from "@/data/mockData";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import SEO from "@/components/SEO/SEO";
 
 const Categories: React.FC = () => {
   const { category } = useParams<{ category: string }>();
@@ -37,8 +38,35 @@ const Categories: React.FC = () => {
     }, 1000);
   };
   
+  // Create structured data for the page
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": `${categoryName} Celebrity Style - CelebrityPersona`,
+    "description": `Explore our collection of celebrity ${categoryName.toLowerCase()} inspirations and find your next style statement.`,
+    "url": `${window.location.origin}/categories/${category}`,
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": filteredOutfits.map((outfit, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "url": `${window.location.origin}/outfit/${outfit.id}`
+      }))
+    }
+  };
+  
   return (
     <PageLayout>
+      <SEO 
+        title={`${categoryName} Celebrity Style - CelebrityPersona`}
+        description={`Explore our collection of celebrity ${categoryName.toLowerCase()} inspirations and find your next style statement.`}
+        canonical={`${window.location.origin}/categories/${category}`}
+        ogType="website"
+        ogImage={filteredOutfits[0]?.image || "/images/hero_img.jpg"}
+        keywords={`celebrity ${categoryName.toLowerCase()}, ${categoryName.toLowerCase()} fashion, celebrity style, fashion inspiration`}
+        jsonLd={jsonLd}
+      />
+      
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-pastel-peach to-pastel-pink py-16">
         <div className="container-custom text-center">

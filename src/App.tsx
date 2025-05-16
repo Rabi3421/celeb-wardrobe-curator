@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Celebrities from "./pages/Celebrities";
@@ -11,6 +12,9 @@ import Outfits from "./pages/Outfits";
 import NotFound from "./pages/NotFound";
 import CategoryDetail from "./pages/CategoryDetail";
 import Categories from "./pages/Categories";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import AffiliateDisclosure from "./pages/AffiliateDisclosure";
 
 function App() {
   return (
@@ -27,6 +31,9 @@ function App() {
         <Route path="/blog-topic/:topic" element={<BlogTopic />} />
         <Route path="/category/:category" element={<CategoryDetail />} />
         <Route path="/categories/:category" element={<Categories />} />
+        <Route path="/privacy-policy" element={<Privacy />} />
+        <Route path="/terms-of-service" element={<Terms />} />
+        <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

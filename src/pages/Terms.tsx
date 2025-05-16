@@ -1,10 +1,30 @@
 
 import React from "react";
 import PageLayout from "@/components/layout/PageLayout";
+import SEO from "@/components/SEO/SEO";
 
 const Terms: React.FC = () => {
+  // Create structured data for the page
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Terms of Service - CelebrityPersona",
+    "description": "Read the terms and conditions that govern your use of the CelebrityPersona website.",
+    "url": `${window.location.origin}/terms-of-service`,
+    "mainEntity": {
+      "@type": "WebPageElement",
+      "mainContentOfPage": "Terms of Service"
+    }
+  };
+
   return (
     <PageLayout>
+      <SEO 
+        title="Terms of Service - CelebrityPersona"
+        description="Read the terms and conditions that govern your use of the CelebrityPersona website."
+        canonical={`${window.location.origin}/terms-of-service`}
+        jsonLd={jsonLd}
+      />
       <div className="container-custom py-12">
         <h1 className="font-serif text-3xl font-medium mb-8">Terms of Service</h1>
         <div className="prose max-w-none">

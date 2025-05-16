@@ -1,10 +1,30 @@
 
 import React from "react";
 import PageLayout from "@/components/layout/PageLayout";
+import SEO from "@/components/SEO/SEO";
 
 const Privacy: React.FC = () => {
+  // Create structured data for the page
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Privacy Policy - CelebrityPersona",
+    "description": "Read our privacy policy to learn how CelebrityPersona handles your personal information and data.",
+    "url": `${window.location.origin}/privacy-policy`,
+    "mainEntity": {
+      "@type": "WebPageElement",
+      "mainContentOfPage": "Privacy Policy"
+    }
+  };
+
   return (
     <PageLayout>
+      <SEO 
+        title="Privacy Policy - CelebrityPersona"
+        description="Read our privacy policy to learn how CelebrityPersona handles your personal information and data."
+        canonical={`${window.location.origin}/privacy-policy`}
+        jsonLd={jsonLd}
+      />
       <div className="container-custom py-12">
         <h1 className="font-serif text-3xl font-medium mb-8">Privacy Policy</h1>
         <div className="prose max-w-none">
