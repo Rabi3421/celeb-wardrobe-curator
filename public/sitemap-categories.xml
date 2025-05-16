@@ -1,0 +1,121 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <!-- Fashion Categories -->
+  <url>
+    <loc>https://www.celebritypersona.com/category/dresses</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/categories/dresses-hero.jpg</image:loc>
+      <image:title>Celebrity Dresses and Gowns</image:title>
+      <image:caption>Red carpet dresses and everyday celebrity dress styles</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/party-dresses</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/evening-gowns</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/shoes</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/categories/shoes-hero.jpg</image:loc>
+      <image:title>Celebrity Footwear</image:title>
+      <image:caption>Trending celebrity shoes and footwear choices</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/heels</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/sneakers</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/makeup</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/categories/makeup-hero.jpg</image:loc>
+      <image:title>Celebrity Makeup Looks</image:title>
+      <image:caption>Makeup products and techniques used by celebrities</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/lipstick</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/foundation</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/handbags</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/categories/handbags-hero.jpg</image:loc>
+      <image:title>Celebrity Handbags and Purses</image:title>
+      <image:caption>Designer bags carried by celebrities and affordable alternatives</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/tote-bags</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/crossbody-bags</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/accessories</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://www.celebritypersona.com/images/categories/accessories-hero.jpg</image:loc>
+      <image:title>Celebrity Accessories</image:title>
+      <image:caption>Jewelry, sunglasses, and accessories worn by celebrities</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/jewelry</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.celebritypersona.com/category/sunglasses</loc>
+    <lastmod>2025-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>

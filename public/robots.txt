@@ -1,40 +1,67 @@
 
+# CelebrityPersona Robots.txt
+# Updated: 2025-05-16
+# Website: https://www.celebritypersona.com/
+
 # Allow crawling of all content for major search engines
 User-agent: Googlebot
 Allow: /
 Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /checkout
+Disallow: /account
 
 User-agent: Bingbot
 Allow: /
 Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /checkout
+Disallow: /account
 
+# Allow Google Image crawler with full access to improve image search results
+User-agent: Googlebot-Image
+Allow: /
+Crawl-delay: 1
+
+# Allow Google Mobile crawler with full access for mobile optimization
+User-agent: Googlebot-Mobile
+Allow: /
+
+# Social media bots for better sharing previews
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
 
-# Allow crawling for Pinterest
+# Allow Pinterest crawler to enhance product pins
 User-agent: Pinterest
 Allow: /
+Crawl-delay: 1
 
-# Allow Google Image crawler
-User-agent: Googlebot-Image
-Allow: /
-
-# Allow Google Mobile crawler
-User-agent: Googlebot-Mobile
-Allow: /
+# Allow Google News crawler for blog posts
+User-agent: Googlebot-News
+Allow: /blog
+Allow: /blog-topic
+Allow: /blog-topics
 
 # Standard rule for all other bots
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /checkout
+Disallow: /account
+Crawl-delay: 2
 
 # Sitemap locations
 Sitemap: https://www.celebritypersona.com/sitemap.xml
 
-# Add category and blog sitemaps
+# Category-specific sitemaps
 Sitemap: https://www.celebritypersona.com/sitemap-blog.xml
 Sitemap: https://www.celebritypersona.com/sitemap-celebrities.xml
 Sitemap: https://www.celebritypersona.com/sitemap-outfits.xml
+Sitemap: https://www.celebritypersona.com/sitemap-categories.xml

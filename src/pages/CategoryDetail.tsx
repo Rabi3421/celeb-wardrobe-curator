@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { subscribeToNewsletter } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { getKeywordString } from "@/data/seoKeywords";
 
 const CategoryDetail: React.FC = () => {
   const { category } = useParams<{ category: string }>();
@@ -163,36 +164,156 @@ const CategoryDetail: React.FC = () => {
     bikes: ["cars"],
   }[category as string] || ["dresses", "shoes", "makeup"];
 
-  // Create JSON-LD structured data for SEO
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": `Celebrity ${formattedCategory} Collection`,
-    "description": `Explore our collection of celebrity-inspired ${formattedCategory.toLowerCase()}.`,
-    "itemListElement": items.map((item, index) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "item": {
-        "@type": "Product",
-        "name": item.title,
-        "description": item.description,
-        "image": item.image,
-        "offers": {
-          "@type": "Offer",
-          "price": item.price,
-          "priceCurrency": "USD"
-        }
+  // FAQ data specific to this category
+  const categoryFaqs = {
+    dresses: [
+      {
+        question: `What are the latest celebrity ${formattedCategory.toLowerCase()} trends?`,
+        answer: `Our collection showcases the latest celebrity ${formattedCategory.toLowerCase()} trends including statement gowns, cocktail dresses, and casual-chic styles worn by A-list celebrities.`
+      },
+      {
+        question: `How can I style celebrity-inspired ${formattedCategory.toLowerCase()} for everyday wear?`,
+        answer: `You can style celebrity-inspired ${formattedCategory.toLowerCase()} for everyday occasions by pairing them with minimal accessories and casual footwear. Our blog offers detailed styling guides.`
+      },
+      {
+        question: `Are these celebrity ${formattedCategory.toLowerCase()} affordable?`,
+        answer: `We offer alternatives at various price points to match celebrity ${formattedCategory.toLowerCase()}, including budget-friendly options that capture the same aesthetic without the designer price tag.`
       }
-    }))
+    ],
+    shoes: [
+      {
+        question: `What celebrity ${formattedCategory.toLowerCase()} are trending this season?`,
+        answer: `This season's trending celebrity ${formattedCategory.toLowerCase()} include platform heels, statement sneakers, and minimalist sandals as seen on red carpets and street style moments.`
+      },
+      {
+        question: `How do I find comfortable celebrity-inspired ${formattedCategory.toLowerCase()}?`,
+        answer: `Look for our comfort-rated alternatives to celebrity ${formattedCategory.toLowerCase()} that offer similar styles with added padding, arch support, and quality materials for all-day wear.`
+      },
+      {
+        question: `What are the most versatile celebrity ${formattedCategory.toLowerCase()} styles?`,
+        answer: `The most versatile celebrity ${formattedCategory.toLowerCase()} include neutral pumps, white sneakers, and ankle boots that can be styled with multiple outfits as demonstrated by fashion-forward stars.`
+      }
+    ],
+    handbags: [
+      {
+        question: `Which celebrity ${formattedCategory.toLowerCase()} are worth the investment?`,
+        answer: `Celebrity-approved investment ${formattedCategory.toLowerCase()} include timeless designs from luxury brands that maintain their value, but we also offer similar alternatives at more accessible price points.`
+      },
+      {
+        question: `How can I spot a quality ${formattedCategory.toLowerCase()} like celebrities wear?`,
+        answer: `Quality ${formattedCategory.toLowerCase()} feature consistent stitching, durable hardware, and structured shapes. Our product descriptions highlight these quality indicators in our celebrity-inspired selections.`
+      },
+      {
+        question: `What are the must-have celebrity ${formattedCategory.toLowerCase()} styles?`,
+        answer: `Must-have celebrity ${formattedCategory.toLowerCase()} include structured totes, crossbody bags, and statement clutches that offer both functionality and style as showcased by fashion icons.`
+      }
+    ],
+    makeup: [
+      {
+        question: `What ${formattedCategory.toLowerCase()} products do celebrities actually use?`,
+        answer: `We've researched actual products used by celebrities and their makeup artists, offering both the exact items and affordable dupes with similar finishes and ingredients.`
+      },
+      {
+        question: `How can I achieve celebrity ${formattedCategory.toLowerCase()} looks at home?`,
+        answer: `Our step-by-step guides detail how to recreate celebrity ${formattedCategory.toLowerCase()} looks using recommended products, application techniques, and professional tips from celebrity makeup artists.`
+      },
+      {
+        question: `Are celebrity-endorsed ${formattedCategory.toLowerCase()} products worth the price?`,
+        answer: `While some celebrity-endorsed ${formattedCategory.toLowerCase()} products deliver excellent results, we help you identify which are worth the splurge and which can be substituted with affordable alternatives.`
+      }
+    ]
   };
+
+  // Select appropriate FAQs based on category
+  const faqs = categoryFaqs[category as keyof typeof categoryFaqs] || [
+    {
+      question: `What celebrity ${formattedCategory.toLowerCase()} are currently trending?`,
+      answer: `Our collection showcases the latest celebrity ${formattedCategory.toLowerCase()} trends including styles from red carpet events, casual outings, and social media appearances.`
+    },
+    {
+      question: `How can I find affordable alternatives to celebrity ${formattedCategory.toLowerCase()}?`,
+      answer: `CelebrityPersona offers carefully curated alternatives to celebrity ${formattedCategory.toLowerCase()} at various price points, helping you achieve the same look for less.`
+    },
+    {
+      question: `Do celebrities actually wear these ${formattedCategory.toLowerCase()}?`,
+      answer: `Yes, our catalogue features ${formattedCategory.toLowerCase()} styles that are worn by celebrities, and we provide similar options that capture the same aesthetic at different price points.`
+    }
+  ];
+
+  // Breadcrumb data for structured data
+  const breadcrumbs = [
+    {
+      name: "Home",
+      url: "/"
+    },
+    {
+      name: "Categories",
+      url: "/categories"
+    },
+    {
+      name: formattedCategory,
+      url: `/category/${category}`
+    }
+  ];
+
+  // Create JSON-LD structured data for SEO with enhanced information
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": `Celebrity ${formattedCategory} Collection`,
+      "description": `Explore our collection of celebrity-inspired ${formattedCategory.toLowerCase()}.`,
+      "itemListElement": filteredItems.slice(0, 10).map((item, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "Product",
+          "name": item.title,
+          "description": item.description || `Celebrity-inspired ${formattedCategory.toLowerCase()}`,
+          "image": item.image,
+          "offers": {
+            "@type": "Offer",
+            "price": item.price ? item.price.replace(/[^0-9.]/g, '') : "",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "url": item.affiliateLink || `${window.location.origin}/category/${category}/${item.id}`
+          }
+        }
+      }))
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": `Celebrity ${formattedCategory} Fashion Collection`,
+      "description": `Discover celebrity-inspired ${formattedCategory.toLowerCase()} and affordable alternatives to recreate star looks.`,
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": filteredItems.length > 0 ? filteredItems[0].image : `${window.location.origin}/images/categories/${category}.jpg`
+      },
+      "mainEntity": {
+        "@type": "ItemList",
+        "itemListElement": filteredItems.slice(0, 10).map((item, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "url": item.affiliateLink || `${window.location.origin}/category/${category}/${item.id}`
+        }))
+      }
+    }
+  ];
 
   return (
     <PageLayout>
       <SEO
-        title={`${formattedCategory} | CelebrityPersona`}
-        description={`Explore celebrity-inspired ${formattedCategory.toLowerCase()} and shop similar styles.`}
-        keywords={`celebrity ${formattedCategory.toLowerCase()}, celebrity fashion, celebrity style`}
+        title={`Celebrity ${formattedCategory} Style | Shop The Look | CelebrityPersona`}
+        description={`Discover celebrity-inspired ${formattedCategory.toLowerCase()} and affordable alternatives. Shop the same styles worn by your favorite stars at a fraction of the price.`}
+        keywords={getKeywordString(category)}
+        ogTitle={`Celebrity ${formattedCategory} | Shop Celebrity-Inspired Fashion`}
+        ogDescription={`Get the look with our celebrity-inspired ${formattedCategory.toLowerCase()} collection. Affordable alternatives to styles worn by Hollywood stars.`}
+        ogImage={filteredItems.length > 0 ? filteredItems[0].image : undefined}
         jsonLd={jsonLd}
+        breadcrumbs={breadcrumbs}
+        faqSchema={faqs}
+        category={category}
       />
 
       {/* Hero Section */}

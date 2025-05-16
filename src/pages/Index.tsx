@@ -128,22 +128,90 @@ const Index: React.FC = () => {
     }
   ];
 
-  // Create JSON-LD structured data for the homepage
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "CelebrityPersona",
-    "url": window.location.origin,
-    "description": "Your ultimate destination for celebrity fashion inspiration with affordable alternatives you can shop right now.",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": `${window.location.origin}/search?q={search_term_string}`
-      },
-      "query-input": "required name=search_term_string"
+  // Enhanced FAQ data for structured data
+  const faqData = [
+    {
+      question: "How do I find celebrity outfit inspiration?",
+      answer: "Browse our curated collection of celebrity outfits by visiting the Celebrities or Outfits section. You can filter by style, event type, or search for your favorite celebrity directly."
+    },
+    {
+      question: "Are the similar fashion items exact matches?",
+      answer: "Our fashion experts curate similar items at various price points that capture the style essence of celebrity outfits. While not exact matches, they offer the same aesthetic at more affordable prices."
+    },
+    {
+      question: "How often is new celebrity fashion content added?",
+      answer: "We update our collection daily with the latest celebrity fashion moments from red carpets, street style, and social media appearances."
+    },
+    {
+      question: "Can I purchase celebrity fashion items directly from CelebrityPersona?",
+      answer: "CelebrityPersona partners with trusted retailers to offer similar items. When you click on a product, you'll be directed to the retailer's website where you can make your purchase securely."
+    },
+    {
+      question: "How can I get personalized celebrity style recommendations?",
+      answer: "Subscribe to our newsletter for personalized style recommendations based on your favorite celebrities and fashion preferences."
     }
-  };
+  ];
+
+  // Enhanced breadcrumb data
+  const breadcrumbData = [
+    {
+      name: "Home",
+      url: "/"
+    }
+  ];
+
+  // Enhanced structured data for the homepage with more specific elements
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "CelebrityPersona",
+      "url": window.location.origin,
+      "description": "Your ultimate destination for celebrity fashion inspiration with affordable alternatives you can shop right now.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": `${window.location.origin}/search?q={search_term_string}`
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "CelebrityPersona",
+      "url": window.location.origin,
+      "logo": `${window.location.origin}/logo.svg`,
+      "sameAs": [
+        "https://twitter.com/celebritypersona",
+        "https://instagram.com/celebritypersona",
+        "https://facebook.com/celebritypersona",
+        "https://pinterest.com/celebritypersona"
+      ]
+    }
+  ];
+  
+  // If we have featured outfits, add those to structured data
+  if (featuredOutfits && featuredOutfits.length > 0) {
+    jsonLd.push({
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Celebrity Fashion Inspiration",
+      "description": "Trending celebrity outfits with affordable alternatives",
+      "itemListElement": featuredOutfits.slice(0, 3).map((outfit, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "Product",
+          "name": outfit.title,
+          "description": outfit.description,
+          "image": outfit.image,
+          "url": `${window.location.origin}/outfit/${outfit.id}`
+        }
+      }))
+    });
+  }
 
   // Handle search submission
   const handleSearch = (e: React.FormEvent) => {
@@ -168,11 +236,19 @@ const Index: React.FC = () => {
   return (
     <PageLayout>
       <SEO
-        title="CelebrityPersona | Discover Celebrity Style & Shop Similar Looks"
-        description="Your ultimate destination for celebrity fashion inspiration with affordable alternatives you can shop right now."
+        title="CelebrityPersona | Celebrity Style Inspiration & Affordable Fashion Alternatives"
+        description="Discover celebrity fashion trends and affordable alternatives for your favorite star outfits. Shop celebrity-inspired dresses, accessories, shoes and party wear at budget-friendly prices."
         ogImage="/images/hero_img.jpg"
-        keywords="celebrity fashion, affordable celebrity style, shop celebrity looks, celebrity outfits, fashion inspiration"
+        ogTitle="Celebrity Style Inspiration & Affordable Fashion Alternatives | CelebrityPersona"
+        ogDescription="Get the celebrity look for less! Browse our collection of celebrity-inspired fashion with affordable alternatives for every budget."
+        twitterCard="summary_large_image"
+        twitterTitle="Celebrity Style Inspiration & Affordable Alternatives"
+        twitterDescription="Discover and shop celebrity-inspired fashion at budget-friendly prices. Red carpet looks, street style, and more!"
+        twitterImage="/images/hero_img.jpg"
+        keywords="celebrity outfits, celebrity dresses, celebrity fashion, affordable celebrity style, celebrity party wear, red carpet looks, celebrity street style, celebrity accessories, celebrity inspired clothing"
         jsonLd={jsonLd}
+        breadcrumbs={breadcrumbData}
+        faqSchema={faqData}
       />
       {/* Hero Banner */}
       <section className="bg-gradient-to-r from-pastel-lavender to-pastel-blue py-12 md:py-20 animate-fade-slide-up">
