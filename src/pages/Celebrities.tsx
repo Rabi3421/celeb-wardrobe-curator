@@ -10,11 +10,12 @@ import { fetchCelebrities } from "@/services/api";
 import { Celebrity } from "@/types/data";
 import CelebritySpotlight from "@/components/ui/CelebritySpotlight";
 import { Card } from "@/components/ui/card";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Celebrities: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearchTerm = searchParams.get("search") || "";
+  const navigate = useNavigate();
   
   const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
@@ -43,9 +44,28 @@ const Celebrities: React.FC = () => {
   };
 
   // Handle search form submission
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateSearchParams(searchTerm);
+    if (!searchTerm.trim()) return;
+
+    try {
+      // Check if the search term matches a celebrity name
+      const matchedCelebrity = celebrities.find(celeb => 
+        celeb.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      if (matchedCelebrity) {
+        // If match found, navigate directly to the celebrity profile
+        navigate(`/celebrity/${matchedCelebrity.id}`);
+      } else {
+        // Otherwise, update search params to show filtered results
+        updateSearchParams(searchTerm);
+      }
+    } catch (error) {
+      console.error("Error during search:", error);
+      // Fallback to regular search filtering
+      updateSearchParams(searchTerm);
+    }
   };
   
   // Filter celebrities based on search term and category

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Menu } from "lucide-react";
@@ -14,15 +13,38 @@ import {
 } from "@/components/ui/navigation-menu"
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { fetchCelebrities } from "@/services/api";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
+    if (!searchTerm.trim()) return;
+
+    try {
+      // Fetch celebrities to search among them
+      const celebrities = await fetchCelebrities();
+      
+      // Check if the search term matches a celebrity name
+      const matchedCelebrity = celebrities.find(celeb => 
+        celeb.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      if (matchedCelebrity) {
+        // If match found, navigate directly to the celebrity profile
+        navigate(`/celebrity/${matchedCelebrity.id}`);
+      } else {
+        // Otherwise, navigate to the search results page
+        navigate(`/celebrities?search=${encodeURIComponent(searchTerm.trim())}`);
+      }
+      
+      setSearchTerm("");
+    } catch (error) {
+      console.error("Error during search:", error);
+      // Fallback to the regular search page if there's an error
       navigate(`/celebrities?search=${encodeURIComponent(searchTerm.trim())}`);
       setSearchTerm("");
     }
