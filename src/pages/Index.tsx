@@ -192,13 +192,14 @@ const Index: React.FC = () => {
     }
   ];
   
-  // If we have featured outfits, add those to structured data
+  // If we have featured outfits, add those to structured data - fixed structure for ItemList
   if (featuredOutfits && featuredOutfits.length > 0) {
     jsonLd.push({
       "@context": "https://schema.org",
       "@type": "ItemList",
       "name": "Celebrity Fashion Inspiration",
       "description": "Trending celebrity outfits with affordable alternatives",
+      "numberOfItems": featuredOutfits.slice(0, 3).length,
       "itemListElement": featuredOutfits.slice(0, 3).map((outfit, index) => ({
         "@type": "ListItem",
         "position": index + 1,
@@ -210,7 +211,7 @@ const Index: React.FC = () => {
           "url": `${window.location.origin}/outfit/${outfit.id}`
         }
       }))
-    });
+    } as any); // Use type assertion to avoid TypeScript error
   }
 
   // Handle search submission
