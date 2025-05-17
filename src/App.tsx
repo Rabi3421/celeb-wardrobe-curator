@@ -27,6 +27,8 @@ import AdminTags from "./pages/AdminTags";
 import AdminSettings from "./pages/AdminSettings";
 import AdminImportData from "./pages/AdminImportData";
 import AdminNewsletterSubscribers from "./pages/AdminNewsletterSubscribers";
+import AdminCelebrities from "./pages/AdminCelebrities";
+import AdminBlog from "./pages/AdminBlog";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -65,6 +67,8 @@ function App() {
                   <Route path="/settings" element={<AdminSettings />} />
                   <Route path="/import-data" element={<AdminImportData />} />
                   <Route path="/newsletter" element={<AdminNewsletterSubscribers />} />
+                  <Route path="/celebrities" element={<AdminCelebrities />} />
+                  <Route path="/blog" element={<AdminBlog />} />
                 </Routes>
               </AdminAuthProvider>
             } />
