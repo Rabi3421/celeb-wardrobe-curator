@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { fetchCelebrities } from "@/services/api";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -52,7 +53,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="sticky top-0 bg-white/80 backdrop-blur-md z-50 shadow-sm">
+    <nav className="sticky top-0 bg-background/80 backdrop-blur-md z-50 shadow-sm dark:shadow-gray-800/10">
       <div className="container-custom py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center">
@@ -95,58 +96,62 @@ const Navbar: React.FC = () => {
             </NavigationMenu>
           </div>
           
-          <div className="relative hidden sm:block w-64">
-            <form onSubmit={handleSearch}>
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search celebrities, styles..."
-                className="pl-9 rounded-full bg-secondary"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </form>
-          </div>
-          
-          <div className="flex md:hidden">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Menu"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
+          <div className="flex items-center gap-2">
+            <div className="relative hidden sm:block w-64">
+              <form onSubmit={handleSearch}>
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search celebrities, styles..."
+                  className="pl-9 rounded-full bg-secondary dark:bg-gray-800"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </form>
+            </div>
+            
+            <ThemeToggle />
+            
+            <div className="flex md:hidden">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Menu"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
         
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t mt-4">
+          <div className="md:hidden py-4 border-t mt-4 dark:border-gray-800">
             <div className="flex flex-col space-y-3">
               <Link 
                 to="/" 
-                className="px-2 py-1 hover:bg-secondary rounded-md text-sm font-medium"
+                className="px-2 py-1 hover:bg-secondary dark:hover:bg-gray-800 rounded-md text-sm font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </Link>
               <Link 
                 to="/celebrities" 
-                className="px-2 py-1 hover:bg-secondary rounded-md text-sm font-medium"
+                className="px-2 py-1 hover:bg-secondary dark:hover:bg-gray-800 rounded-md text-sm font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Celebrities
               </Link>
               <Link 
                 to="/outfits" 
-                className="px-2 py-1 hover:bg-secondary rounded-md text-sm font-medium"
+                className="px-2 py-1 hover:bg-secondary dark:hover:bg-gray-800 rounded-md text-sm font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Outfits
               </Link>
               <Link 
                 to="/blog" 
-                className="px-2 py-1 hover:bg-secondary rounded-md text-sm font-medium"
+                className="px-2 py-1 hover:bg-secondary dark:hover:bg-gray-800 rounded-md text-sm font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Blog
@@ -156,7 +161,7 @@ const Navbar: React.FC = () => {
                   <Search className="absolute left-2.5 top-5 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search celebrities, styles..."
-                    className="pl-9 rounded-full bg-secondary"
+                    className="pl-9 rounded-full bg-secondary dark:bg-gray-800"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
