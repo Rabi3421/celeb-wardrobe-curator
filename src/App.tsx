@@ -17,11 +17,21 @@ import Terms from "./pages/Terms";
 import AffiliateDisclosure from "./pages/AffiliateDisclosure";
 import { HelmetProvider } from 'react-helmet-async';
 
+// Admin pages
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminLogin from "./pages/AdminLogin";
+import AdminOutfits from "./pages/AdminOutfits";
+import AdminTags from "./pages/AdminTags";
+import AdminSettings from "./pages/AdminSettings";
+import AdminImportData from "./pages/AdminImportData";
+import AdminNewsletterSubscribers from "./pages/AdminNewsletterSubscribers";
+
 function App() {
   return (
     <HelmetProvider>
       <BrowserRouter>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<Index />} />
           <Route path="/celebrities" element={<Celebrities />} />
           <Route path="/celebrity/:id" element={<CelebrityProfile />} />
@@ -37,6 +47,16 @@ function App() {
           <Route path="/privacy-policy" element={<Privacy />} />
           <Route path="/terms-of-service" element={<Terms />} />
           <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
+          
+          {/* Admin routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/outfits" element={<AdminOutfits />} />
+          <Route path="/admin/tags" element={<AdminTags />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/import-data" element={<AdminImportData />} />
+          <Route path="/admin/newsletter" element={<AdminNewsletterSubscribers />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
