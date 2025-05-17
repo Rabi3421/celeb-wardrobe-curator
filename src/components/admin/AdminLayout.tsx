@@ -10,13 +10,13 @@ import {
   BarChart, 
   Tag, 
   Settings, 
-  LogOut, 
-  User 
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -123,7 +123,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <main className="container-custom py-8">
-        {children}
+        <ScrollArea className="h-full">
+          {children}
+        </ScrollArea>
       </main>
     </div>
   );

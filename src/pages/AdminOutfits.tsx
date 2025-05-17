@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Search, Edit, Trash, Eye, Image, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -32,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -45,6 +47,7 @@ const AdminOutfits: React.FC = () => {
   const [editOutfit, setEditOutfit] = useState<Outfit | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [outfitToDelete, setOutfitToDelete] = useState<Outfit | null>(null);
+  const [showAddEditForm, setShowAddEditForm] = useState(false);
   const queryClient = useQueryClient();
 
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
@@ -325,6 +328,8 @@ const AdminOutfits: React.FC = () => {
     } else {
       addOutfitMutation.mutate(data);
     }
+    
+    setShowAddEditForm(false);
   };
 
   const handleDelete = (outfit: Outfit) => {
@@ -352,6 +357,14 @@ const AdminOutfits: React.FC = () => {
     if (outfit.tags) {
       setValue('tagsString', outfit.tags.join(', '));
     }
+    
+    setShowAddEditForm(true);
+  };
+  
+  const handleAddNew = () => {
+    setEditOutfit(null);
+    reset();
+    setShowAddEditForm(true);
   };
 
   const formatDate = (dateString: string | undefined) => {
@@ -363,146 +376,10 @@ const AdminOutfits: React.FC = () => {
     <AdminLayout>
       <div className="flex justify-between items-center mb-6">
         <h1 className="font-serif text-2xl font-medium">Outfits</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Outfit
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>
-                {editOutfit ? "Edit Outfit" : "Add New Outfit"}
-              </DialogTitle>
-              <DialogDescription>
-                Fill in the details for the outfit.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    {...register("title", { required: "Title is required" })}
-                    defaultValue={editOutfit?.title || ""}
-                  />
-                  {errors.title && (
-                    <p className="text-sm text-red-500">
-                      {errors.title.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="image">Image URL</Label>
-                  <Input
-                    id="image"
-                    {...register("image", { required: "Image URL is required" })}
-                    defaultValue={editOutfit?.image || ""}
-                  />
-                  {errors.image && (
-                    <p className="text-sm text-red-500">
-                      {errors.image.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="celebrityId">Celebrity</Label>
-                  {isCelebritiesLoading ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Loading celebrities...</span>
-                    </div>
-                  ) : (
-                    <select
-                      id="celebrityId"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                      {...register("celebrityId", { required: "Celebrity is required" })}
-                      defaultValue={editOutfit?.celebrityId || ""}
-                    >
-                      <option value="">Select a celebrity</option>
-                      {celebrities.map((celebrity: Celebrity) => (
-                        <option key={celebrity.id} value={celebrity.id}>{celebrity.name}</option>
-                      ))}
-                    </select>
-                  )}
-                  {errors.celebrityId && (
-                    <p className="text-sm text-red-500">
-                      {errors.celebrityId.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    {...register("description", { required: "Description is required" })}
-                    defaultValue={editOutfit?.description || ""}
-                  />
-                  {errors.description && (
-                    <p className="text-sm text-red-500">
-                      {errors.description.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="occasion">Occasion</Label>
-                  <Input
-                    id="occasion"
-                    {...register("occasion")}
-                    defaultValue={editOutfit?.occasion || ""}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    {...register("date")}
-                    defaultValue={formatDate(editOutfit?.date)}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="tagsString">Tags (comma separated)</Label>
-                  <Input
-                    id="tagsString"
-                    {...register("tagsString")}
-                    defaultValue={editOutfit?.tags ? editOutfit.tags.join(', ') : ""}
-                    placeholder="red carpet, formal, gala, etc."
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="fullDescription">Full Description</Label>
-                  <textarea
-                    id="fullDescription"
-                    className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                    {...register("fullDescription")}
-                    defaultValue={editOutfit?.fullDescription || ""}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button 
-                  type="submit" 
-                  disabled={addOutfitMutation.isPending || updateOutfitMutation.isPending}
-                >
-                  {(addOutfitMutation.isPending || updateOutfitMutation.isPending) && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {editOutfit ? "Update Outfit" : "Add Outfit"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={handleAddNew}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Outfit
+        </Button>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm p-6">
@@ -605,6 +482,158 @@ const AdminOutfits: React.FC = () => {
           </Table>
         </div>
       </div>
+
+      {/* Add/Edit Form Dialog */}
+      <Dialog open={showAddEditForm} onOpenChange={setShowAddEditForm}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>
+              {editOutfit ? "Edit Outfit" : "Add New Outfit"}
+            </DialogTitle>
+            <DialogDescription>
+              Fill in the details for the outfit.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ScrollArea className="flex-1 pr-4">
+            <form id="outfit-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="title" className="font-medium">Title *</Label>
+                  <Input
+                    id="title"
+                    {...register("title", { required: "Title is required" })}
+                    defaultValue={editOutfit?.title || ""}
+                    placeholder="Enter outfit title"
+                  />
+                  {errors.title && (
+                    <p className="text-sm text-red-500">
+                      {errors.title.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="image" className="font-medium">Image URL *</Label>
+                  <Input
+                    id="image"
+                    {...register("image", { required: "Image URL is required" })}
+                    defaultValue={editOutfit?.image || ""}
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {errors.image && (
+                    <p className="text-sm text-red-500">
+                      {errors.image.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="celebrityId" className="font-medium">Celebrity *</Label>
+                  {isCelebritiesLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Loading celebrities...</span>
+                    </div>
+                  ) : (
+                    <select
+                      id="celebrityId"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      {...register("celebrityId", { required: "Celebrity is required" })}
+                      defaultValue={editOutfit?.celebrityId || ""}
+                    >
+                      <option value="">Select a celebrity</option>
+                      {celebrities.map((celebrity: Celebrity) => (
+                        <option key={celebrity.id} value={celebrity.id}>{celebrity.name}</option>
+                      ))}
+                    </select>
+                  )}
+                  {errors.celebrityId && (
+                    <p className="text-sm text-red-500">
+                      {errors.celebrityId.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="occasion" className="font-medium">Occasion</Label>
+                  <Input
+                    id="occasion"
+                    {...register("occasion")}
+                    defaultValue={editOutfit?.occasion || ""}
+                    placeholder="e.g., Red Carpet, Award Show, etc."
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="description" className="font-medium">Description *</Label>
+                  <Input
+                    id="description"
+                    {...register("description", { required: "Description is required" })}
+                    defaultValue={editOutfit?.description || ""}
+                    placeholder="Brief description of the outfit"
+                  />
+                  {errors.description && (
+                    <p className="text-sm text-red-500">
+                      {errors.description.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="date" className="font-medium">Date Worn</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    {...register("date")}
+                    defaultValue={formatDate(editOutfit?.date)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="tagsString" className="font-medium">Tags (comma separated)</Label>
+                <Input
+                  id="tagsString"
+                  {...register("tagsString")}
+                  defaultValue={editOutfit?.tags ? editOutfit.tags.join(', ') : ""}
+                  placeholder="red carpet, formal, gala, etc."
+                />
+                <p className="text-xs text-muted-foreground">
+                  Separate tags with commas
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="fullDescription" className="font-medium">Full Description</Label>
+                <Textarea
+                  id="fullDescription"
+                  className="min-h-32"
+                  {...register("fullDescription")}
+                  defaultValue={editOutfit?.fullDescription || ""}
+                  placeholder="Detailed description of the outfit, including style notes, materials, designer information, etc."
+                />
+              </div>
+            </form>
+          </ScrollArea>
+          
+          <DialogFooter className="pt-2">
+            <Button variant="outline" onClick={() => setShowAddEditForm(false)}>
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              form="outfit-form"
+              disabled={addOutfitMutation.isPending || updateOutfitMutation.isPending}
+            >
+              {(addOutfitMutation.isPending || updateOutfitMutation.isPending) && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {editOutfit ? "Update Outfit" : "Add Outfit"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
