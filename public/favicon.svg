@@ -1,9 +1,26 @@
 
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="8" fill="#9b87f5"/>
-  <path d="M7 7C7 6.44772 7.44772 6 8 6H24C24.5523 6 25 6.44772 25 7V25C25 25.5523 24.5523 26 24 26H8C7.44772 26 7 25.5523 7 25V7Z" fill="#7E69AB"/>
+  <!-- Background with gradient -->
+  <rect width="32" height="32" rx="8" fill="url(#paint0_linear)"/>
+  
+  <!-- Perfume bottle shape -->
+  <path d="M7 7C7 6.44772 7.44772 6 8 6H24C24.5523 6 25 6.44772 25 7V25C25 25.5523 24.5523 26 24 26H8C7.44772 26 7 25.5523 7 25V7Z" fill="#9575DE"/>
+  
+  <!-- Perfume bottle content -->
   <path d="M16 8C12.6863 8 10 10.6863 10 14C10 16.0151 11.2109 17.7401 13 18.5768V24C13 24.5523 13.4477 25 14 25H18C18.5523 25 19 24.5523 19 24V18.5768C20.7891 17.7401 22 16.0151 22 14C22 10.6863 19.3137 8 16 8Z" fill="white"/>
+  
+  <!-- Perfume bottle detail -->
   <path d="M14.5 17C14.2239 17 14 17.2239 14 17.5C14 17.7761 14.2239 18 14.5 18H17.5C17.7761 18 18 17.7761 18 17.5C18 17.2239 17.7761 17 17.5 17H14.5Z" fill="#E5DEFF"/>
+  
+  <!-- Eyes -->
   <circle cx="19" cy="13" r="1.5" fill="#1A1F2C"/>
   <circle cx="13" cy="13" r="1.5" fill="#1A1F2C"/>
+
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="paint0_linear" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stopColor="#9b87f5"/>
+      <stop offset="1" stopColor="#7E69AB"/>
+    </linearGradient>
+  </defs>
 </svg>
