@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Celebrities from "./pages/Celebrities";
 import CelebrityProfile from "./pages/CelebrityProfile";
@@ -56,11 +56,18 @@ function App() {
             <Route path="/terms-of-service" element={<Terms />} />
             <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
             
-            {/* Admin routes wrapped with AdminAuthProvider */}
+            {/* Admin routes */}
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="/admin/login" element={
+              <AdminAuthProvider>
+                <AdminLogin />
+              </AdminAuthProvider>
+            } />
+            
+            {/* Protected admin routes */}
             <Route path="/admin/*" element={
               <AdminAuthProvider>
                 <Routes>
-                  <Route path="/login" element={<AdminLogin />} />
                   <Route path="/dashboard" element={<AdminDashboard />} />
                   <Route path="/outfits" element={<AdminOutfits />} />
                   <Route path="/tags" element={<AdminTags />} />

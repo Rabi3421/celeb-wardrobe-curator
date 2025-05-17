@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { Button } from "@/components/ui/button";
@@ -33,12 +33,7 @@ const AdminLogin: React.FC = () => {
     },
   });
 
-  useEffect(() => {
-    // If already authenticated, redirect to dashboard
-    if (isAuthenticated) {
-      navigate("/admin/dashboard");
-    }
-  }, [isAuthenticated, navigate]);
+  // We'll handle redirect in useEffect separately - remove the redirect when component mounts
 
   const createTestUser = async (email: string, password: string) => {
     try {

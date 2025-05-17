@@ -28,10 +28,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const { user, logout, isAuthenticated } = useAdminAuth();
   
   useEffect(() => {
-    if (!isAuthenticated) {
+    // If not authenticated and not on login page, redirect to login
+    if (!isAuthenticated && !location.pathname.includes('/admin/login')) {
       navigate("/admin/login");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, location.pathname]);
 
   const navItems = [
     { path: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
@@ -48,6 +49,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     navigate("/admin/login");
   };
 
+  // If not authenticated, don't render admin layout
   if (!isAuthenticated) return null;
 
   return (
