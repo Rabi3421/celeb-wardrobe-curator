@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Menu } from "lucide-react";
@@ -55,9 +54,8 @@ const Navbar: React.FC = () => {
     <nav className="sticky top-0 bg-white/80 backdrop-blur-md z-50 shadow-sm">
       <div className="container-custom py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center">
-            <img src="/logo.svg" alt="Celebrity Persona" className="h-10 w-auto" />
-            <span className="sr-only">Celebrity Persona</span>
+          <Link to="/" className="font-serif text-2xl font-bold">
+            CelebrityPersona
           </Link>
           
           <div className="hidden md:block">
