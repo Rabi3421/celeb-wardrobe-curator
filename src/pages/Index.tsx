@@ -222,18 +222,6 @@ const Index: React.FC = () => {
     }
   };
 
-  // Display loading state if data is being fetched
-  if (isLoading) {
-    return (
-      <PageLayout>
-        <SEO />
-        <div className="container-custom py-16 text-center">
-          <p className="text-muted-foreground">Loading content...</p>
-        </div>
-      </PageLayout>
-    );
-  }
-
   return (
     <PageLayout>
       <SEO
@@ -291,7 +279,7 @@ const Index: React.FC = () => {
           </div>
           <div className="md:w-1/2 flex justify-center">
             <img
-              src="/images/hero_img.jpg"
+              src="/images/hero_img.webp"
               alt="Celebrity red carpet fashion"
               className="rounded-2xl shadow-hero-glow max-w-sm md:max-w-md object-cover h-[500px] transform transition duration-500 hover:scale-105"
             />
