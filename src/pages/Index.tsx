@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import SEO from "@/components/SEO/SEO";
@@ -277,11 +278,11 @@ const Index: React.FC = () => {
               </button>
             </div>
           </div>
-          <div className="md:w-1/2 flex justify-center">
+          <div className="md:w-1/2 flex justify-center w-full">
             <img
               src="/images/hero_img.webp"
               alt="Celebrity red carpet fashion"
-              className="rounded-2xl shadow-hero-glow max-w-sm md:max-w-md object-cover h-[500px] transform transition duration-500 hover:scale-105"
+              className="rounded-2xl shadow-hero-glow w-full max-w-[280px] sm:max-w-[350px] md:max-w-md object-cover h-auto md:h-[500px] transform transition duration-500 hover:scale-105"
             />
           </div>
         </div>
