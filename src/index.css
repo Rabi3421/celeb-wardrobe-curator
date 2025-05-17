@@ -47,45 +47,6 @@
     --sidebar-ring: 217 91% 60%;
   }
 
-  .dark {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 98%;
-
-    --card: 240 10% 4%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 10% 4%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 350 100% 95%;
-    --primary-foreground: 355 78% 40%;
-
-    --secondary: 240 4% 10%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 64.9%;
-
-    --accent: 225 30% 16%;
-    --accent-foreground: 222 47% 70%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 240 5% 65%;
-
-    --sidebar-background: 240 10% 5%;
-    --sidebar-foreground: 240 5% 80%;
-    --sidebar-primary: 240 5% 85%;
-    --sidebar-primary-foreground: 240 5% 10%;
-    --sidebar-accent: 240 5% 15%;
-    --sidebar-accent-foreground: 240 5% 85%;
-    --sidebar-border: 240 5% 15%;
-    --sidebar-ring: 217 91% 60%;
-  }
-
   * {
     @apply border-border;
   }
@@ -102,7 +63,7 @@
 
 @layer components {
   .outfit-card {
-    @apply bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300;
+    @apply bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300;
   }
 
   .celebrity-profile {
@@ -122,6 +83,6 @@
   }
 
   .affiliate-card {
-    @apply bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm hover:shadow transition-all duration-300;
+    @apply bg-white p-4 rounded-xl shadow-sm hover:shadow transition-all duration-300;
   }
 }
