@@ -20,7 +20,8 @@ export async function fetchCelebrities(): Promise<Celebrity[]> {
     outfitCount: item.outfitcount || 0,
     bio: item.bio,
     category: item.category,
-    styleType: item.style_type
+    styleType: item.style_type,
+    slug: item.slug || item.id
   })) || [];
 }
 
@@ -44,8 +45,38 @@ export async function fetchCelebrityById(id: string): Promise<Celebrity | null> 
     outfitCount: data.outfitcount || 0,
     bio: data.bio,
     category: data.category,
-    styleType: data.style_type
+    styleType: data.style_type,
+    slug: data.slug || data.id
   } : null;
+}
+
+export async function fetchCelebrityBySlug(slug: string): Promise<Celebrity | null> {
+  const { data, error } = await supabase
+    .from("celebrities")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
+  
+  if (error) {
+    console.error(`Error fetching celebrity with slug ${slug}:`, error);
+    return null;
+  }
+  
+  // Try fetching by ID if no results found by slug
+  if (!data) {
+    return fetchCelebrityById(slug);
+  }
+  
+  return {
+    id: data.id,
+    name: data.name,
+    image: data.image,
+    outfitCount: data.outfitcount || 0,
+    bio: data.bio,
+    category: data.category,
+    styleType: data.style_type,
+    slug: data.slug || data.id
+  };
 }
 
 // Outfit APIs
@@ -93,7 +124,8 @@ export async function fetchOutfits(): Promise<Outfit[]> {
     occasion: outfit.occasion,
     date: outfit.date,
     // Use tags from our tagMap if available, or fall back to the tags array from outfits table
-    tags: tagMap[outfit.id] || outfit.tags || []
+    tags: tagMap[outfit.id] || outfit.tags || [],
+    slug: outfit.slug || outfit.id
   })) || [];
 }
 
@@ -140,7 +172,57 @@ export async function fetchOutfitById(id: string): Promise<Outfit | null> {
     fullDescription: outfit.full_description,
     occasion: outfit.occasion,
     date: outfit.date,
-    tags: tags
+    tags: tags,
+    slug: outfit.slug || outfit.id
+  };
+}
+
+export async function fetchOutfitBySlug(slug: string): Promise<Outfit | null> {
+  const { data: outfit, error: outfitError } = await supabase
+    .from("outfits")
+    .select(`
+      *,
+      celebrities:celebrity_id (name)
+    `)
+    .eq("slug", slug)
+    .maybeSingle();
+  
+  if (outfitError) {
+    console.error(`Error fetching outfit with slug ${slug}:`, outfitError);
+    return null;
+  }
+  
+  // Try fetching by ID if no results found by slug
+  if (!outfit) {
+    return fetchOutfitById(slug);
+  }
+  
+  // Get tags for this outfit
+  const { data: tagData, error: tagError } = await supabase
+    .from("outfit_tags")
+    .select("tag_name")
+    .eq("outfit_id", outfit.id);
+  
+  if (tagError) {
+    console.error(`Error fetching tags for outfit ID ${outfit.id}:`, tagError);
+  }
+  
+  // Extract tag names from the tag data
+  const tags = tagData ? tagData.map(tag => tag.tag_name) : outfit.tags || [];
+  
+  // Transform the data to match the expected format
+  return {
+    id: outfit.id,
+    image: outfit.image,
+    celebrityId: outfit.celebrity_id,
+    celebrity: outfit.celebrities?.name || "Unknown Celebrity",
+    title: outfit.title,
+    description: outfit.description,
+    fullDescription: outfit.full_description,
+    occasion: outfit.occasion,
+    date: outfit.date,
+    tags: tags,
+    slug: outfit.slug || outfit.id
   };
 }
 
@@ -350,4 +432,14 @@ export async function subscribeToNewsletter(email: string, source: string = "foo
       message: "An unexpected error occurred. Please try again later." 
     };
   }
+}
+
+// Function to generate a slug from a string
+export function generateSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
+    .trim();
 }

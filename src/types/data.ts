@@ -7,6 +7,7 @@ export interface Celebrity {
   bio: string;
   category: string;
   styleType: string;
+  slug?: string;
 }
 
 // Outfit type
@@ -21,6 +22,7 @@ export interface Outfit {
   occasion?: string;
   date?: string;
   tags?: string[];
+  slug?: string;
 }
 
 // Affiliate product type

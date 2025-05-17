@@ -12,6 +12,7 @@ interface OutfitCardProps {
   description: string;
   date?: string;
   occasion?: string;
+  slug?: string;
 }
 
 const OutfitCard: React.FC<OutfitCardProps> = ({
@@ -22,11 +23,15 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
   title,
   description,
   date,
-  occasion
+  occasion,
+  slug
 }) => {
+  const outfitUrl = slug ? `/outfit/s/${slug}` : `/outfit/${id}`;
+  const celebrityUrl = `/celebrity/s/${celebrityId}`;
+
   return (
     <div className="outfit-card rounded-lg shadow-sm overflow-hidden bg-white animate-fade-in">
-      <Link to={`/outfit/${id}`}>
+      <Link to={outfitUrl}>
         <div className="relative aspect-[3/4] overflow-hidden">
           <img
             src={image}
@@ -42,12 +47,12 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
         </div>
       </Link>
       <div className="p-4">
-        <Link to={`/celebrity/${celebrityId}`} className="block">
+        <Link to={celebrityUrl} className="block">
           <h3 className="font-medium text-sm text-primary-foreground hover:underline">
             {celebrity}
           </h3>
         </Link>
-        <Link to={`/outfit/${id}`}>
+        <Link to={outfitUrl}>
           <h2 className="font-serif font-medium text-lg mt-1 line-clamp-1 hover:text-primary transition-colors">
             {title}
           </h2>

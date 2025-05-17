@@ -42,9 +42,17 @@ function App() {
             {/* Public routes */}
             <Route path="/" element={<Index />} />
             <Route path="/celebrities" element={<Celebrities />} />
+            
+            {/* Support both ID and slug-based routes for celebrities */}
             <Route path="/celebrity/:id" element={<CelebrityProfile />} />
+            <Route path="/celebrity/s/:slug" element={<CelebrityProfile />} />
+            
             <Route path="/outfits" element={<Outfits />} />
+            
+            {/* Support both ID and slug-based routes for outfits */}
             <Route path="/outfit/:id" element={<OutfitDetail />} />
+            <Route path="/outfit/s/:slug" element={<OutfitDetail />} />
+            
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<BlogPost />} />
             <Route path="/blog-topics" element={<BlogTopics />} />

@@ -1,55 +1,46 @@
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "@/components/layout/PageLayout";
 import AffiliateProductCard from "@/components/ui/AffiliateProductCard";
-import { fetchOutfitById, fetchAffiliateProductsByOutfitId } from "@/services/api";
+import { fetchOutfitBySlug, fetchOutfitById, fetchAffiliateProductsByOutfitId } from "@/services/api";
 import { Outfit, AffiliateProduct } from "@/types/data";
 import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 const OutfitDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [outfit, setOutfit] = useState<Outfit | null>(null);
-  const [products, setProducts] = useState<AffiliateProduct[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      setError(null);
+  const { id, slug } = useParams<{ id?: string; slug?: string }>();
+  const identifier = slug || id;
+  
+  // Query to fetch outfit data
+  const { data: outfit, isLoading: isLoadingOutfit, error: outfitError } = useQuery({
+    queryKey: ['outfit', identifier],
+    queryFn: async () => {
+      if (!identifier) throw new Error("Outfit ID or slug not found");
       
-      if (!id) {
-        setError("Outfit ID not found");
-        setLoading(false);
-        return;
-      }
+      // Try fetching by slug first if that's what we have, otherwise by ID
+      const outfitData = slug 
+        ? await fetchOutfitBySlug(slug)
+        : await fetchOutfitById(id!);
+      
+      if (!outfitData) throw new Error("Outfit not found");
+      return outfitData;
+    }
+  });
 
-      try {
-        // Fetch the outfit
-        const outfitData = await fetchOutfitById(id);
-        if (!outfitData) {
-          setError("Outfit not found");
-          setLoading(false);
-          return;
-        }
-        setOutfit(outfitData);
-        
-        // Fetch affiliate products
-        const affiliateProducts = await fetchAffiliateProductsByOutfitId(id);
-        setProducts(affiliateProducts);
-      } catch (err) {
-        console.error("Error fetching outfit details:", err);
-        setError("Failed to load outfit details. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Query to fetch affiliate products for this outfit
+  const { data: products = [], isLoading: isLoadingProducts } = useQuery({
+    queryKey: ['outfit', identifier, 'products'],
+    queryFn: async () => {
+      if (!outfit) return [];
+      return fetchAffiliateProductsByOutfitId(outfit.id);
+    },
+    enabled: !!outfit
+  });
 
-    loadData();
-  }, [id]);
+  const isLoading = isLoadingOutfit || isLoadingProducts;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <PageLayout>
         <div className="container-custom py-16 text-center">
@@ -60,7 +51,7 @@ const OutfitDetail: React.FC = () => {
     );
   }
 
-  if (error || !outfit) {
+  if (outfitError || !outfit) {
     return (
       <PageLayout>
         <div className="container-custom py-16 text-center">
@@ -79,7 +70,7 @@ const OutfitDetail: React.FC = () => {
       <div className="container-custom py-8 md:py-16">
         <div className="mb-6">
           <Link
-            to={`/celebrity/${outfit.celebrityId}`}
+            to={`/celebrity/s/${outfit.celebrityId}`}
             className="text-sm font-medium text-primary-foreground hover:underline inline-flex items-center"
           >
             <svg
@@ -131,7 +122,7 @@ const OutfitDetail: React.FC = () => {
           {/* Right column - Details */}
           <div>
             <div className="mb-6">
-              <Link to={`/celebrity/${outfit.celebrityId}`}>
+              <Link to={`/celebrity/s/${outfit.celebrityId}`}>
                 <h3 className="font-medium text-sm text-primary-foreground hover:underline">
                   {outfit.celebrity}
                 </h3>

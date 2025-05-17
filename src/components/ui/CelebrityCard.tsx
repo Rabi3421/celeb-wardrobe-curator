@@ -1,13 +1,13 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Celebrity } from "@/types/data";
 
 interface CelebrityCardProps {
   id: string;
   name: string;
   image: string;
   outfitCount: number;
+  slug?: string;
 }
 
 const CelebrityCard: React.FC<CelebrityCardProps> = ({
@@ -15,9 +15,12 @@ const CelebrityCard: React.FC<CelebrityCardProps> = ({
   name,
   image,
   outfitCount,
+  slug
 }) => {
+  const celebrityUrl = slug ? `/celebrity/s/${slug}` : `/celebrity/${id}`;
+
   return (
-    <Link to={`/celebrity/${id}`}>
+    <Link to={celebrityUrl}>
       <div className="celebrity-profile animate-fade-in">
         <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-background shadow-md">
           <img

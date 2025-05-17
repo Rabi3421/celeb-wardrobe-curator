@@ -1,25 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import PageLayout from "@/components/layout/PageLayout";
 import OutfitCard from "@/components/ui/OutfitCard";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { celebrities, outfits } from "@/data/mockData";
+import { fetchCelebrityBySlug, fetchCelebrityById, fetchOutfits } from "@/services/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Heart, Instagram, Star, Tag, Twitter, User } from "lucide-react";
+import { Calendar, Heart, Instagram, Loader2, Star, Tag, Twitter, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Celebrity } from "@/types/data";
+import { Celebrity, Outfit } from "@/types/data";
+import { useQuery } from "@tanstack/react-query";
 
 const CelebrityProfile: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const celebrity = celebrities.find(celeb => celeb.id === id) as Celebrity | undefined;
-  const celebrityOutfits = outfits.filter(outfit => outfit.celebrityId === id);
+  const { id, slug } = useParams<{ id?: string; slug?: string }>();
+  const identifier = slug || id;
   const { toast } = useToast();
   
   const [activeTab, setActiveTab] = useState("outfits");
   const [isFollowing, setIsFollowing] = useState(false);
   const [followers, setFollowers] = useState(3200);
+
+  // Query to fetch celebrity data
+  const { data: celebrity, isLoading: isLoadingCelebrity, error: celebrityError } = useQuery({
+    queryKey: ['celebrity', identifier],
+    queryFn: async () => {
+      if (!identifier) return null;
+      
+      // Try fetching by slug first if that's what we have, otherwise by ID
+      const celebData = slug 
+        ? await fetchCelebrityBySlug(slug)
+        : await fetchCelebrityById(id!);
+      
+      if (!celebData) throw new Error("Celebrity not found");
+      return celebData;
+    }
+  });
+
+  // Query to fetch outfits for this celebrity
+  const { data: outfits = [], isLoading: isLoadingOutfits } = useQuery({
+    queryKey: ['celebrity', identifier, 'outfits'],
+    queryFn: async () => {
+      if (!celebrity) return [];
+      
+      const allOutfits = await fetchOutfits();
+      return allOutfits.filter(outfit => outfit.celebrityId === celebrity.id);
+    },
+    enabled: !!celebrity
+  });
 
   // Handle Follow/Unfollow
   const handleFollowToggle = () => {
@@ -40,7 +68,18 @@ const CelebrityProfile: React.FC = () => {
     }
   };
 
-  if (!celebrity) {
+  if (isLoadingCelebrity) {
+    return (
+      <PageLayout>
+        <div className="container-custom py-16 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="text-muted-foreground mt-4">Loading celebrity profile...</p>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (celebrityError || !celebrity) {
     return (
       <PageLayout>
         <div className="container-custom py-16 text-center">
@@ -52,12 +91,12 @@ const CelebrityProfile: React.FC = () => {
   }
 
   // Get latest outfit
-  const latestOutfit = celebrityOutfits[0];
+  const latestOutfit = outfits[0];
   
   // Group outfits by occasion
-  const occasionGroups: Record<string, typeof outfits> = {};
+  const occasionGroups: Record<string, Outfit[]> = {};
   
-  celebrityOutfits.forEach(outfit => {
+  outfits.forEach(outfit => {
     const occasion = outfit.occasion || "Other";
     if (!occasionGroups[occasion]) {
       occasionGroups[occasion] = [];
@@ -90,7 +129,7 @@ const CelebrityProfile: React.FC = () => {
               <div className="flex flex-wrap gap-4 justify-center md:justify-start mb-4">
                 <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
                   <span className="text-sm text-muted-foreground">Outfits</span>
-                  <p className="font-medium">{celebrityOutfits.length}</p>
+                  <p className="font-medium">{outfits.length}</p>
                 </div>
                 <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
                   <span className="text-sm text-muted-foreground">Style</span>
@@ -177,49 +216,68 @@ const CelebrityProfile: React.FC = () => {
                         <span className="text-sm">Summer Collection</span>
                       </div>
                     </div>
-                    <Button className="btn-primary w-fit">View Outfit Details</Button>
+                    <Button 
+                      className="btn-primary w-fit" 
+                      asChild
+                    >
+                      <a href={`/outfit/s/${latestOutfit.slug || latestOutfit.id}`}>View Outfit Details</a>
+                    </Button>
                   </div>
                 </div>
               </div>
             )}
             
             {/* Outfit Categories */}
-            <div>
-              <Tabs defaultValue={Object.keys(occasionGroups)[0] || "all"}>
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="section-title mb-0">Browse By Occasion</h2>
-                  <TabsList className="bg-transparent">
-                    {Object.keys(occasionGroups).map((occasion) => (
-                      <TabsTrigger
-                        key={occasion}
-                        value={occasion}
-                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                      >
-                        {occasion}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </div>
-
-                {Object.entries(occasionGroups).map(([occasion, outfitList]) => (
-                  <TabsContent key={occasion} value={occasion} className="mt-0">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                      {outfitList.map((outfit) => (
-                        <OutfitCard
-                          key={outfit.id}
-                          id={outfit.id}
-                          image={outfit.image}
-                          celebrity={outfit.celebrity}
-                          celebrityId={outfit.celebrityId}
-                          title={outfit.title}
-                          description={outfit.description}
-                        />
+            {isLoadingOutfits ? (
+              <div className="text-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+                <p className="text-muted-foreground mt-4">Loading outfits...</p>
+              </div>
+            ) : outfits.length > 0 ? (
+              <div>
+                <Tabs defaultValue={Object.keys(occasionGroups)[0] || "all"}>
+                  <div className="flex justify-between items-center mb-6 flex-wrap">
+                    <h2 className="section-title mb-2 md:mb-0">Browse By Occasion</h2>
+                    <TabsList className="bg-transparent">
+                      {Object.keys(occasionGroups).map((occasion) => (
+                        <TabsTrigger
+                          key={occasion}
+                          value={occasion}
+                          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                        >
+                          {occasion}
+                        </TabsTrigger>
                       ))}
-                    </div>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </div>
+                    </TabsList>
+                  </div>
+
+                  {Object.entries(occasionGroups).map(([occasion, outfitList]) => (
+                    <TabsContent key={occasion} value={occasion} className="mt-0">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                        {outfitList.map((outfit) => (
+                          <OutfitCard
+                            key={outfit.id}
+                            id={outfit.id}
+                            image={outfit.image}
+                            celebrity={outfit.celebrity}
+                            celebrityId={outfit.celebrityId}
+                            title={outfit.title}
+                            description={outfit.description}
+                            date={outfit.date}
+                            occasion={outfit.occasion}
+                            slug={outfit.slug}
+                          />
+                        ))}
+                      </div>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p>No outfits found for this celebrity.</p>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="style" className="space-y-8">
