@@ -17,6 +17,7 @@ import Terms from "./pages/Terms";
 import AffiliateDisclosure from "./pages/AffiliateDisclosure";
 import { HelmetProvider } from 'react-helmet-async';
 import { AdminAuthProvider } from './contexts/AdminAuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Admin pages
 import AdminDashboard from "./pages/AdminDashboard";
@@ -27,46 +28,51 @@ import AdminSettings from "./pages/AdminSettings";
 import AdminImportData from "./pages/AdminImportData";
 import AdminNewsletterSubscribers from "./pages/AdminNewsletterSubscribers";
 
+// Create a new QueryClient instance
+const queryClient = new QueryClient();
+
 function App() {
   return (
     <HelmetProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/celebrities" element={<Celebrities />} />
-          <Route path="/celebrity/:id" element={<CelebrityProfile />} />
-          <Route path="/outfits" element={<Outfits />} />
-          <Route path="/outfit/:id" element={<OutfitDetail />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:id" element={<BlogPost />} />
-          <Route path="/blog-topics" element={<BlogTopics />} />
-          <Route path="/blog-topic/:topic" element={<BlogTopic />} />
-          <Route path="/category/:category" element={<CategoryDetail />} />
-          <Route path="/categories" element={<Categories />} />
-          <Route path="/categories/:category" element={<Categories />} />
-          <Route path="/privacy-policy" element={<Privacy />} />
-          <Route path="/terms-of-service" element={<Terms />} />
-          <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
-          
-          {/* Admin routes wrapped with AdminAuthProvider */}
-          <Route path="/admin/*" element={
-            <AdminAuthProvider>
-              <Routes>
-                <Route path="/login" element={<AdminLogin />} />
-                <Route path="/dashboard" element={<AdminDashboard />} />
-                <Route path="/outfits" element={<AdminOutfits />} />
-                <Route path="/tags" element={<AdminTags />} />
-                <Route path="/settings" element={<AdminSettings />} />
-                <Route path="/import-data" element={<AdminImportData />} />
-                <Route path="/newsletter" element={<AdminNewsletterSubscribers />} />
-              </Routes>
-            </AdminAuthProvider>
-          } />
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/celebrities" element={<Celebrities />} />
+            <Route path="/celebrity/:id" element={<CelebrityProfile />} />
+            <Route path="/outfits" element={<Outfits />} />
+            <Route path="/outfit/:id" element={<OutfitDetail />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogPost />} />
+            <Route path="/blog-topics" element={<BlogTopics />} />
+            <Route path="/blog-topic/:topic" element={<BlogTopic />} />
+            <Route path="/category/:category" element={<CategoryDetail />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/categories/:category" element={<Categories />} />
+            <Route path="/privacy-policy" element={<Privacy />} />
+            <Route path="/terms-of-service" element={<Terms />} />
+            <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
+            
+            {/* Admin routes wrapped with AdminAuthProvider */}
+            <Route path="/admin/*" element={
+              <AdminAuthProvider>
+                <Routes>
+                  <Route path="/login" element={<AdminLogin />} />
+                  <Route path="/dashboard" element={<AdminDashboard />} />
+                  <Route path="/outfits" element={<AdminOutfits />} />
+                  <Route path="/tags" element={<AdminTags />} />
+                  <Route path="/settings" element={<AdminSettings />} />
+                  <Route path="/import-data" element={<AdminImportData />} />
+                  <Route path="/newsletter" element={<AdminNewsletterSubscribers />} />
+                </Routes>
+              </AdminAuthProvider>
+            } />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </QueryClientProvider>
     </HelmetProvider>
   );
 }
