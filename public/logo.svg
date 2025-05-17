@@ -3,21 +3,13 @@
   <!-- Background with gradient -->
   <path d="M42 8C42 3.58172 45.5817 0 50 0H190C194.418 0 198 3.58172 198 8V40C198 44.4183 194.418 48 190 48H50C45.5817 48 42 44.4183 42 40V8Z" fill="url(#paint0_linear)" fillOpacity="0.9"/>
   
-  <!-- Icon background -->
-  <rect x="4" y="8" width="32" height="32" rx="8" fill="url(#paint1_linear)"/>
+  <!-- Fashion icon: stylized hanger -->
+  <path d="M11 15C11 14.4477 11.4477 14 12 14H28C28.5523 14 29 14.4477 29 15V18H24L20 22L16 18H11V15Z" fill="#9575DE"/>
+  <path d="M11 18H16L20 22L24 18H29V33C29 33.5523 28.5523 34 28 34H12C11.4477 34 11 33.5523 11 33V18Z" fill="white"/>
   
-  <!-- Perfume bottle shape -->
-  <path d="M11 15C11 14.4477 11.4477 14 12 14H28C28.5523 14 29 14.4477 29 15V33C29 33.5523 28.5523 34 28 34H12C11.4477 34 11 33.5523 11 33V15Z" fill="#9575DE"/>
-  
-  <!-- Perfume bottle content -->
-  <path d="M20 16C16.6863 16 14 18.6863 14 22C14 24.0151 15.2109 25.7401 17 26.5768V32C17 32.5523 17.4477 33 18 33H22C22.5523 33 23 32.5523 23 32V26.5768C24.7891 25.7401 26 24.0151 26 22C26 18.6863 23.3137 16 20 16Z" fill="white"/>
-  
-  <!-- Perfume bottle details -->
-  <path d="M18.5 25C18.2239 25 18 25.2239 18 25.5C18 25.7761 18.2239 26 18.5 26H21.5C21.7761 26 22 25.7761 22 25.5C22 25.2239 21.7761 25 21.5 25H18.5Z" fill="#E5DEFF"/>
-  
-  <!-- Eyes -->
-  <circle cx="23" cy="21" r="1.5" fill="#1A1F2C"/>
-  <circle cx="17" cy="21" r="1.5" fill="#1A1F2C"/>
+  <!-- Stylish details -->
+  <circle cx="20" cy="26" r="4" fill="#9575DE" fillOpacity="0.2"/>
+  <circle cx="20" cy="26" r="2" fill="#9575DE"/>
   
   <!-- Text: Celebrity -->
   <path d="M59.5703 35V19.8281H65.3047C66.8828 19.8281 68.1953 20.125 69.2422 20.7188C70.2891 21.3125 71.0781 22.1562 71.6094 23.25C72.1406 24.3438 72.4062 25.5938 72.4062 27C72.4062 28.4062 72.1406 29.6562 71.6094 30.75C71.0781 31.8438 70.2891 32.6875 69.2422 33.2812C68.1953 33.875 66.8828 34.1719 65.3047 34.1719H61.4062V31.9375H65.2266C66.2734 31.9375 67.1172 31.75 67.7578 31.375C68.3984 31 68.875 30.4375 69.1875 29.6875C69.5078 28.9375 69.6719 28.0469 69.6719 27.0156C69.6719 25.9844 69.5078 25.0938 69.1875 24.3438C68.875 23.5938 68.3984 23.0312 67.7578 22.6562C67.1172 22.2812 66.2812 22.0938 65.25 22.0938H62.3281V35H59.5703Z" fill="white"/>
@@ -58,10 +50,6 @@
   <!-- Gradient definitions -->
   <defs>
     <linearGradient id="paint0_linear" x1="42" y1="0" x2="198" y2="48" gradientUnits="userSpaceOnUse">
-      <stop stopColor="#9b87f5"/>
-      <stop offset="1" stopColor="#7E69AB"/>
-    </linearGradient>
-    <linearGradient id="paint1_linear" x1="4" y1="8" x2="36" y2="40" gradientUnits="userSpaceOnUse">
       <stop stopColor="#9b87f5"/>
       <stop offset="1" stopColor="#7E69AB"/>
     </linearGradient>
