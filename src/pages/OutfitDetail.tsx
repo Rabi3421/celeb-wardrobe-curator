@@ -1,21 +1,74 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "@/components/layout/PageLayout";
 import AffiliateProductCard from "@/components/ui/AffiliateProductCard";
-import { outfits, affiliateProducts } from "@/data/mockData";
+import { fetchOutfitById, fetchAffiliateProductsByOutfitId } from "@/services/api";
+import { Outfit, AffiliateProduct } from "@/types/data";
+import { Loader2 } from "lucide-react";
 
 const OutfitDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const outfit = outfits.find(outfit => outfit.id === id);
-  const products = affiliateProducts.filter(product => product.outfitId === id);
+  const [outfit, setOutfit] = useState<Outfit | null>(null);
+  const [products, setProducts] = useState<AffiliateProduct[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!outfit) {
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      if (!id) {
+        setError("Outfit ID not found");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch the outfit
+        const outfitData = await fetchOutfitById(id);
+        if (!outfitData) {
+          setError("Outfit not found");
+          setLoading(false);
+          return;
+        }
+        setOutfit(outfitData);
+        
+        // Fetch affiliate products
+        const affiliateProducts = await fetchAffiliateProductsByOutfitId(id);
+        setProducts(affiliateProducts);
+      } catch (err) {
+        console.error("Error fetching outfit details:", err);
+        setError("Failed to load outfit details. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <div className="container-custom py-16 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="mt-4 text-muted-foreground">Loading outfit details...</p>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (error || !outfit) {
     return (
       <PageLayout>
         <div className="container-custom py-16 text-center">
           <h2 className="font-serif text-2xl mb-4">Outfit not found</h2>
           <p className="text-muted-foreground">The outfit you're looking for doesn't exist or has been removed.</p>
+          <Link to="/outfits" className="mt-6 inline-block text-primary hover:underline">
+            View all outfits
+          </Link>
         </div>
       </PageLayout>
     );
@@ -53,15 +106,17 @@ const OutfitDetail: React.FC = () => {
             <div className="rounded-2xl overflow-hidden shadow-lg">
               <img
                 src={outfit.image}
-                alt={`${outfit.celebrity} wearing ${outfit.title}`}
+                alt={`${outfit.celebrity} wearing ${outfit.title} - Celebrity fashion inspiration`}
                 className="w-full h-auto object-cover"
               />
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              <span className="bg-pastel-blue px-3 py-1 rounded-full text-xs font-medium">
-                {outfit.occasion}
-              </span>
+              {outfit.occasion && (
+                <span className="bg-pastel-blue px-3 py-1 rounded-full text-xs font-medium">
+                  {outfit.occasion}
+                </span>
+              )}
               {outfit.tags && outfit.tags.map((tag, index) => (
                 <span
                   key={index}
@@ -77,7 +132,7 @@ const OutfitDetail: React.FC = () => {
           <div>
             <div className="mb-6">
               <Link to={`/celebrity/${outfit.celebrityId}`}>
-                <h3 className="font-medium text-primary-foreground hover:underline">
+                <h3 className="font-medium text-sm text-primary-foreground hover:underline">
                   {outfit.celebrity}
                 </h3>
               </Link>
@@ -89,37 +144,47 @@ const OutfitDetail: React.FC = () => {
               </p>
             </div>
 
-            <div className="mb-8">
-              <h2 className="font-serif text-xl font-medium mb-4">
-                Shop Similar Items
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {products.map((product) => (
-                  <AffiliateProductCard
-                    key={product.id}
-                    image={product.image}
-                    title={product.title}
-                    price={product.price}
-                    retailer={product.retailer}
-                    affiliateLink={product.affiliateLink}
-                  />
-                ))}
+            {products.length > 0 && (
+              <div className="mb-8">
+                <h2 className="font-serif text-xl font-medium mb-4">
+                  Shop Similar Items
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {products.map((product) => (
+                    <AffiliateProductCard
+                      key={product.id}
+                      image={product.image}
+                      title={product.title}
+                      price={product.price}
+                      retailer={product.retailer}
+                      affiliateLink={product.affiliateLink}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div>
               <h2 className="font-serif text-xl font-medium mb-3">
                 Outfit Details
               </h2>
               <div className="space-y-3">
-                <div className="flex justify-between border-b border-border pb-2">
-                  <span className="text-muted-foreground">Date</span>
-                  <span className="font-medium">{outfit.date}</span>
-                </div>
-                <div className="flex justify-between border-b border-border pb-2">
-                  <span className="text-muted-foreground">Occasion</span>
-                  <span className="font-medium">{outfit.occasion}</span>
-                </div>
+                {outfit.date && (
+                  <div className="flex justify-between border-b border-border pb-2">
+                    <span className="text-muted-foreground">Date</span>
+                    <span className="font-medium">{new Date(outfit.date).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}</span>
+                  </div>
+                )}
+                {outfit.occasion && (
+                  <div className="flex justify-between border-b border-border pb-2">
+                    <span className="text-muted-foreground">Occasion</span>
+                    <span className="font-medium">{outfit.occasion}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Share</span>
                   <div className="flex space-x-4">

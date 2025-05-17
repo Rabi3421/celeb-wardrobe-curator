@@ -50,20 +50,39 @@ export async function fetchCelebrityById(id: string): Promise<Celebrity | null> 
 
 // Outfit APIs
 export async function fetchOutfits(): Promise<Outfit[]> {
-  const { data, error } = await supabase
+  const { data: outfitsData, error: outfitsError } = await supabase
     .from("outfits")
     .select(`
       *,
       celebrities:celebrity_id (name)
     `);
   
-  if (error) {
-    console.error("Error fetching outfits:", error);
+  if (outfitsError) {
+    console.error("Error fetching outfits:", outfitsError);
     return [];
   }
   
+  // Get all outfit tags
+  const { data: tagData, error: tagError } = await supabase
+    .from("outfit_tags")
+    .select("*");
+  
+  if (tagError) {
+    console.error("Error fetching outfit tags:", tagError);
+    return [];
+  }
+  
+  // Create a map of outfit ID to tags
+  const tagMap: Record<string, string[]> = {};
+  tagData?.forEach(tag => {
+    if (!tagMap[tag.outfit_id]) {
+      tagMap[tag.outfit_id] = [];
+    }
+    tagMap[tag.outfit_id].push(tag.tag_name);
+  });
+  
   // Transform the data to match the expected format
-  return data?.map(outfit => ({
+  return outfitsData?.map(outfit => ({
     id: outfit.id,
     image: outfit.image,
     celebrityId: outfit.celebrity_id,
@@ -73,12 +92,13 @@ export async function fetchOutfits(): Promise<Outfit[]> {
     fullDescription: outfit.full_description,
     occasion: outfit.occasion,
     date: outfit.date,
-    tags: outfit.tags
+    // Use tags from our tagMap if available, or fall back to the tags array from outfits table
+    tags: tagMap[outfit.id] || outfit.tags || []
   })) || [];
 }
 
 export async function fetchOutfitById(id: string): Promise<Outfit | null> {
-  const { data, error } = await supabase
+  const { data: outfit, error: outfitError } = await supabase
     .from("outfits")
     .select(`
       *,
@@ -87,24 +107,41 @@ export async function fetchOutfitById(id: string): Promise<Outfit | null> {
     .eq("id", id)
     .single();
   
-  if (error) {
-    console.error(`Error fetching outfit with ID ${id}:`, error);
+  if (outfitError) {
+    console.error(`Error fetching outfit with ID ${id}:`, outfitError);
     return null;
   }
   
+  if (!outfit) {
+    return null;
+  }
+  
+  // Get tags for this outfit
+  const { data: tagData, error: tagError } = await supabase
+    .from("outfit_tags")
+    .select("tag_name")
+    .eq("outfit_id", id);
+  
+  if (tagError) {
+    console.error(`Error fetching tags for outfit ID ${id}:`, tagError);
+  }
+  
+  // Extract tag names from the tag data
+  const tags = tagData ? tagData.map(tag => tag.tag_name) : outfit.tags || [];
+  
   // Transform the data to match the expected format
-  return data ? {
-    id: data.id,
-    image: data.image,
-    celebrityId: data.celebrity_id,
-    celebrity: data.celebrities?.name || "Unknown Celebrity",
-    title: data.title,
-    description: data.description,
-    fullDescription: data.full_description,
-    occasion: data.occasion,
-    date: data.date,
-    tags: data.tags
-  } : null;
+  return {
+    id: outfit.id,
+    image: outfit.image,
+    celebrityId: outfit.celebrity_id,
+    celebrity: outfit.celebrities?.name || "Unknown Celebrity",
+    title: outfit.title,
+    description: outfit.description,
+    fullDescription: outfit.full_description,
+    occasion: outfit.occasion,
+    date: outfit.date,
+    tags: tags
+  };
 }
 
 // Blog APIs
