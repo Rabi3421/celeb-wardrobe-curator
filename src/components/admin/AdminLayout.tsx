@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
@@ -44,22 +45,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     }
   }, [isAuthenticated, navigate, location.pathname, user, authChecked, isLoading]);
 
-  // Show loading state while checking authentication
-  if (isLoading || !authChecked) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-secondary/50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-lg">Loading authentication...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If not authenticated, don't render admin layout
-  if (!isAuthenticated) return null;
-
-  // Rest of the admin layout rendering
   const navItems = [
     { path: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
     { path: "/admin/celebrities", label: "Celebrities", icon: <Users size={20} /> },
@@ -74,6 +59,22 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     logout();
     navigate("/admin/login");
   };
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary/50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, don't render admin layout - but don't redirect here
+  // We handle redirection in the useEffect instead
+  if (!isAuthenticated) return null;
 
   return (
     <div className="min-h-screen bg-secondary/50">
