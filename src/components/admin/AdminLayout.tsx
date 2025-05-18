@@ -25,20 +25,25 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, isAuthenticated } = useAdminAuth();
+  const { user, logout, isAuthenticated, authChecked, isLoading } = useAdminAuth();
   
   useEffect(() => {
     // Add console logs to help debug the authentication state
+    console.log("AdminLayout - authChecked:", authChecked);
+    console.log("AdminLayout - isLoading:", isLoading);
     console.log("AdminLayout - isAuthenticated:", isAuthenticated);
     console.log("AdminLayout - current path:", location.pathname);
     console.log("AdminLayout - user:", user);
     
-    // If not authenticated and not on login page, redirect to login
-    if (!isAuthenticated && !location.pathname.includes('/admin/login')) {
-      console.log("Redirecting to login page due to no authentication");
-      navigate("/admin/login");
+    // Only redirect if auth has been checked and we're not in a loading state
+    if (authChecked && !isLoading) {
+      // If not authenticated and not on login page, redirect to login
+      if (!isAuthenticated && !location.pathname.includes('/admin/login')) {
+        console.log("Redirecting to login page due to no authentication");
+        navigate("/admin/login");
+      }
     }
-  }, [isAuthenticated, navigate, location.pathname, user]);
+  }, [isAuthenticated, navigate, location.pathname, user, authChecked, isLoading]);
 
   const navItems = [
     { path: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
@@ -54,6 +59,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     logout();
     navigate("/admin/login");
   };
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary/50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // If not authenticated, don't render admin layout - but don't redirect here
   // We handle redirection in the useEffect instead

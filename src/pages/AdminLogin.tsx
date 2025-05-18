@@ -21,7 +21,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const AdminLogin: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { login, isAuthenticated } = useAdminAuth();
+  const { login, isAuthenticated, authChecked, isLoading: authLoading } = useAdminAuth();
   const navigate = useNavigate();
   
   const form = useForm<LoginFormValues>({
@@ -34,12 +34,16 @@ const AdminLogin: React.FC = () => {
 
   // Add useEffect to redirect when authentication state changes
   useEffect(() => {
+    console.log("AdminLogin - authChecked:", authChecked);
+    console.log("AdminLogin - authLoading:", authLoading);
     console.log("AdminLogin - isAuthenticated:", isAuthenticated);
-    if (isAuthenticated) {
+    
+    // Only redirect if auth has been checked and not still loading
+    if (authChecked && !authLoading && isAuthenticated) {
       console.log("User is authenticated, redirecting to dashboard");
-      navigate("/admin/dashboard");
+      navigate("/admin/dashboard", { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, authChecked, authLoading]);
 
   const createTestUser = async (email: string, password: string) => {
     try {
@@ -132,7 +136,7 @@ const AdminLogin: React.FC = () => {
             const retrySuccess = await login(data.email, data.password);
             if (retrySuccess) {
               console.log("Login successful after creating test user");
-              navigate("/admin/dashboard");
+              navigate("/admin/dashboard", { replace: true });
               return;
             }
           }
@@ -145,12 +149,24 @@ const AdminLogin: React.FC = () => {
         });
       } else {
         console.log("Login successful, navigating to dashboard");
-        navigate("/admin/dashboard");
+        navigate("/admin/dashboard", { replace: true });
       }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // If already authenticated, show loading while redirecting
+  if (authChecked && isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pastel-lavender to-white p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pastel-lavender to-white p-4">

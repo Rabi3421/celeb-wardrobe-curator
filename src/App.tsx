@@ -68,7 +68,7 @@ function App() {
               {/* Admin login route - accessible without authentication */}
               <Route path="/admin/login" element={<AdminLogin />} />
               
-              {/* Admin redirect */}
+              {/* Admin redirect - make this an exact match */}
               <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
               
               {/* All other admin routes use AdminLayout which checks authentication */}

@@ -12,15 +12,23 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+    console.log("AuthProvider useEffect running - setting up auth listeners");
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log("Auth state changed:", event, currentSession);
-        setSession(currentSession);
+        
+        if (!mounted) return;
         
         if (currentSession?.user) {
+          console.log("Session found in auth state change");
+          setSession(currentSession);
+          
           // Format user data to match our User type
           const userData: User = {
             id: currentSession.user.id,
@@ -35,44 +43,59 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           setUser(userData);
           setIsAuthenticated(true);
         } else {
-          console.log("No session or user, clearing auth state");
+          console.log("No session or user in auth state change, clearing auth state");
           setUser(null);
           setIsAuthenticated(false);
+          setSession(null);
         }
-        
-        setIsLoading(false);
       }
     );
 
     // Check for existing session on mount
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log("Initial session check:", session);
-      
-      if (session) {
-        setSession(session);
+      try {
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        console.log("Initial session check:", existingSession);
         
-        // Format user data to match our User type
-        const userData: User = {
-          id: session.user.id,
-          email: session.user.email || '',
-          name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Admin User',
-          role: 'admin',
-          password: '', // We don't store password in state
-          lastLogin: new Date().toISOString()
-        };
+        if (!mounted) return;
         
-        console.log("Setting initial user data:", userData);
-        setUser(userData);
-        setIsAuthenticated(true);
+        if (existingSession?.user) {
+          console.log("Existing session found");
+          setSession(existingSession);
+          
+          // Format user data to match our User type
+          const userData: User = {
+            id: existingSession.user.id,
+            email: existingSession.user.email || '',
+            name: existingSession.user.user_metadata?.name || existingSession.user.email?.split('@')[0] || 'Admin User',
+            role: 'admin',
+            password: '', // We don't store password in state
+            lastLogin: new Date().toISOString()
+          };
+          
+          console.log("Setting initial user data:", userData);
+          setUser(userData);
+          setIsAuthenticated(true);
+        } else {
+          console.log("No existing session found");
+          setUser(null);
+          setIsAuthenticated(false);
+          setSession(null);
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+          setAuthChecked(true);
+        }
       }
-      
-      setIsLoading(false);
     };
 
     checkSession();
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -157,6 +180,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const logout = async () => {
+    console.log("Logging out user");
     const { error } = await supabase.auth.signOut();
     
     if (error) {
@@ -168,6 +192,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       });
     } else {
       console.log("User logged out successfully");
+      // Explicitly clear all auth state
       setUser(null);
       setIsAuthenticated(false);
       setSession(null);
@@ -180,8 +205,15 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
-      {!isLoading && children}
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      isAuthenticated,
+      isLoading,
+      authChecked
+    }}>
+      {children}
     </AuthContext.Provider>
   );
 };
