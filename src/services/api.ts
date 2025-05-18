@@ -1,6 +1,21 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AffiliateProduct, BlogPost, Celebrity, CategoryItem, Outfit } from "@/types/data";
+import { Json } from "@/integrations/supabase/types";
+
+// Helper function to safely parse JSON and cast to specific types
+function parseJsonField<T>(jsonValue: Json | null, defaultValue: T): T {
+  if (!jsonValue) return defaultValue;
+  
+  if (typeof jsonValue === 'string') {
+    try {
+      return JSON.parse(jsonValue) as T;
+    } catch (e) {
+      return defaultValue;
+    }
+  }
+  
+  return jsonValue as unknown as T;
+}
 
 // Fetch celebrities from the database
 export const fetchCelebrities = async (): Promise<Celebrity[]> => {
@@ -13,25 +28,19 @@ export const fetchCelebrities = async (): Promise<Celebrity[]> => {
 
     // Convert database fields to match our Celebrity type
     const formattedData: Celebrity[] = data.map(item => {
-      // Process social media JSON if needed
-      let socialMediaValue = item.social_media;
-      if (typeof socialMediaValue === 'string') {
-        try {
-          socialMediaValue = JSON.parse(socialMediaValue);
-        } catch (e) {
-          socialMediaValue = {};
-        }
-      }
+      // Process social media and signature objects with proper typing
+      const socialMediaDefault = { instagram: "", twitter: "", facebook: "", youtube: "", tiktok: "", website: "" };
+      const signatureDefault = { look: "", accessories: "", designers: "", perfume: "" };
       
-      // Process signature JSON if needed
-      let signatureValue = item.signature;
-      if (typeof signatureValue === 'string') {
-        try {
-          signatureValue = JSON.parse(signatureValue);
-        } catch (e) {
-          signatureValue = {};
-        }
-      }
+      const socialMedia = parseJsonField(
+        item.social_media, 
+        socialMediaDefault
+      );
+      
+      const signature = parseJsonField(
+        item.signature,
+        signatureDefault
+      );
       
       return {
         id: item.id,
@@ -49,7 +58,7 @@ export const fetchCelebrities = async (): Promise<Celebrity[]> => {
         careerHighlights: item.career_highlights,
         personalLife: item.personal_life,
         awards: item.awards,
-        socialMedia: socialMediaValue,
+        socialMedia, // Properly typed
         interestingFacts: item.interesting_facts,
         nationality: item.nationality,
         languages: item.languages,
@@ -59,7 +68,7 @@ export const fetchCelebrities = async (): Promise<Celebrity[]> => {
         businessVentures: item.business_ventures,
         controversies: item.controversies,
         fanbaseNickname: item.fanbase_nickname,
-        signature: signatureValue,
+        signature, // Properly typed
         measurements: item.measurements,
         dietFitness: item.diet_fitness,
         styleEvolution: item.style_evolution,
@@ -94,24 +103,19 @@ export const getCelebrityById = async (id: string): Promise<Celebrity | null> =>
       return null;
     }
 
-    // Process social media and signature data
-    let socialMediaValue = data.social_media;
-    if (typeof socialMediaValue === 'string') {
-      try {
-        socialMediaValue = JSON.parse(socialMediaValue);
-      } catch (e) {
-        socialMediaValue = {};
-      }
-    }
+    // Process social media and signature with proper typing
+    const socialMediaDefault = { instagram: "", twitter: "", facebook: "", youtube: "", tiktok: "", website: "" };
+    const signatureDefault = { look: "", accessories: "", designers: "", perfume: "" };
     
-    let signatureValue = data.signature;
-    if (typeof signatureValue === 'string') {
-      try {
-        signatureValue = JSON.parse(signatureValue);
-      } catch (e) {
-        signatureValue = {};
-      }
-    }
+    const socialMedia = parseJsonField(
+      data.social_media, 
+      socialMediaDefault
+    );
+    
+    const signature = parseJsonField(
+      data.signature,
+      signatureDefault
+    );
 
     // Convert database fields to match our Celebrity type
     const celebrity: Celebrity = {
@@ -130,7 +134,7 @@ export const getCelebrityById = async (id: string): Promise<Celebrity | null> =>
       careerHighlights: data.career_highlights,
       personalLife: data.personal_life,
       awards: data.awards,
-      socialMedia: socialMediaValue,
+      socialMedia, // Properly typed
       interestingFacts: data.interesting_facts,
       nationality: data.nationality,
       languages: data.languages,
@@ -140,7 +144,7 @@ export const getCelebrityById = async (id: string): Promise<Celebrity | null> =>
       businessVentures: data.business_ventures,
       controversies: data.controversies,
       fanbaseNickname: data.fanbase_nickname,
-      signature: signatureValue,
+      signature, // Properly typed
       measurements: data.measurements,
       dietFitness: data.diet_fitness,
       styleEvolution: data.style_evolution,
@@ -238,24 +242,19 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
       return null;
     }
 
-    // Process social media and signature data
-    let socialMediaValue = data.social_media;
-    if (typeof socialMediaValue === 'string') {
-      try {
-        socialMediaValue = JSON.parse(socialMediaValue);
-      } catch (e) {
-        socialMediaValue = {};
-      }
-    }
+    // Process social media and signature with proper typing
+    const socialMediaDefault = { instagram: "", twitter: "", facebook: "", youtube: "", tiktok: "", website: "" };
+    const signatureDefault = { look: "", accessories: "", designers: "", perfume: "" };
     
-    let signatureValue = data.signature;
-    if (typeof signatureValue === 'string') {
-      try {
-        signatureValue = JSON.parse(signatureValue);
-      } catch (e) {
-        signatureValue = {};
-      }
-    }
+    const socialMedia = parseJsonField(
+      data.social_media,
+      socialMediaDefault
+    );
+    
+    const signature = parseJsonField(
+      data.signature,
+      signatureDefault
+    );
 
     const celebrity: Celebrity = {
       id: data.id,
@@ -273,7 +272,7 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
       careerHighlights: data.career_highlights,
       personalLife: data.personal_life,
       awards: data.awards,
-      socialMedia: socialMediaValue,
+      socialMedia, // Properly typed
       interestingFacts: data.interesting_facts,
       nationality: data.nationality,
       languages: data.languages,
@@ -283,7 +282,7 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
       businessVentures: data.business_ventures,
       controversies: data.controversies,
       fanbaseNickname: data.fanbase_nickname,
-      signature: signatureValue,
+      signature, // Properly typed
       measurements: data.measurements,
       dietFitness: data.diet_fitness,
       styleEvolution: data.style_evolution,
@@ -496,9 +495,9 @@ export const fetchBlogPosts = async (limit?: number, categoryFilter?: string): P
       slug: post.slug || post.id,
       created_at: post.created_at,
       updated_at: post.updated_at,
-      meta_description: post.meta_description,
-      structured_data: post.structured_data,
-      keywords: post.keywords
+      meta_description: post.meta_description || '',
+      structured_data: post.structured_data || '',
+      keywords: post.keywords || ''
     }));
   } catch (error) {
     console.error('Error fetching blog posts:', error);
@@ -598,7 +597,7 @@ export const fetchCategoryItems = async (category: string): Promise<CategoryItem
 export default { 
   fetchCelebrities,
   getCelebrityById,
-  fetchCelebrityById, // Add alias for fetchCelebrityById
+  fetchCelebrityById,
   fetchCelebrityBySlug,
   addCelebrity,
   generateSlug,
@@ -611,4 +610,3 @@ export default {
   fetchCategoryItems,
   subscribeToNewsletter
 };
-
