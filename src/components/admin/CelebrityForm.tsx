@@ -304,7 +304,7 @@ const CelebrityForm: React.FC<CelebrityFormProps> = ({ onSuccess }) => {
                   name="height" 
                   value={formState.height || ''} 
                   onChange={handleChange} 
-                  placeholder="e.g., 5'10\" or 178cm"
+                  placeholder="e.g., 5'10&quot; or 178cm"
                 />
               </div>
             </div>
