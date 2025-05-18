@@ -12,7 +12,8 @@ import {
   Facebook, 
   GraduationCap,
   Link,
-  Award
+  Award,
+  User
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 

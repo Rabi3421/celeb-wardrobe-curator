@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Celebrity } from "@/types/data";
@@ -134,24 +133,32 @@ const AdminCelebrities: React.FC = () => {
         throw error;
       }
 
-      return data.map(celebrity => ({
-        id: celebrity.id,
-        name: celebrity.name,
-        image: celebrity.image,
-        bio: celebrity.bio,
-        category: celebrity.category,
-        styleType: celebrity.style_type,
-        outfitCount: celebrity.outfits?.[0]?.count || 0,
-        birthdate: celebrity.birthdate,
-        birthplace: celebrity.birthplace,
-        height: celebrity.height,
-        education: celebrity.education,
-        careerHighlights: celebrity.career_highlights,
-        personalLife: celebrity.personal_life,
-        awards: celebrity.awards,
-        socialMedia: celebrity.social_media || {},
-        interestingFacts: celebrity.interesting_facts
-      }));
+      return data.map(celebrity => {
+        // Ensure social_media is properly typed as the expected socialMedia object structure
+        // or set it to an empty object if null/undefined
+        const socialMediaObject = celebrity.social_media && typeof celebrity.social_media === 'object' 
+          ? celebrity.social_media
+          : {};
+          
+        return {
+          id: celebrity.id,
+          name: celebrity.name,
+          image: celebrity.image,
+          bio: celebrity.bio,
+          category: celebrity.category,
+          styleType: celebrity.style_type,
+          outfitCount: celebrity.outfits?.[0]?.count || 0,
+          birthdate: celebrity.birthdate,
+          birthplace: celebrity.birthplace || "",
+          height: celebrity.height || "",
+          education: celebrity.education || "",
+          careerHighlights: celebrity.career_highlights || "",
+          personalLife: celebrity.personal_life || "",
+          awards: celebrity.awards || "",
+          socialMedia: socialMediaObject,
+          interestingFacts: celebrity.interesting_facts || ""
+        };
+      });
     }
   });
 
@@ -336,13 +343,13 @@ const AdminCelebrities: React.FC = () => {
       careerHighlights: celebrity.careerHighlights || "",
       personalLife: celebrity.personalLife || "",
       awards: celebrity.awards || "",
-      socialMedia: celebrity.socialMedia || {
-        instagram: "",
-        twitter: "",
-        facebook: "",
-        youtube: "",
-        tiktok: "",
-        website: ""
+      socialMedia: {
+        instagram: celebrity.socialMedia?.instagram || "",
+        twitter: celebrity.socialMedia?.twitter || "",
+        facebook: celebrity.socialMedia?.facebook || "",
+        youtube: celebrity.socialMedia?.youtube || "",
+        tiktok: celebrity.socialMedia?.tiktok || "",
+        website: celebrity.socialMedia?.website || ""
       },
       interestingFacts: celebrity.interestingFacts || "",
     });
