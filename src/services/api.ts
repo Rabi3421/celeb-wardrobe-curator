@@ -12,49 +12,53 @@ export const fetchCelebrities = async (): Promise<{data: Celebrity[], error: any
     }
 
     // Convert database fields to match our Celebrity type
-    const formattedData: Celebrity[] = data.map(item => ({
-      id: item.id,
-      name: item.name,
-      image: item.image,
-      outfitCount: item.outfitcount || 0,
-      bio: item.bio,
-      category: item.category,
-      styleType: item.style_type,
-      slug: item.slug || item.id,
-      birthdate: item.birthdate,
-      birthplace: item.birthplace,
-      height: item.height,
-      education: item.education,
-      careerHighlights: item.career_highlights,
-      personalLife: item.personal_life,
-      awards: item.awards,
-      // Fix the type assertion syntax - move the semicolon outside the parentheses
-      socialMedia: item.social_media ? 
-        (typeof item.social_media === 'string' ? 
-          JSON.parse(item.social_media) : 
-          item.social_media) as Celebrity['socialMedia'],
-      interestingFacts: item.interesting_facts,
-      nationality: item.nationality,
-      languages: item.languages,
-      netWorth: item.net_worth,
-      zodiacSign: item.zodiac_sign,
-      philanthropyWork: item.philanthropy_work,
-      businessVentures: item.business_ventures,
-      controversies: item.controversies,
-      fanbaseNickname: item.fanbase_nickname,
-      // Fix the type assertion syntax
-      signature: item.signature ? 
-        (typeof item.signature === 'string' ? 
-          JSON.parse(item.signature) : 
-          item.signature) as Celebrity['signature'],
-      measurements: item.measurements,
-      dietFitness: item.diet_fitness,
-      styleEvolution: item.style_evolution,
-      influences: item.influences,
-      quotes: item.quotes,
-      publicPerception: item.public_perception,
-      brandEndorsements: item.brand_endorsements
-    }));
+    const formattedData: Celebrity[] = data.map(item => {
+      let socialMediaValue = item.social_media;
+      if (typeof socialMediaValue === 'string') {
+        socialMediaValue = JSON.parse(socialMediaValue);
+      }
+      
+      let signatureValue = item.signature;
+      if (typeof signatureValue === 'string') {
+        signatureValue = JSON.parse(signatureValue);
+      }
+      
+      return {
+        id: item.id,
+        name: item.name,
+        image: item.image,
+        outfitCount: item.outfitcount || 0,
+        bio: item.bio,
+        category: item.category,
+        styleType: item.style_type,
+        slug: item.slug || item.id,
+        birthdate: item.birthdate,
+        birthplace: item.birthplace,
+        height: item.height,
+        education: item.education,
+        careerHighlights: item.career_highlights,
+        personalLife: item.personal_life,
+        awards: item.awards,
+        socialMedia: socialMediaValue as Celebrity['socialMedia'],
+        interestingFacts: item.interesting_facts,
+        nationality: item.nationality,
+        languages: item.languages,
+        netWorth: item.net_worth,
+        zodiacSign: item.zodiac_sign,
+        philanthropyWork: item.philanthropy_work,
+        businessVentures: item.business_ventures,
+        controversies: item.controversies,
+        fanbaseNickname: item.fanbase_nickname,
+        signature: signatureValue as Celebrity['signature'],
+        measurements: item.measurements,
+        dietFitness: item.diet_fitness,
+        styleEvolution: item.style_evolution,
+        influences: item.influences,
+        quotes: item.quotes,
+        publicPerception: item.public_perception,
+        brandEndorsements: item.brand_endorsements
+      };
+    });
 
     return { data: formattedData, error: null };
   } catch (error) {
@@ -79,6 +83,17 @@ export const getCelebrityById = async (id: string): Promise<{data: Celebrity | n
       return { data: null, error: null };
     }
 
+    // Process social media and signature data
+    let socialMediaValue = data.social_media;
+    if (typeof socialMediaValue === 'string') {
+      socialMediaValue = JSON.parse(socialMediaValue);
+    }
+    
+    let signatureValue = data.signature;
+    if (typeof signatureValue === 'string') {
+      signatureValue = JSON.parse(signatureValue);
+    }
+
     // Convert database fields to match our Celebrity type
     const celebrity: Celebrity = {
       id: data.id,
@@ -96,11 +111,7 @@ export const getCelebrityById = async (id: string): Promise<{data: Celebrity | n
       careerHighlights: data.career_highlights,
       personalLife: data.personal_life,
       awards: data.awards,
-      // Fix the type assertion syntax
-      socialMedia: data.social_media ? 
-        (typeof data.social_media === 'string' ? 
-          JSON.parse(data.social_media) : 
-          data.social_media) as Celebrity['socialMedia'],
+      socialMedia: socialMediaValue as Celebrity['socialMedia'],
       interestingFacts: data.interesting_facts,
       nationality: data.nationality,
       languages: data.languages,
@@ -110,11 +121,7 @@ export const getCelebrityById = async (id: string): Promise<{data: Celebrity | n
       businessVentures: data.business_ventures,
       controversies: data.controversies,
       fanbaseNickname: data.fanbase_nickname,
-      // Fix the type assertion syntax
-      signature: data.signature ? 
-        (typeof data.signature === 'string' ? 
-          JSON.parse(data.signature) : 
-          data.signature) as Celebrity['signature'],
+      signature: signatureValue as Celebrity['signature'],
       measurements: data.measurements,
       dietFitness: data.diet_fitness,
       styleEvolution: data.style_evolution,
