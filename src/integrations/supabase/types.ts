@@ -194,63 +194,111 @@ export type Database = {
           bio: string
           birthdate: string | null
           birthplace: string | null
+          brand_endorsements: string | null
+          business_ventures: string | null
           career_highlights: string | null
           category: string
+          controversies: string | null
           created_at: string
+          diet_fitness: string | null
           education: string | null
+          fanbase_nickname: string | null
           height: string | null
           id: string
           image: string
+          influences: string | null
           interesting_facts: string | null
+          languages: string | null
+          measurements: string | null
           name: string
+          nationality: string | null
+          net_worth: string | null
           outfitcount: number | null
           personal_life: string | null
+          philanthropy_work: string | null
+          public_perception: string | null
+          quotes: string | null
+          signature: Json | null
           slug: string | null
           social_media: Json | null
+          style_evolution: string | null
           style_type: string
           updated_at: string
+          zodiac_sign: string | null
         }
         Insert: {
           awards?: string | null
           bio: string
           birthdate?: string | null
           birthplace?: string | null
+          brand_endorsements?: string | null
+          business_ventures?: string | null
           career_highlights?: string | null
           category: string
+          controversies?: string | null
           created_at?: string
+          diet_fitness?: string | null
           education?: string | null
+          fanbase_nickname?: string | null
           height?: string | null
           id?: string
           image: string
+          influences?: string | null
           interesting_facts?: string | null
+          languages?: string | null
+          measurements?: string | null
           name: string
+          nationality?: string | null
+          net_worth?: string | null
           outfitcount?: number | null
           personal_life?: string | null
+          philanthropy_work?: string | null
+          public_perception?: string | null
+          quotes?: string | null
+          signature?: Json | null
           slug?: string | null
           social_media?: Json | null
+          style_evolution?: string | null
           style_type: string
           updated_at?: string
+          zodiac_sign?: string | null
         }
         Update: {
           awards?: string | null
           bio?: string
           birthdate?: string | null
           birthplace?: string | null
+          brand_endorsements?: string | null
+          business_ventures?: string | null
           career_highlights?: string | null
           category?: string
+          controversies?: string | null
           created_at?: string
+          diet_fitness?: string | null
           education?: string | null
+          fanbase_nickname?: string | null
           height?: string | null
           id?: string
           image?: string
+          influences?: string | null
           interesting_facts?: string | null
+          languages?: string | null
+          measurements?: string | null
           name?: string
+          nationality?: string | null
+          net_worth?: string | null
           outfitcount?: number | null
           personal_life?: string | null
+          philanthropy_work?: string | null
+          public_perception?: string | null
+          quotes?: string | null
+          signature?: Json | null
           slug?: string | null
           social_media?: Json | null
+          style_evolution?: string | null
           style_type?: string
           updated_at?: string
+          zodiac_sign?: string | null
         }
         Relationships: []
       }
