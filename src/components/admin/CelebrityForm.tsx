@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Award, Calendar, Globe, Image, Info, Star,
-  Camera, Instagram, Twitter, Facebook, Youtube, TikTok, 
+  Camera, Instagram, Twitter, Facebook, Youtube, 
   Link as LinkIcon, DollarSign, User, Languages
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -617,7 +617,7 @@ const CelebrityForm: React.FC<CelebrityFormProps> = ({ onSuccess }) => {
               
               <div className="grid gap-2">
                 <Label htmlFor="socialMedia.tiktok">
-                  <TikTok className="inline mr-2 h-4 w-4" />
+                  <Twitter className="inline mr-2 h-4 w-4" />
                   TikTok
                 </Label>
                 <Input 

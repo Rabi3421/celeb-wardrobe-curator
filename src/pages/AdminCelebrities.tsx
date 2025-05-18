@@ -46,7 +46,10 @@ const AdminCelebrities = () => {
         careerHighlights: item.career_highlights,
         personalLife: item.personal_life,
         awards: item.awards,
-        socialMedia: item.social_media || {},
+        socialMedia: item.social_media ? 
+          (typeof item.social_media === 'string' ? 
+            JSON.parse(item.social_media) : 
+            item.social_media as Celebrity['socialMedia']),
         interestingFacts: item.interesting_facts,
         nationality: item.nationality,
         languages: item.languages,
@@ -56,7 +59,10 @@ const AdminCelebrities = () => {
         businessVentures: item.business_ventures,
         controversies: item.controversies,
         fanbaseNickname: item.fanbase_nickname,
-        signature: item.signature || {},
+        signature: item.signature ? 
+          (typeof item.signature === 'string' ? 
+            JSON.parse(item.signature) : 
+            item.signature as Celebrity['signature']),
         measurements: item.measurements,
         dietFitness: item.diet_fitness,
         styleEvolution: item.style_evolution,

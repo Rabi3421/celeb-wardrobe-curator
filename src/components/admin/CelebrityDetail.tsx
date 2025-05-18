@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Celebrity } from '@/types/data';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Award, Calendar, Globe, Image, Info, Star, Music, Film, 
-  Camera, Instagram, Twitter, Facebook, Youtube, TikTok, 
+  Award, Calendar, Globe, Image, Info, Star, 
+  Camera, Instagram, Twitter, Facebook, Youtube, 
   Link, DollarSign, User, Languages
 } from 'lucide-react';
 
@@ -346,7 +345,7 @@ const CelebrityDetail: React.FC<CelebrityDetailProps> = ({ celebrity }) => {
             {celebrity.socialMedia?.tiktok && (
               <div>
                 <h3 className="font-semibold mb-1 flex items-center">
-                  <TikTok className="h-4 w-4 mr-2" /> TikTok
+                  <Twitter className="h-4 w-4 mr-2" /> TikTok
                 </h3>
                 <a href={celebrity.socialMedia.tiktok.startsWith('http') 
                   ? celebrity.socialMedia.tiktok 
