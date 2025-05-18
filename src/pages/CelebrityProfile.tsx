@@ -1,11 +1,10 @@
-
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import PageLayout from "@/components/layout/PageLayout";
 import OutfitCard from "@/components/ui/OutfitCard";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { fetchCelebrityBySlug, fetchCelebrityById, fetchOutfits } from "@/services/api";
+import { fetchCelebrityBySlug, getCelebrityById, fetchOutfits } from "@/services/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +49,7 @@ const CelebrityProfile: React.FC = () => {
       // Try fetching by slug first if that's what we have, otherwise by ID
       const celebData = slug 
         ? await fetchCelebrityBySlug(slug)
-        : await fetchCelebrityById(id!);
+        : await getCelebrityById(id!);
       
       if (!celebData) throw new Error("Celebrity not found");
       return celebData;

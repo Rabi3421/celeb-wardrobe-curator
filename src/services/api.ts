@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AffiliateProduct, BlogPost, Celebrity, CategoryItem, Outfit } from "@/types/data";
 
 // Fetch celebrities from the database
-export const fetchCelebrities = async (): Promise<{data: Celebrity[], error: any}> => {
+export const fetchCelebrities = async (): Promise<Celebrity[]> => {
   try {
     const { data, error } = await supabase.from('celebrities').select('*');
 
@@ -13,16 +13,24 @@ export const fetchCelebrities = async (): Promise<{data: Celebrity[], error: any
 
     // Convert database fields to match our Celebrity type
     const formattedData: Celebrity[] = data.map(item => {
-      // Handle social_media JSON parsing
+      // Process social media JSON if needed
       let socialMediaValue = item.social_media;
       if (typeof socialMediaValue === 'string') {
-        socialMediaValue = JSON.parse(socialMediaValue);
+        try {
+          socialMediaValue = JSON.parse(socialMediaValue);
+        } catch (e) {
+          socialMediaValue = {};
+        }
       }
       
-      // Handle signature JSON parsing
+      // Process signature JSON if needed
       let signatureValue = item.signature;
       if (typeof signatureValue === 'string') {
-        signatureValue = JSON.parse(signatureValue);
+        try {
+          signatureValue = JSON.parse(signatureValue);
+        } catch (e) {
+          signatureValue = {};
+        }
       }
       
       return {
@@ -41,7 +49,7 @@ export const fetchCelebrities = async (): Promise<{data: Celebrity[], error: any
         careerHighlights: item.career_highlights,
         personalLife: item.personal_life,
         awards: item.awards,
-        socialMedia: socialMediaValue as Celebrity['socialMedia'],
+        socialMedia: socialMediaValue,
         interestingFacts: item.interesting_facts,
         nationality: item.nationality,
         languages: item.languages,
@@ -51,7 +59,7 @@ export const fetchCelebrities = async (): Promise<{data: Celebrity[], error: any
         businessVentures: item.business_ventures,
         controversies: item.controversies,
         fanbaseNickname: item.fanbase_nickname,
-        signature: signatureValue as Celebrity['signature'],
+        signature: signatureValue,
         measurements: item.measurements,
         dietFitness: item.diet_fitness,
         styleEvolution: item.style_evolution,
@@ -62,15 +70,15 @@ export const fetchCelebrities = async (): Promise<{data: Celebrity[], error: any
       };
     });
 
-    return { data: formattedData, error: null };
+    return formattedData;
   } catch (error) {
     console.error('Error fetching celebrities:', error);
-    return { data: [], error };
+    return [];
   }
 };
 
 // Get celebrity by ID
-export const getCelebrityById = async (id: string): Promise<{data: Celebrity | null, error: any}> => {
+export const getCelebrityById = async (id: string): Promise<Celebrity | null> => {
   try {
     const { data, error } = await supabase
       .from('celebrities')
@@ -83,18 +91,26 @@ export const getCelebrityById = async (id: string): Promise<{data: Celebrity | n
     }
 
     if (!data) {
-      return { data: null, error: null };
+      return null;
     }
 
     // Process social media and signature data
     let socialMediaValue = data.social_media;
     if (typeof socialMediaValue === 'string') {
-      socialMediaValue = JSON.parse(socialMediaValue);
+      try {
+        socialMediaValue = JSON.parse(socialMediaValue);
+      } catch (e) {
+        socialMediaValue = {};
+      }
     }
     
     let signatureValue = data.signature;
     if (typeof signatureValue === 'string') {
-      signatureValue = JSON.parse(signatureValue);
+      try {
+        signatureValue = JSON.parse(signatureValue);
+      } catch (e) {
+        signatureValue = {};
+      }
     }
 
     // Convert database fields to match our Celebrity type
@@ -114,7 +130,7 @@ export const getCelebrityById = async (id: string): Promise<{data: Celebrity | n
       careerHighlights: data.career_highlights,
       personalLife: data.personal_life,
       awards: data.awards,
-      socialMedia: socialMediaValue as Celebrity['socialMedia'],
+      socialMedia: socialMediaValue,
       interestingFacts: data.interesting_facts,
       nationality: data.nationality,
       languages: data.languages,
@@ -124,7 +140,7 @@ export const getCelebrityById = async (id: string): Promise<{data: Celebrity | n
       businessVentures: data.business_ventures,
       controversies: data.controversies,
       fanbaseNickname: data.fanbase_nickname,
-      signature: signatureValue as Celebrity['signature'],
+      signature: signatureValue,
       measurements: data.measurements,
       dietFitness: data.diet_fitness,
       styleEvolution: data.style_evolution,
@@ -134,12 +150,15 @@ export const getCelebrityById = async (id: string): Promise<{data: Celebrity | n
       brandEndorsements: data.brand_endorsements
     };
 
-    return { data: celebrity, error: null };
+    return celebrity;
   } catch (error) {
     console.error('Error fetching celebrity by ID:', error);
-    return { data: null, error };
+    return null;
   }
 };
+
+// Add the missing fetchCelebrityById function that's needed by CelebrityProfile component
+export const fetchCelebrityById = getCelebrityById;
 
 // Add celebrity
 export const addCelebrity = async (celebrity: Partial<Celebrity>): Promise<{success: boolean, error: any, data?: any}> => {
@@ -203,7 +222,7 @@ export const generateSlug = (name: string): string => {
 };
 
 // Fetch celebrity by slug
-export const fetchCelebrityBySlug = async (slug: string): Promise<{data: Celebrity | null, error: any}> => {
+export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | null> => {
   try {
     const { data, error } = await supabase
       .from('celebrities')
@@ -216,18 +235,26 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<{data: Celebri
     }
 
     if (!data) {
-      return { data: null, error: null };
+      return null;
     }
 
     // Process social media and signature data
     let socialMediaValue = data.social_media;
     if (typeof socialMediaValue === 'string') {
-      socialMediaValue = JSON.parse(socialMediaValue);
+      try {
+        socialMediaValue = JSON.parse(socialMediaValue);
+      } catch (e) {
+        socialMediaValue = {};
+      }
     }
     
     let signatureValue = data.signature;
     if (typeof signatureValue === 'string') {
-      signatureValue = JSON.parse(signatureValue);
+      try {
+        signatureValue = JSON.parse(signatureValue);
+      } catch (e) {
+        signatureValue = {};
+      }
     }
 
     const celebrity: Celebrity = {
@@ -246,7 +273,7 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<{data: Celebri
       careerHighlights: data.career_highlights,
       personalLife: data.personal_life,
       awards: data.awards,
-      socialMedia: socialMediaValue as Celebrity['socialMedia'],
+      socialMedia: socialMediaValue,
       interestingFacts: data.interesting_facts,
       nationality: data.nationality,
       languages: data.languages,
@@ -256,7 +283,7 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<{data: Celebri
       businessVentures: data.business_ventures,
       controversies: data.controversies,
       fanbaseNickname: data.fanbase_nickname,
-      signature: signatureValue as Celebrity['signature'],
+      signature: signatureValue,
       measurements: data.measurements,
       dietFitness: data.diet_fitness,
       styleEvolution: data.style_evolution,
@@ -266,10 +293,10 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<{data: Celebri
       brandEndorsements: data.brand_endorsements
     };
 
-    return { data: celebrity, error: null };
+    return celebrity;
   } catch (error) {
     console.error('Error fetching celebrity by slug:', error);
-    return { data: null, error };
+    return null;
   }
 };
 
@@ -313,7 +340,7 @@ export const subscribeToNewsletter = async (email: string, source: string): Prom
 };
 
 // Fetch outfits
-export const fetchOutfits = async (limit?: number, celebrityId?: string): Promise<{data: Outfit[], error: any}> => {
+export const fetchOutfits = async (limit?: number, celebrityId?: string): Promise<Outfit[]> => {
   try {
     let query = supabase.from('outfits').select('*');
 
@@ -332,36 +359,45 @@ export const fetchOutfits = async (limit?: number, celebrityId?: string): Promis
     }
 
     // Convert database fields to match our Outfit type
-    const formattedData: Outfit[] = data.map(item => ({
-      id: item.id,
-      title: item.title,
-      image: item.image,
-      description: item.description,
-      date: item.date,
-      location: item.location,
-      event: item.event,
-      slug: item.slug || item.id,
-      celebrityId: item.celebrity_id,
-      lookType: item.look_type,
-      season: item.season,
-      products: item.products,
-      tags: item.tags,
-      likes: item.likes || 0,
-      stylist: item.stylist,
-      photographer: item.photographer,
-      makeupArtist: item.makeup_artist,
-      hairStylist: item.hair_stylist
-    }));
+    const formattedData: Outfit[] = data.map(item => {
+      // Add celebrity property that's required in Outfit type
+      // Since we don't have celebrity name in outfits table, we'll set it empty here
+      // It should be populated elsewhere in the app by looking up the celebrity by ID
+      return {
+        id: item.id,
+        title: item.title,
+        image: item.image,
+        description: item.description,
+        fullDescription: item.full_description,
+        date: item.date,
+        location: '',
+        event: '',
+        slug: item.slug || item.id,
+        celebrityId: item.celebrity_id,
+        celebrity: '', // Required by Outfit type
+        affiliateLink: item.affiliate_link,
+        lookType: '',
+        season: '',
+        products: [],
+        tags: item.tags || [],
+        likes: 0,
+        occasion: item.occasion || '',
+        stylist: '',
+        photographer: '',
+        makeupArtist: '',
+        hairStylist: ''
+      };
+    });
 
-    return { data: formattedData, error: null };
+    return formattedData;
   } catch (error) {
     console.error('Error fetching outfits:', error);
-    return { data: [], error };
+    return [];
   }
 };
 
 // Fetch outfit by slug
-export const fetchOutfitBySlug = async (slug: string): Promise<{data: Outfit | null, error: any}> => {
+export const fetchOutfitBySlug = async (slug: string): Promise<Outfit | null> => {
   try {
     const { data, error } = await supabase
       .from('outfits')
@@ -374,7 +410,7 @@ export const fetchOutfitBySlug = async (slug: string): Promise<{data: Outfit | n
     }
 
     if (!data) {
-      return { data: null, error: null };
+      return null;
     }
 
     const outfit: Outfit = {
@@ -382,31 +418,35 @@ export const fetchOutfitBySlug = async (slug: string): Promise<{data: Outfit | n
       title: data.title,
       image: data.image,
       description: data.description,
+      fullDescription: data.full_description,
       date: data.date,
-      location: data.location,
-      event: data.event,
+      location: '',
+      event: '',
       slug: data.slug || data.id,
       celebrityId: data.celebrity_id,
-      lookType: data.look_type,
-      season: data.season,
-      products: data.products,
-      tags: data.tags,
-      likes: data.likes || 0,
-      stylist: data.stylist,
-      photographer: data.photographer,
-      makeupArtist: data.makeup_artist,
-      hairStylist: data.hair_stylist
+      celebrity: '', // This needs to be filled elsewhere
+      affiliateLink: data.affiliate_link,
+      lookType: '',
+      season: '',
+      products: [],
+      tags: data.tags || [],
+      likes: 0,
+      occasion: data.occasion || '',
+      stylist: '',
+      photographer: '',
+      makeupArtist: '',
+      hairStylist: ''
     };
 
-    return { data: outfit, error: null };
+    return outfit;
   } catch (error) {
     console.error('Error fetching outfit by slug:', error);
-    return { data: null, error };
+    return null;
   }
 };
 
 // Fetch outfit by ID
-export const fetchOutfitById = async (id: string): Promise<{data: Outfit | null, error: any}> => {
+export const fetchOutfitById = async (id: string): Promise<Outfit | null> => {
   try {
     const { data, error } = await supabase
       .from('outfits')
@@ -419,7 +459,7 @@ export const fetchOutfitById = async (id: string): Promise<{data: Outfit | null,
     }
 
     if (!data) {
-      return { data: null, error: null };
+      return null;
     }
 
     const outfit: Outfit = {
@@ -427,26 +467,30 @@ export const fetchOutfitById = async (id: string): Promise<{data: Outfit | null,
       title: data.title,
       image: data.image,
       description: data.description,
+      fullDescription: data.full_description,
       date: data.date,
-      location: data.location,
-      event: data.event,
+      location: '',
+      event: '',
       slug: data.slug || data.id,
       celebrityId: data.celebrity_id,
-      lookType: data.look_type,
-      season: data.season,
-      products: data.products,
-      tags: data.tags,
-      likes: data.likes || 0,
-      stylist: data.stylist,
-      photographer: data.photographer,
-      makeupArtist: data.makeup_artist,
-      hairStylist: data.hair_stylist
+      celebrity: '', // This needs to be filled elsewhere
+      affiliateLink: data.affiliate_link,
+      lookType: '',
+      season: '',
+      products: [],
+      tags: data.tags || [],
+      likes: 0,
+      occasion: data.occasion || '',
+      stylist: '',
+      photographer: '',
+      makeupArtist: '',
+      hairStylist: ''
     };
 
-    return { data: outfit, error: null };
+    return outfit;
   } catch (error) {
     console.error('Error fetching outfit by id:', error);
-    return { data: null, error };
+    return null;
   }
 };
 
@@ -479,7 +523,7 @@ export const fetchBlogPosts = async (limit?: number, categoryFilter?: string): P
       date: post.date,
       author: post.author,
       category: post.category,
-      tags: post.tags,
+      tags: post.tags || [],
       slug: post.slug || post.id,
       readTime: post.read_time || '5 min',
       relatedPosts: post.related_posts || []
@@ -507,19 +551,19 @@ export const fetchAffiliateProducts = async (limit?: number): Promise<AffiliateP
 
     return data.map(product => ({
       id: product.id,
-      name: product.name,
+      name: product.title, // Map title to name
       description: product.description,
       image: product.image,
       price: product.price,
-      brand: product.brand,
-      category: product.category,
-      link: product.link,
-      discount: product.discount,
-      rating: product.rating,
-      reviewCount: product.review_count,
-      isFeatured: product.is_featured,
-      isNew: product.is_new,
-      isBestSeller: product.is_best_seller
+      brand: product.retailer, // Map retailer to brand
+      category: '', // Not available in the data
+      link: product.affiliate_link,
+      discount: '', // Not available in the data
+      rating: 0, // Not available in the data
+      reviewCount: 0, // Not available in the data
+      isFeatured: false, // Not available in the data
+      isNew: false, // Not available in the data
+      isBestSeller: false // Not available in the data
     }));
   } catch (error) {
     console.error('Error fetching affiliate products:', error);
@@ -530,28 +574,12 @@ export const fetchAffiliateProducts = async (limit?: number): Promise<AffiliateP
 // Fetch affiliate products by outfit ID
 export const fetchAffiliateProductsByOutfitId = async (outfitId: string): Promise<AffiliateProduct[]> => {
   try {
-    // First, get the outfit-product relationships
-    const { data: relationships, error: relError } = await supabase
-      .from('outfit_products')
-      .select('product_id')
-      .eq('outfit_id', outfitId);
-
-    if (relError) {
-      throw relError;
-    }
-
-    if (!relationships || relationships.length === 0) {
-      return [];
-    }
-
-    // Get all product IDs
-    const productIds = relationships.map(rel => rel.product_id);
-
-    // Fetch all products with those IDs
+    // Since there's no outfit_products relation table in the schema shown
+    // We'll directly fetch affiliate products with the given outfit_id
     const { data, error } = await supabase
       .from('affiliate_products')
       .select('*')
-      .in('id', productIds);
+      .eq('outfit_id', outfitId);
 
     if (error) {
       throw error;
@@ -559,19 +587,19 @@ export const fetchAffiliateProductsByOutfitId = async (outfitId: string): Promis
 
     return data.map(product => ({
       id: product.id,
-      name: product.name,
+      name: product.title, // Map title to name
       description: product.description,
       image: product.image,
       price: product.price,
-      brand: product.brand,
-      category: product.category,
-      link: product.link,
-      discount: product.discount,
-      rating: product.rating,
-      reviewCount: product.review_count,
-      isFeatured: product.is_featured,
-      isNew: product.is_new,
-      isBestSeller: product.is_best_seller
+      brand: product.retailer, // Map retailer to brand
+      category: '', // Not available in the data
+      link: product.affiliate_link,
+      discount: '', // Not available in the data
+      rating: 0, // Not available in the data
+      reviewCount: 0, // Not available in the data
+      isFeatured: false, // Not available in the data
+      isNew: false, // Not available in the data
+      isBestSeller: false // Not available in the data
     }));
   } catch (error) {
     console.error('Error fetching affiliate products by outfit ID:', error);
@@ -585,7 +613,7 @@ export const fetchCategoryItems = async (category: string): Promise<CategoryItem
     const { data, error } = await supabase
       .from('category_items')
       .select('*')
-      .eq('category', category);
+      .eq('category_name', category);
 
     if (error) {
       throw error;
@@ -593,17 +621,17 @@ export const fetchCategoryItems = async (category: string): Promise<CategoryItem
 
     return data.map(item => ({
       id: item.id,
-      name: item.name,
+      name: item.title,
       description: item.description,
       image: item.image,
       price: item.price,
-      brand: item.brand,
-      category: item.category,
-      link: item.link,
-      celebrityIds: item.celebrity_ids || [],
-      outfitIds: item.outfit_ids || [],
-      rating: item.rating,
-      reviewCount: item.review_count
+      brand: item.retailer,
+      category: item.category_name,
+      link: item.affiliate_link,
+      celebrityIds: [], // Not available in the data
+      outfitIds: [], // Not available in the data
+      rating: 0, // Not available in the data
+      reviewCount: 0 // Not available in the data
     }));
   } catch (error) {
     console.error(`Error fetching category items for ${category}:`, error);
@@ -614,6 +642,7 @@ export const fetchCategoryItems = async (category: string): Promise<CategoryItem
 export default { 
   fetchCelebrities,
   getCelebrityById,
+  fetchCelebrityById, // Add alias for fetchCelebrityById
   fetchCelebrityBySlug,
   addCelebrity,
   generateSlug,
@@ -626,3 +655,4 @@ export default {
   fetchCategoryItems,
   subscribeToNewsletter
 };
+
