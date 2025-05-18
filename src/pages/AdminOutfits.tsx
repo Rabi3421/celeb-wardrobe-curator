@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Outfit, Celebrity } from "@/types/data";
@@ -13,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, Edit, Trash, Eye, Image, Loader2 } from "lucide-react";
+import { Plus, Search, Edit, Trash, Eye, Image, Loader2, ExternalLink } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -104,6 +103,7 @@ const AdminOutfits: React.FC = () => {
         fullDescription: outfit.full_description,
         occasion: outfit.occasion,
         date: outfit.date,
+        affiliateLink: outfit.affiliate_link,
       }));
     }
   });
@@ -169,6 +169,7 @@ const AdminOutfits: React.FC = () => {
           full_description: data.fullDescription || null,
           occasion: data.occasion || null,
           date: data.date || null,
+          affiliate_link: data.affiliateLink || null,
         }])
         .select('*')
         .single();
@@ -228,6 +229,7 @@ const AdminOutfits: React.FC = () => {
           full_description: data.fullDescription || null,
           occasion: data.occasion || null,
           date: data.date || null,
+          affiliate_link: data.affiliateLink || null,
         })
         .eq('id', data.id);
 
@@ -589,6 +591,22 @@ const AdminOutfits: React.FC = () => {
                     defaultValue={formatDate(editOutfit?.date)}
                   />
                 </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="affiliateLink" className="font-medium">Affiliate Link</Label>
+                <div className="relative">
+                  <Input
+                    id="affiliateLink"
+                    {...register("affiliateLink")}
+                    defaultValue={editOutfit?.affiliateLink || ""}
+                    placeholder="https://example.com/product-link"
+                  />
+                  <ExternalLink className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Add a direct purchase link for this outfit (optional)
+                </p>
               </div>
 
               <div className="grid gap-2">

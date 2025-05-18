@@ -282,6 +282,7 @@ export type Database = {
       }
       outfits: {
         Row: {
+          affiliate_link: string | null
           celebrity_id: string
           created_at: string
           date: string | null
@@ -296,6 +297,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          affiliate_link?: string | null
           celebrity_id: string
           created_at?: string
           date?: string | null
@@ -310,6 +312,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          affiliate_link?: string | null
           celebrity_id?: string
           created_at?: string
           date?: string | null

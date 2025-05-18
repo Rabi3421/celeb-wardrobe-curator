@@ -5,8 +5,10 @@ import PageLayout from "@/components/layout/PageLayout";
 import AffiliateProductCard from "@/components/ui/AffiliateProductCard";
 import { fetchOutfitBySlug, fetchOutfitById, fetchAffiliateProductsByOutfitId } from "@/services/api";
 import { Outfit, AffiliateProduct } from "@/types/data";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShoppingCart, ExternalLink } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 const OutfitDetail: React.FC = () => {
   const { id, slug } = useParams<{ id?: string; slug?: string }>();
@@ -39,6 +41,23 @@ const OutfitDetail: React.FC = () => {
   });
 
   const isLoading = isLoadingOutfit || isLoadingProducts;
+
+  const handleBuyNowClick = () => {
+    // If there's an affiliate link, open it in a new tab
+    if (outfit?.affiliateLink) {
+      window.open(outfit.affiliateLink, '_blank');
+      toast({
+        title: "Opening retailer website",
+        description: "You're being redirected to the retailer's website",
+      });
+    } else {
+      toast({
+        title: "No purchase link available",
+        description: "This outfit doesn't have a direct purchase link",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -133,6 +152,18 @@ const OutfitDetail: React.FC = () => {
               <p className="text-muted-foreground">
                 {outfit.fullDescription || outfit.description}
               </p>
+              
+              {outfit.affiliateLink && (
+                <Button 
+                  onClick={handleBuyNowClick} 
+                  className="mt-6 w-full md:w-auto"
+                  size="lg"
+                >
+                  <ShoppingCart className="mr-2" />
+                  Buy Now
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </Button>
+              )}
             </div>
 
             {products.length > 0 && (

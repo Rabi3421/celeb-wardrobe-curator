@@ -1,3 +1,4 @@
+
 // Celebrity type
 export interface Celebrity {
   id: string;
@@ -23,6 +24,7 @@ export interface Outfit {
   date?: string;
   tags?: string[];
   slug?: string;
+  affiliateLink?: string;
 }
 
 // Affiliate product type
