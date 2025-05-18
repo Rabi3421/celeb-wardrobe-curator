@@ -1,3 +1,4 @@
+
 // Celebrity type
 export interface Celebrity {
   id: string;
@@ -24,6 +25,27 @@ export interface Celebrity {
     website?: string;
   };
   interestingFacts?: string;
+  nationality?: string;
+  languages?: string;
+  netWorth?: string;
+  zodiacSign?: string;
+  philanthropyWork?: string;
+  businessVentures?: string;
+  controversies?: string;
+  fanbaseNickname?: string;
+  signature?: {
+    look?: string;
+    accessories?: string;
+    designers?: string;
+    perfume?: string;
+  };
+  measurements?: string;
+  dietFitness?: string;
+  styleEvolution?: string;
+  influences?: string;
+  quotes?: string;
+  publicPerception?: string;
+  brandEndorsements?: string;
 }
 
 // Outfit type

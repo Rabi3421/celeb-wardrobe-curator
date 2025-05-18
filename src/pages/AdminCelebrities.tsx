@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Celebrity } from "@/types/data";
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Edit, Trash, Eye, Loader2 } from "lucide-react";
+import { Plus, Search, Edit, Trash, Eye, Loader2, User, Image, Calendar, MapPin, Award, Star, Info, Link, Instagram, Twitter, Facebook, Youtube } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -74,7 +75,28 @@ const AdminCelebrities: React.FC = () => {
         tiktok: "",
         website: ""
       },
-      interestingFacts: ""
+      interestingFacts: "",
+      nationality: "",
+      languages: "",
+      netWorth: "",
+      zodiacSign: "",
+      philanthropyWork: "",
+      businessVentures: "",
+      controversies: "",
+      fanbaseNickname: "",
+      signature: {
+        look: "",
+        accessories: "",
+        designers: "",
+        perfume: ""
+      },
+      measurements: "",
+      dietFitness: "",
+      styleEvolution: "",
+      influences: "",
+      quotes: "",
+      publicPerception: "",
+      brandEndorsements: ""
     }
   });
 
@@ -158,6 +180,24 @@ const AdminCelebrities: React.FC = () => {
             }
           : {};
           
+        // Handle signature object
+        const signature = typeof celebrity.signature === 'object' && celebrity.signature !== null
+          ? {
+              look: typeof celebrity.signature === 'object' && 'look' in celebrity.signature 
+                ? (celebrity.signature.look as string) || "" 
+                : "",
+              accessories: typeof celebrity.signature === 'object' && 'accessories' in celebrity.signature 
+                ? (celebrity.signature.accessories as string) || "" 
+                : "",
+              designers: typeof celebrity.signature === 'object' && 'designers' in celebrity.signature 
+                ? (celebrity.signature.designers as string) || "" 
+                : "",
+              perfume: typeof celebrity.signature === 'object' && 'perfume' in celebrity.signature 
+                ? (celebrity.signature.perfume as string) || "" 
+                : ""
+            }
+          : { look: "", accessories: "", designers: "", perfume: "" };
+
         return {
           id: celebrity.id,
           name: celebrity.name,
@@ -174,7 +214,23 @@ const AdminCelebrities: React.FC = () => {
           personalLife: celebrity.personal_life || "",
           awards: celebrity.awards || "",
           socialMedia,
-          interestingFacts: celebrity.interesting_facts || ""
+          interestingFacts: celebrity.interesting_facts || "",
+          nationality: celebrity.nationality || "",
+          languages: celebrity.languages || "",
+          netWorth: celebrity.net_worth || "",
+          zodiacSign: celebrity.zodiac_sign || "",
+          philanthropyWork: celebrity.philanthropy_work || "",
+          businessVentures: celebrity.business_ventures || "",
+          controversies: celebrity.controversies || "",
+          fanbaseNickname: celebrity.fanbase_nickname || "",
+          signature,
+          measurements: celebrity.measurements || "",
+          dietFitness: celebrity.diet_fitness || "",
+          styleEvolution: celebrity.style_evolution || "",
+          influences: celebrity.influences || "",
+          quotes: celebrity.quotes || "",
+          publicPerception: celebrity.public_perception || "",
+          brandEndorsements: celebrity.brand_endorsements || ""
         };
       });
     }
@@ -199,7 +255,23 @@ const AdminCelebrities: React.FC = () => {
           personal_life: data.personalLife || "",
           awards: data.awards || "",
           social_media: data.socialMedia || {},
-          interesting_facts: data.interestingFacts || ""
+          interesting_facts: data.interestingFacts || "",
+          nationality: data.nationality || "",
+          languages: data.languages || "",
+          net_worth: data.netWorth || "",
+          zodiac_sign: data.zodiacSign || "",
+          philanthropy_work: data.philanthropyWork || "",
+          business_ventures: data.businessVentures || "",
+          controversies: data.controversies || "",
+          fanbase_nickname: data.fanbaseNickname || "",
+          signature: data.signature || {},
+          measurements: data.measurements || "",
+          diet_fitness: data.dietFitness || "",
+          style_evolution: data.styleEvolution || "",
+          influences: data.influences || "",
+          quotes: data.quotes || "",
+          public_perception: data.publicPerception || "",
+          brand_endorsements: data.brandEndorsements || ""
         }])
         .select()
         .single();
@@ -249,7 +321,23 @@ const AdminCelebrities: React.FC = () => {
           personal_life: data.personalLife || "",
           awards: data.awards || "",
           social_media: data.socialMedia || {},
-          interesting_facts: data.interestingFacts || ""
+          interesting_facts: data.interestingFacts || "",
+          nationality: data.nationality || "",
+          languages: data.languages || "",
+          net_worth: data.netWorth || "",
+          zodiac_sign: data.zodiacSign || "",
+          philanthropy_work: data.philanthropyWork || "",
+          business_ventures: data.businessVentures || "",
+          controversies: data.controversies || "",
+          fanbase_nickname: data.fanbaseNickname || "",
+          signature: data.signature || {},
+          measurements: data.measurements || "",
+          diet_fitness: data.dietFitness || "",
+          style_evolution: data.styleEvolution || "",
+          influences: data.influences || "",
+          quotes: data.quotes || "",
+          public_perception: data.publicPerception || "",
+          brand_endorsements: data.brandEndorsements || ""
         })
         .eq('id', editCelebrity!.id);
 
@@ -370,6 +458,22 @@ const AdminCelebrities: React.FC = () => {
         website: celebrity.socialMedia?.website || ""
       },
       interestingFacts: celebrity.interestingFacts || "",
+      nationality: celebrity.nationality || "",
+      languages: celebrity.languages || "",
+      netWorth: celebrity.netWorth || "",
+      zodiacSign: celebrity.zodiacSign || "",
+      philanthropyWork: celebrity.philanthropyWork || "",
+      businessVentures: celebrity.businessVentures || "",
+      controversies: celebrity.controversies || "",
+      fanbaseNickname: celebrity.fanbaseNickname || "",
+      signature: celebrity.signature || { look: "", accessories: "", designers: "", perfume: "" },
+      measurements: celebrity.measurements || "",
+      dietFitness: celebrity.dietFitness || "",
+      styleEvolution: celebrity.styleEvolution || "",
+      influences: celebrity.influences || "",
+      quotes: celebrity.quotes || "",
+      publicPerception: celebrity.publicPerception || "",
+      brandEndorsements: celebrity.brandEndorsements || ""
     });
     setFormDialogOpen(true);
   };
@@ -397,7 +501,28 @@ const AdminCelebrities: React.FC = () => {
         tiktok: "",
         website: ""
       },
-      interestingFacts: ""
+      interestingFacts: "",
+      nationality: "",
+      languages: "",
+      netWorth: "",
+      zodiacSign: "",
+      philanthropyWork: "",
+      businessVentures: "",
+      controversies: "",
+      fanbaseNickname: "",
+      signature: {
+        look: "",
+        accessories: "",
+        designers: "",
+        perfume: ""
+      },
+      measurements: "",
+      dietFitness: "",
+      styleEvolution: "",
+      influences: "",
+      quotes: "",
+      publicPerception: "",
+      brandEndorsements: ""
     });
     setFormDialogOpen(true);
   }
@@ -519,10 +644,12 @@ const AdminCelebrities: React.FC = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="mb-4">
+                <TabsList className="mb-4 flex flex-wrap">
                   <TabsTrigger value="basic">Basic Info</TabsTrigger>
                   <TabsTrigger value="biography">Biography</TabsTrigger>
                   <TabsTrigger value="career">Career &amp; Personal</TabsTrigger>
+                  <TabsTrigger value="style">Style &amp; Fashion</TabsTrigger>
+                  <TabsTrigger value="additional">Additional Info</TabsTrigger>
                   <TabsTrigger value="social">Social Media</TabsTrigger>
                 </TabsList>
                 
@@ -537,7 +664,10 @@ const AdminCelebrities: React.FC = () => {
                         <FormItem>
                           <FormLabel>Name</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <div className="relative">
+                              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                              <Input className="pl-9" {...field} />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -551,7 +681,40 @@ const AdminCelebrities: React.FC = () => {
                         <FormItem>
                           <FormLabel>Birth Date</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <div className="relative">
+                              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                              <Input className="pl-9" type="date" {...field} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="nationality"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nationality</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., American, British, etc." />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="languages"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Languages Spoken</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., English, Spanish, etc." />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -643,7 +806,10 @@ const AdminCelebrities: React.FC = () => {
                         <FormItem>
                           <FormLabel>Birthplace</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="e.g., Los Angeles, California, USA" />
+                            <div className="relative">
+                              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                              <Input className="pl-9" {...field} placeholder="e.g., Los Angeles, California, USA" />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -673,12 +839,48 @@ const AdminCelebrities: React.FC = () => {
                       <FormItem>
                         <FormLabel>Profile Image URL</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <div className="relative">
+                            <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                            <Input className="pl-9" {...field} />
+                          </div>
                         </FormControl>
+                        <FormDescription>
+                          Provide a link to a high-quality image of the celebrity (recommended size: 800x1000 pixels)
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="zodiacSign"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Zodiac Sign</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Leo, Virgo, etc." />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="netWorth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Net Worth</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., $50 million" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </TabsContent>
 
                 {/* Biography Tab */}
@@ -723,6 +925,60 @@ const AdminCelebrities: React.FC = () => {
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="personalLife"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Personal Life</FormLabel>
+                        <FormDescription>
+                          Information about family, relationships, hobbies, causes, etc.
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="quotes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notable Quotes</FormLabel>
+                        <FormDescription>
+                          Famous or meaningful quotes from the celebrity
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Enter one quote per line"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="interestingFacts"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Interesting Facts</FormLabel>
+                        <FormDescription>
+                          Unique or lesser-known facts about the celebrity
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </TabsContent>
 
                 {/* Career & Personal Tab */}
@@ -754,10 +1010,14 @@ const AdminCelebrities: React.FC = () => {
                       <FormItem>
                         <FormLabel>Awards &amp; Recognition</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="List major awards, nominations, and honors received"
-                            {...field} 
-                          />
+                          <div className="relative">
+                            <Award className="absolute left-3 top-3 text-muted-foreground h-4 w-4" />
+                            <Textarea 
+                              className="pl-9"
+                              placeholder="List major awards, nominations, and honors received"
+                              {...field} 
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -766,12 +1026,12 @@ const AdminCelebrities: React.FC = () => {
 
                   <FormField
                     control={form.control}
-                    name="personalLife"
+                    name="businessVentures"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Personal Life</FormLabel>
+                        <FormLabel>Business Ventures</FormLabel>
                         <FormDescription>
-                          Information about family, relationships, hobbies, causes, etc.
+                          Companies, products, or business initiatives the celebrity has launched or invested in
                         </FormDescription>
                         <FormControl>
                           <Textarea {...field} />
@@ -783,12 +1043,225 @@ const AdminCelebrities: React.FC = () => {
 
                   <FormField
                     control={form.control}
-                    name="interestingFacts"
+                    name="philanthropyWork"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Interesting Facts</FormLabel>
+                        <FormLabel>Philanthropy &amp; Charity Work</FormLabel>
                         <FormDescription>
-                          Unique or lesser-known facts about the celebrity
+                          Charitable organizations, causes, and advocacy work the celebrity is involved with
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="brandEndorsements"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Brand Endorsements</FormLabel>
+                        <FormDescription>
+                          Major brand partnerships, sponsorships, and ambassadorships
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+
+                {/* Style & Fashion Tab */}
+                <TabsContent value="style" className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="styleEvolution"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Style Evolution</FormLabel>
+                        <FormDescription>
+                          How the celebrity&apos;s fashion sense has changed over time
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="signature.look"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Signature Look</FormLabel>
+                        <FormDescription>
+                          Distinctive fashion elements the celebrity is known for
+                        </FormDescription>
+                        <FormControl>
+                          <div className="relative">
+                            <Star className="absolute left-3 top-3 text-muted-foreground h-4 w-4" />
+                            <Textarea 
+                              className="pl-9"
+                              {...field} 
+                              placeholder="e.g., Monochromatic outfits, bold prints, etc."
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="signature.accessories"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Signature Accessories</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Unique jewelry, hats, etc." />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="signature.perfume"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Signature Perfume/Cologne</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Chanel No. 5, Dior Sauvage, etc." />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="signature.designers"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Favorite Designers</FormLabel>
+                        <FormDescription>
+                          Fashion designers frequently worn by the celebrity
+                        </FormDescription>
+                        <FormControl>
+                          <Input {...field} placeholder="e.g., Gucci, Versace, Louis Vuitton, etc." />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="measurements"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Measurements</FormLabel>
+                        <FormDescription>
+                          Physical measurements if publicly available
+                        </FormDescription>
+                        <FormControl>
+                          <Input {...field} placeholder="e.g., 34-26-36 (inches)" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="dietFitness"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Diet &amp; Fitness Routine</FormLabel>
+                        <FormDescription>
+                          Information about the celebrity&apos;s health and wellness habits
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+
+                {/* Additional Info Tab */}
+                <TabsContent value="additional" className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="controversies"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Controversies</FormLabel>
+                        <FormDescription>
+                          Any significant controversies or scandals associated with the celebrity
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="fanbaseNickname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fanbase Nickname</FormLabel>
+                        <FormDescription>
+                          What the celebrity&apos;s fans call themselves
+                        </FormDescription>
+                        <FormControl>
+                          <Input {...field} placeholder="e.g., Swifties, Beyhive, etc." />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="influences"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Influences &amp; Inspirations</FormLabel>
+                        <FormDescription>
+                          People, artists, or movements that have influenced the celebrity
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="publicPerception"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Public Perception &amp; Reputation</FormLabel>
+                        <FormDescription>
+                          How the celebrity is generally perceived by the public and media
                         </FormDescription>
                         <FormControl>
                           <Textarea {...field} />
@@ -809,10 +1282,14 @@ const AdminCelebrities: React.FC = () => {
                         <FormItem>
                           <FormLabel>Instagram URL</FormLabel>
                           <FormControl>
-                            <Input 
-                              {...field} 
-                              placeholder="https://www.instagram.com/username"
-                            />
+                            <div className="relative">
+                              <Instagram className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                              <Input 
+                                className="pl-9"
+                                {...field} 
+                                placeholder="https://www.instagram.com/username"
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -826,10 +1303,14 @@ const AdminCelebrities: React.FC = () => {
                         <FormItem>
                           <FormLabel>Twitter URL</FormLabel>
                           <FormControl>
-                            <Input 
-                              {...field} 
-                              placeholder="https://twitter.com/username"
-                            />
+                            <div className="relative">
+                              <Twitter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                              <Input 
+                                className="pl-9"
+                                {...field} 
+                                placeholder="https://twitter.com/username"
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -845,10 +1326,14 @@ const AdminCelebrities: React.FC = () => {
                         <FormItem>
                           <FormLabel>Facebook URL</FormLabel>
                           <FormControl>
-                            <Input 
-                              {...field} 
-                              placeholder="https://www.facebook.com/username"
-                            />
+                            <div className="relative">
+                              <Facebook className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                              <Input 
+                                className="pl-9"
+                                {...field} 
+                                placeholder="https://www.facebook.com/username"
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -862,10 +1347,14 @@ const AdminCelebrities: React.FC = () => {
                         <FormItem>
                           <FormLabel>YouTube Channel</FormLabel>
                           <FormControl>
-                            <Input 
-                              {...field} 
-                              placeholder="https://www.youtube.com/channel/..."
-                            />
+                            <div className="relative">
+                              <Youtube className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                              <Input 
+                                className="pl-9"
+                                {...field} 
+                                placeholder="https://www.youtube.com/channel/..."
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -898,10 +1387,14 @@ const AdminCelebrities: React.FC = () => {
                         <FormItem>
                           <FormLabel>Official Website</FormLabel>
                           <FormControl>
-                            <Input 
-                              {...field} 
-                              placeholder="https://www.officialsite.com"
-                            />
+                            <div className="relative">
+                              <Link className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                              <Input 
+                                className="pl-9"
+                                {...field} 
+                                placeholder="https://www.officialsite.com"
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
