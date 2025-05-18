@@ -496,7 +496,7 @@ const AdminCelebrities: React.FC = () => {
                 <TabsList className="mb-4">
                   <TabsTrigger value="basic">Basic Info</TabsTrigger>
                   <TabsTrigger value="biography">Biography</TabsTrigger>
-                  <TabsTrigger value="career">Career {'\u0026'} Personal</TabsTrigger>
+                  <TabsTrigger value="career">Career & Personal</TabsTrigger>
                   <TabsTrigger value="social">Social Media</TabsTrigger>
                 </TabsList>
                 
