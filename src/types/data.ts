@@ -1,4 +1,3 @@
-
 // Celebrity type
 export interface Celebrity {
   id: string;
@@ -9,6 +8,22 @@ export interface Celebrity {
   category: string;
   styleType: string;
   slug?: string;
+  birthdate?: string;
+  birthplace?: string;
+  height?: string;
+  education?: string;
+  careerHighlights?: string;
+  personalLife?: string;
+  awards?: string;
+  socialMedia?: {
+    instagram?: string;
+    twitter?: string;
+    facebook?: string;
+    youtube?: string;
+    tiktok?: string;
+    website?: string;
+  };
+  interestingFacts?: string;
 }
 
 // Outfit type

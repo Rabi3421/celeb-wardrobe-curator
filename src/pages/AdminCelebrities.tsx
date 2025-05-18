@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Edit, Trash, Eye, Loader2 } from "lucide-react";
+import { Plus, Search, Edit, Trash, Eye, Loader2, Calendar, MapPin } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -41,8 +41,11 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage 
+  FormMessage,
+  FormDescription
 } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminCelebrities: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,6 +62,22 @@ const AdminCelebrities: React.FC = () => {
       bio: "",
       category: "",
       styleType: "",
+      birthdate: "",
+      birthplace: "",
+      height: "",
+      education: "",
+      careerHighlights: "",
+      personalLife: "",
+      awards: "",
+      socialMedia: {
+        instagram: "",
+        twitter: "",
+        facebook: "",
+        youtube: "",
+        tiktok: "",
+        website: ""
+      },
+      interestingFacts: ""
     }
   });
 
@@ -100,7 +119,7 @@ const AdminCelebrities: React.FC = () => {
     }
   });
 
-  // Fetch all celebrities from Supabase
+  // Fetch all celebrities from Supabase with the new fields
   const { data: celebrities = [], isLoading: isCelebritiesLoading } = useQuery({
     queryKey: ['celebrities'],
     queryFn: async () => {
@@ -124,7 +143,16 @@ const AdminCelebrities: React.FC = () => {
         bio: celebrity.bio,
         category: celebrity.category,
         styleType: celebrity.style_type,
-        outfitCount: celebrity.outfits?.[0]?.count || 0
+        outfitCount: celebrity.outfits?.[0]?.count || 0,
+        birthdate: celebrity.birthdate,
+        birthplace: celebrity.birthplace,
+        height: celebrity.height,
+        education: celebrity.education,
+        careerHighlights: celebrity.career_highlights,
+        personalLife: celebrity.personal_life,
+        awards: celebrity.awards,
+        socialMedia: celebrity.social_media || {},
+        interestingFacts: celebrity.interesting_facts
       }));
     }
   });
@@ -139,7 +167,16 @@ const AdminCelebrities: React.FC = () => {
           image: data.image,
           bio: data.bio,
           category: data.category,
-          style_type: data.styleType
+          style_type: data.styleType,
+          birthdate: data.birthdate || null,
+          birthplace: data.birthplace || "",
+          height: data.height || "",
+          education: data.education || "",
+          career_highlights: data.careerHighlights || "",
+          personal_life: data.personalLife || "",
+          awards: data.awards || "",
+          social_media: data.socialMedia || {},
+          interesting_facts: data.interestingFacts || ""
         }])
         .select()
         .single();
@@ -180,7 +217,16 @@ const AdminCelebrities: React.FC = () => {
           image: data.image,
           bio: data.bio,
           category: data.category,
-          style_type: data.styleType
+          style_type: data.styleType,
+          birthdate: data.birthdate || null,
+          birthplace: data.birthplace || "",
+          height: data.height || "",
+          education: data.education || "",
+          career_highlights: data.careerHighlights || "",
+          personal_life: data.personalLife || "",
+          awards: data.awards || "",
+          social_media: data.socialMedia || {},
+          interesting_facts: data.interestingFacts || ""
         })
         .eq('id', editCelebrity!.id);
 
@@ -271,6 +317,13 @@ const AdminCelebrities: React.FC = () => {
 
   const handleEdit = (celebrity: Celebrity) => {
     setEditCelebrity(celebrity);
+    // Format the birthdate to a form the input can handle
+    let formattedBirthdate = "";
+    if (celebrity.birthdate) {
+      const date = new Date(celebrity.birthdate);
+      formattedBirthdate = date.toISOString().split('T')[0];
+    }
+
     // Set form values
     form.reset({
       name: celebrity.name,
@@ -278,6 +331,22 @@ const AdminCelebrities: React.FC = () => {
       bio: celebrity.bio,
       category: celebrity.category,
       styleType: celebrity.styleType,
+      birthdate: formattedBirthdate,
+      birthplace: celebrity.birthplace || "",
+      height: celebrity.height || "",
+      education: celebrity.education || "",
+      careerHighlights: celebrity.careerHighlights || "",
+      personalLife: celebrity.personalLife || "",
+      awards: celebrity.awards || "",
+      socialMedia: celebrity.socialMedia || {
+        instagram: "",
+        twitter: "",
+        facebook: "",
+        youtube: "",
+        tiktok: "",
+        website: ""
+      },
+      interestingFacts: celebrity.interestingFacts || "",
     });
     setFormDialogOpen(true);
   };
@@ -290,6 +359,22 @@ const AdminCelebrities: React.FC = () => {
       bio: "",
       category: "",
       styleType: "",
+      birthdate: "",
+      birthplace: "",
+      height: "",
+      education: "",
+      careerHighlights: "",
+      personalLife: "",
+      awards: "",
+      socialMedia: {
+        instagram: "",
+        twitter: "",
+        facebook: "",
+        youtube: "",
+        tiktok: "",
+        website: ""
+      },
+      interestingFacts: ""
     });
     setFormDialogOpen(true);
   }
@@ -399,138 +484,409 @@ const AdminCelebrities: React.FC = () => {
 
       {/* Celebrity Form Dialog */}
       <Dialog open={formDialogOpen} onOpenChange={setFormDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[850px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editCelebrity ? "Edit Celebrity" : "Add New Celebrity"}
             </DialogTitle>
             <DialogDescription>
-              Fill in the details for the celebrity profile.
+              Fill in the details for the celebrity profile. Complete information helps create comprehensive celebrity profiles.
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                rules={{ required: "Name is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="image"
-                rules={{ required: "Image URL is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profile Image URL</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="category"
-                rules={{ required: "Category is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      {isCategoriesLoading ? (
-                        <div className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Loading categories...</span>
-                        </div>
-                      ) : (
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                          value={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categories.map(category => (
-                              <SelectItem key={category} value={category}>
-                                {category}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <Tabs defaultValue="basic" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                  <TabsTrigger value="biography">Biography</TabsTrigger>
+                  <TabsTrigger value="career">Career & Personal</TabsTrigger>
+                  <TabsTrigger value="social">Social Media</TabsTrigger>
+                </TabsList>
+                
+                {/* Basic Info Tab */}
+                <TabsContent value="basic" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      rules={{ required: "Name is required" }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    />
 
-              <FormField
-                control={form.control}
-                name="styleType"
-                rules={{ required: "Style Type is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Style Type</FormLabel>
-                    <FormControl>
-                      {isStyleTypesLoading ? (
-                        <div className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Loading style types...</span>
-                        </div>
-                      ) : (
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                          value={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a style type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {styleTypes.map(styleType => (
-                              <SelectItem key={styleType} value={styleType}>
-                                {styleType}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                    <FormField
+                      control={form.control}
+                      name="birthdate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Birth Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    />
+                  </div>
 
-              <FormField
-                control={form.control}
-                name="bio"
-                rules={{ required: "Bio is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Biography</FormLabel>
-                    <FormControl>
-                      <textarea
-                        className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      rules={{ required: "Category is required" }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category</FormLabel>
+                          <FormControl>
+                            {isCategoriesLoading ? (
+                              <div className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span>Loading categories...</span>
+                              </div>
+                            ) : (
+                              <Select 
+                                onValueChange={field.onChange} 
+                                defaultValue={field.value}
+                                value={field.value}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {categories.map(category => (
+                                    <SelectItem key={category} value={category}>
+                                      {category}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="styleType"
+                      rules={{ required: "Style Type is required" }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Style Type</FormLabel>
+                          <FormControl>
+                            {isStyleTypesLoading ? (
+                              <div className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span>Loading style types...</span>
+                              </div>
+                            ) : (
+                              <Select 
+                                onValueChange={field.onChange} 
+                                defaultValue={field.value}
+                                value={field.value}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a style type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {styleTypes.map(styleType => (
+                                    <SelectItem key={styleType} value={styleType}>
+                                      {styleType}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="birthplace"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Birthplace</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Los Angeles, California, USA" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="height"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Height</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., 5' 9\" (175 cm)" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="image"
+                    rules={{ required: "Image URL is required" }}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Profile Image URL</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+
+                {/* Biography Tab */}
+                <TabsContent value="biography" className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="bio"
+                    rules={{ required: "Biography is required" }}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Short Biography</FormLabel>
+                        <FormDescription>
+                          A brief introduction that will appear at the top of the profile (1-2 paragraphs)
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea 
+                            className="min-h-24" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="education"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Education</FormLabel>
+                        <FormDescription>
+                          Details about the celebrity's educational background
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="e.g., Graduated from New York University with a degree in Fine Arts"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+
+                {/* Career & Personal Tab */}
+                <TabsContent value="career" className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="careerHighlights"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Career Highlights</FormLabel>
+                        <FormDescription>
+                          Notable achievements, roles, or milestones in their career
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea 
+                            className="min-h-24"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="awards"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Awards & Recognition</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="List major awards, nominations, and honors received"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="personalLife"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Personal Life</FormLabel>
+                        <FormDescription>
+                          Information about family, relationships, hobbies, causes, etc.
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="interestingFacts"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Interesting Facts</FormLabel>
+                        <FormDescription>
+                          Unique or lesser-known facts about the celebrity
+                        </FormDescription>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+
+                {/* Social Media Tab */}
+                <TabsContent value="social" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="socialMedia.instagram"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Instagram URL</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="https://www.instagram.com/username"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="socialMedia.twitter"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Twitter URL</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="https://twitter.com/username"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="socialMedia.facebook"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Facebook URL</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="https://www.facebook.com/username"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="socialMedia.youtube"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>YouTube Channel</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="https://www.youtube.com/channel/..."
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="socialMedia.tiktok"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>TikTok URL</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="https://www.tiktok.com/@username"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="socialMedia.website"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Official Website</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="https://www.officialsite.com"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
 
               <DialogFooter>
                 <Button 

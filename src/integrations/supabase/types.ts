@@ -190,38 +190,65 @@ export type Database = {
       }
       celebrities: {
         Row: {
+          awards: string | null
           bio: string
+          birthdate: string | null
+          birthplace: string | null
+          career_highlights: string | null
           category: string
           created_at: string
+          education: string | null
+          height: string | null
           id: string
           image: string
+          interesting_facts: string | null
           name: string
           outfitcount: number | null
+          personal_life: string | null
           slug: string | null
+          social_media: Json | null
           style_type: string
           updated_at: string
         }
         Insert: {
+          awards?: string | null
           bio: string
+          birthdate?: string | null
+          birthplace?: string | null
+          career_highlights?: string | null
           category: string
           created_at?: string
+          education?: string | null
+          height?: string | null
           id?: string
           image: string
+          interesting_facts?: string | null
           name: string
           outfitcount?: number | null
+          personal_life?: string | null
           slug?: string | null
+          social_media?: Json | null
           style_type: string
           updated_at?: string
         }
         Update: {
+          awards?: string | null
           bio?: string
+          birthdate?: string | null
+          birthplace?: string | null
+          career_highlights?: string | null
           category?: string
           created_at?: string
+          education?: string | null
+          height?: string | null
           id?: string
           image?: string
+          interesting_facts?: string | null
           name?: string
           outfitcount?: number | null
+          personal_life?: string | null
           slug?: string | null
+          social_media?: Json | null
           style_type?: string
           updated_at?: string
         }
