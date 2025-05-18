@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { 
@@ -27,7 +27,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const location = useLocation();
   const { user, logout, isAuthenticated } = useAdminAuth();
   
-  useEffect(() => {
+  React.useEffect(() => {
     // If not authenticated and not on login page, redirect to login
     if (!isAuthenticated && !location.pathname.includes('/admin/login')) {
       navigate("/admin/login");
