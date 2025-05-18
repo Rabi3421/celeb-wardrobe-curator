@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
@@ -136,22 +135,12 @@ const AdminCelebrities = () => {
           <h1 className="text-3xl font-bold">Manage Celebrities</h1>
           <div className="flex gap-4">
             <div className="bg-white dark:bg-gray-800 rounded-md p-1">
-              <TabsList>
-                <TabsTrigger
-                  value="grid"
-                  onClick={() => setViewMode('grid')}
-                  data-state={viewMode === 'grid' ? 'active' : ''}
-                >
-                  Grid
-                </TabsTrigger>
-                <TabsTrigger
-                  value="list"
-                  onClick={() => setViewMode('list')}
-                  data-state={viewMode === 'list' ? 'active' : ''}
-                >
-                  List
-                </TabsTrigger>
-              </TabsList>
+              <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'grid' | 'list')}>
+                <TabsList>
+                  <TabsTrigger value="grid">Grid</TabsTrigger>
+                  <TabsTrigger value="list">List</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
             <Button onClick={() => setIsAddDialogOpen(true)}>Add New Celebrity</Button>
           </div>
