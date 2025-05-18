@@ -370,22 +370,12 @@ export const fetchOutfits = async (limit?: number, celebrityId?: string): Promis
         description: item.description,
         fullDescription: item.full_description,
         date: item.date,
-        location: '',
-        event: '',
         slug: item.slug || item.id,
         celebrityId: item.celebrity_id,
         celebrity: '', // Required by Outfit type
         affiliateLink: item.affiliate_link,
-        lookType: '',
-        season: '',
-        products: [],
         tags: item.tags || [],
-        likes: 0,
-        occasion: item.occasion || '',
-        stylist: '',
-        photographer: '',
-        makeupArtist: '',
-        hairStylist: ''
+        occasion: item.occasion || ''
       };
     });
 
@@ -420,22 +410,12 @@ export const fetchOutfitBySlug = async (slug: string): Promise<Outfit | null> =>
       description: data.description,
       fullDescription: data.full_description,
       date: data.date,
-      location: '',
-      event: '',
       slug: data.slug || data.id,
       celebrityId: data.celebrity_id,
       celebrity: '', // This needs to be filled elsewhere
       affiliateLink: data.affiliate_link,
-      lookType: '',
-      season: '',
-      products: [],
       tags: data.tags || [],
-      likes: 0,
-      occasion: data.occasion || '',
-      stylist: '',
-      photographer: '',
-      makeupArtist: '',
-      hairStylist: ''
+      occasion: data.occasion || ''
     };
 
     return outfit;
@@ -469,22 +449,12 @@ export const fetchOutfitById = async (id: string): Promise<Outfit | null> => {
       description: data.description,
       fullDescription: data.full_description,
       date: data.date,
-      location: '',
-      event: '',
       slug: data.slug || data.id,
       celebrityId: data.celebrity_id,
       celebrity: '', // This needs to be filled elsewhere
       affiliateLink: data.affiliate_link,
-      lookType: '',
-      season: '',
-      products: [],
       tags: data.tags || [],
-      likes: 0,
-      occasion: data.occasion || '',
-      stylist: '',
-      photographer: '',
-      makeupArtist: '',
-      hairStylist: ''
+      occasion: data.occasion || ''
     };
 
     return outfit;
@@ -523,10 +493,12 @@ export const fetchBlogPosts = async (limit?: number, categoryFilter?: string): P
       date: post.date,
       author: post.author,
       category: post.category,
-      tags: post.tags || [],
       slug: post.slug || post.id,
-      readTime: post.read_time || '5 min',
-      relatedPosts: post.related_posts || []
+      created_at: post.created_at,
+      updated_at: post.updated_at,
+      meta_description: post.meta_description,
+      structured_data: post.structured_data,
+      keywords: post.keywords
     }));
   } catch (error) {
     console.error('Error fetching blog posts:', error);
@@ -551,19 +523,13 @@ export const fetchAffiliateProducts = async (limit?: number): Promise<AffiliateP
 
     return data.map(product => ({
       id: product.id,
-      name: product.title, // Map title to name
-      description: product.description,
+      outfitId: product.outfit_id,
       image: product.image,
+      title: product.title,
       price: product.price,
-      brand: product.retailer, // Map retailer to brand
-      category: '', // Not available in the data
-      link: product.affiliate_link,
-      discount: '', // Not available in the data
-      rating: 0, // Not available in the data
-      reviewCount: 0, // Not available in the data
-      isFeatured: false, // Not available in the data
-      isNew: false, // Not available in the data
-      isBestSeller: false // Not available in the data
+      retailer: product.retailer,
+      affiliateLink: product.affiliate_link,
+      description: product.description || ''
     }));
   } catch (error) {
     console.error('Error fetching affiliate products:', error);
@@ -587,19 +553,13 @@ export const fetchAffiliateProductsByOutfitId = async (outfitId: string): Promis
 
     return data.map(product => ({
       id: product.id,
-      name: product.title, // Map title to name
-      description: product.description,
+      outfitId: product.outfit_id,
       image: product.image,
+      title: product.title,
       price: product.price,
-      brand: product.retailer, // Map retailer to brand
-      category: '', // Not available in the data
-      link: product.affiliate_link,
-      discount: '', // Not available in the data
-      rating: 0, // Not available in the data
-      reviewCount: 0, // Not available in the data
-      isFeatured: false, // Not available in the data
-      isNew: false, // Not available in the data
-      isBestSeller: false // Not available in the data
+      retailer: product.retailer,
+      affiliateLink: product.affiliate_link,
+      description: product.description || ''
     }));
   } catch (error) {
     console.error('Error fetching affiliate products by outfit ID:', error);
@@ -621,17 +581,13 @@ export const fetchCategoryItems = async (category: string): Promise<CategoryItem
 
     return data.map(item => ({
       id: item.id,
-      name: item.title,
-      description: item.description,
+      categoryName: item.category_name,
+      title: item.title,
+      description: item.description || '',
       image: item.image,
-      price: item.price,
-      brand: item.retailer,
-      category: item.category_name,
-      link: item.affiliate_link,
-      celebrityIds: [], // Not available in the data
-      outfitIds: [], // Not available in the data
-      rating: 0, // Not available in the data
-      reviewCount: 0 // Not available in the data
+      price: item.price || '',
+      retailer: item.retailer || '',
+      affiliateLink: item.affiliate_link || ''
     }));
   } catch (error) {
     console.error(`Error fetching category items for ${category}:`, error);
