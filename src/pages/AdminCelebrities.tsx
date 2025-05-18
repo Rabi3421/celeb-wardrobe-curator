@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Celebrity } from "@/types/data";
@@ -134,10 +135,16 @@ const AdminCelebrities: React.FC = () => {
       }
 
       return data.map(celebrity => {
-        // Ensure social_media is properly typed as the expected socialMedia object structure
-        // or set it to an empty object if null/undefined
-        const socialMediaObject = celebrity.social_media && typeof celebrity.social_media === 'object' 
-          ? celebrity.social_media
+        // Create proper socialMedia object that conforms to the Celebrity type definition
+        const socialMedia = typeof celebrity.social_media === 'object' && celebrity.social_media !== null
+          ? {
+              instagram: celebrity.social_media.instagram as string | undefined,
+              twitter: celebrity.social_media.twitter as string | undefined,
+              facebook: celebrity.social_media.facebook as string | undefined,
+              youtube: celebrity.social_media.youtube as string | undefined,
+              tiktok: celebrity.social_media.tiktok as string | undefined,
+              website: celebrity.social_media.website as string | undefined
+            }
           : {};
           
         return {
@@ -155,7 +162,7 @@ const AdminCelebrities: React.FC = () => {
           careerHighlights: celebrity.career_highlights || "",
           personalLife: celebrity.personal_life || "",
           awards: celebrity.awards || "",
-          socialMedia: socialMediaObject,
+          socialMedia,
           interestingFacts: celebrity.interesting_facts || ""
         };
       });
