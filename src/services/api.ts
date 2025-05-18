@@ -21,7 +21,32 @@ export async function fetchCelebrities(): Promise<Celebrity[]> {
     bio: item.bio,
     category: item.category,
     styleType: item.style_type,
-    slug: item.slug || item.id
+    slug: item.slug || item.id,
+    birthdate: item.birthdate,
+    birthplace: item.birthplace,
+    height: item.height,
+    education: item.education,
+    careerHighlights: item.career_highlights,
+    personalLife: item.personal_life,
+    awards: item.awards,
+    socialMedia: item.social_media,
+    interestingFacts: item.interesting_facts,
+    nationality: item.nationality,
+    languages: item.languages,
+    netWorth: item.net_worth,
+    zodiacSign: item.zodiac_sign,
+    philanthropyWork: item.philanthropy_work,
+    businessVentures: item.business_ventures,
+    controversies: item.controversies,
+    fanbaseNickname: item.fanbase_nickname,
+    signature: item.signature || {},
+    measurements: item.measurements,
+    dietFitness: item.diet_fitness,
+    styleEvolution: item.style_evolution,
+    influences: item.influences,
+    quotes: item.quotes,
+    publicPerception: item.public_perception,
+    brandEndorsements: item.brand_endorsements
   })) || [];
 }
 
@@ -46,7 +71,32 @@ export async function fetchCelebrityById(id: string): Promise<Celebrity | null> 
     bio: data.bio,
     category: data.category,
     styleType: data.style_type,
-    slug: data.slug || data.id
+    slug: data.slug || data.id,
+    birthdate: data.birthdate,
+    birthplace: data.birthplace,
+    height: data.height,
+    education: data.education,
+    careerHighlights: data.career_highlights,
+    personalLife: data.personal_life,
+    awards: data.awards,
+    socialMedia: data.social_media,
+    interestingFacts: data.interesting_facts,
+    nationality: data.nationality,
+    languages: data.languages,
+    netWorth: data.net_worth,
+    zodiacSign: data.zodiac_sign,
+    philanthropyWork: data.philanthropy_work,
+    businessVentures: data.business_ventures,
+    controversies: data.controversies,
+    fanbaseNickname: data.fanbase_nickname,
+    signature: data.signature || {},
+    measurements: data.measurements,
+    dietFitness: data.diet_fitness,
+    styleEvolution: data.style_evolution,
+    influences: data.influences,
+    quotes: data.quotes,
+    publicPerception: data.public_perception,
+    brandEndorsements: data.brand_endorsements
   } : null;
 }
 
@@ -75,8 +125,89 @@ export async function fetchCelebrityBySlug(slug: string): Promise<Celebrity | nu
     bio: data.bio,
     category: data.category,
     styleType: data.style_type,
-    slug: data.slug || data.id
+    slug: data.slug || data.id,
+    birthdate: data.birthdate,
+    birthplace: data.birthplace,
+    height: data.height,
+    education: data.education,
+    careerHighlights: data.career_highlights,
+    personalLife: data.personal_life,
+    awards: data.awards,
+    socialMedia: data.social_media,
+    interestingFacts: data.interesting_facts,
+    nationality: data.nationality,
+    languages: data.languages,
+    netWorth: data.net_worth,
+    zodiacSign: data.zodiac_sign,
+    philanthropyWork: data.philanthropy_work,
+    businessVentures: data.business_ventures,
+    controversies: data.controversies,
+    fanbaseNickname: data.fanbase_nickname,
+    signature: data.signature || {},
+    measurements: data.measurements,
+    dietFitness: data.diet_fitness,
+    styleEvolution: data.style_evolution,
+    influences: data.influences,
+    quotes: data.quotes,
+    publicPerception: data.public_perception,
+    brandEndorsements: data.brand_endorsements
   };
+}
+
+// New function to add a celebrity with all the expanded fields
+export async function addCelebrity(celebrity: Partial<Celebrity>): Promise<{ success: boolean, id?: string, error?: string }> {
+  try {
+    // Convert from camelCase to snake_case for database
+    const dbCelebrity = {
+      name: celebrity.name,
+      image: celebrity.image,
+      bio: celebrity.bio,
+      category: celebrity.category,
+      style_type: celebrity.styleType,
+      slug: celebrity.slug || generateSlug(celebrity.name || ''),
+      birthdate: celebrity.birthdate,
+      birthplace: celebrity.birthplace,
+      height: celebrity.height,
+      education: celebrity.education,
+      career_highlights: celebrity.careerHighlights,
+      personal_life: celebrity.personalLife,
+      awards: celebrity.awards,
+      social_media: celebrity.socialMedia,
+      interesting_facts: celebrity.interestingFacts,
+      nationality: celebrity.nationality,
+      languages: celebrity.languages,
+      net_worth: celebrity.netWorth,
+      zodiac_sign: celebrity.zodiacSign,
+      philanthropy_work: celebrity.philanthropyWork,
+      business_ventures: celebrity.businessVentures,
+      controversies: celebrity.controversies,
+      fanbase_nickname: celebrity.fanbaseNickname,
+      signature: celebrity.signature,
+      measurements: celebrity.measurements,
+      diet_fitness: celebrity.dietFitness,
+      style_evolution: celebrity.styleEvolution,
+      influences: celebrity.influences,
+      quotes: celebrity.quotes,
+      public_perception: celebrity.publicPerception,
+      brand_endorsements: celebrity.brandEndorsements
+    };
+
+    const { data, error } = await supabase
+      .from('celebrities')
+      .insert([dbCelebrity])
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error("Error adding celebrity:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, id: data.id };
+  } catch (err) {
+    console.error("Exception during celebrity addition:", err);
+    return { success: false, error: String(err) };
+  }
 }
 
 // Outfit APIs
