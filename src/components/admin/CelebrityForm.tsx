@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -10,11 +11,10 @@ import { Celebrity } from '@/types/data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { addCelebrity } from '@/services/api';
-import { generateSlug } from '@/services/api';
+import { addCelebrity, generateSlug } from '@/services/api';
 
 interface CelebrityFormProps {
   onSuccess: () => void;
@@ -639,15 +639,15 @@ const CelebrityForm: React.FC<CelebrityFormProps> = ({ onSuccess }) => {
                   name="socialMedia.website" 
                   value={formState.socialMedia?.website || ''} 
                   onChange={handleChange} 
-                  placeholder="Official website URL"
+                  placeholder="Website URL"
                 />
               </div>
             </div>
           </TabsContent>
         </Tabs>
         
-        <div className="mt-6">
-          <Button type="submit" className="w-full">
+        <div className="flex justify-end mt-6">
+          <Button type="submit" className="w-full sm:w-auto">
             Add Celebrity
           </Button>
         </div>

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Celebrity } from "@/types/data";
 
@@ -30,7 +31,7 @@ export const fetchCelebrities = async (): Promise<{data: Celebrity[], error: any
       socialMedia: item.social_media ? 
         (typeof item.social_media === 'string' ? 
           JSON.parse(item.social_media) : 
-          item.social_media as Celebrity['socialMedia']),
+          item.social_media) as Celebrity['socialMedia'],
       interestingFacts: item.interesting_facts,
       nationality: item.nationality,
       languages: item.languages,
@@ -43,7 +44,7 @@ export const fetchCelebrities = async (): Promise<{data: Celebrity[], error: any
       signature: item.signature ? 
         (typeof item.signature === 'string' ? 
           JSON.parse(item.signature) : 
-          item.signature as Celebrity['signature']),
+          item.signature) as Celebrity['signature'],
       measurements: item.measurements,
       dietFitness: item.diet_fitness,
       styleEvolution: item.style_evolution,
@@ -96,7 +97,7 @@ export const getCelebrityById = async (id: string): Promise<{data: Celebrity | n
       socialMedia: data.social_media ? 
         (typeof data.social_media === 'string' ? 
           JSON.parse(data.social_media) : 
-          data.social_media as Celebrity['socialMedia']),
+          data.social_media) as Celebrity['socialMedia'],
       interestingFacts: data.interesting_facts,
       nationality: data.nationality,
       languages: data.languages,
@@ -109,7 +110,7 @@ export const getCelebrityById = async (id: string): Promise<{data: Celebrity | n
       signature: data.signature ? 
         (typeof data.signature === 'string' ? 
           JSON.parse(data.signature) : 
-          data.signature as Celebrity['signature']),
+          data.signature) as Celebrity['signature'],
       measurements: data.measurements,
       dietFitness: data.diet_fitness,
       styleEvolution: data.style_evolution,

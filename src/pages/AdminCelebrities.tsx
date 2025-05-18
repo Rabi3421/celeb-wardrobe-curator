@@ -49,7 +49,7 @@ const AdminCelebrities = () => {
         socialMedia: item.social_media ? 
           (typeof item.social_media === 'string' ? 
             JSON.parse(item.social_media) : 
-            item.social_media as Celebrity['socialMedia']),
+            item.social_media) as Celebrity['socialMedia'],
         interestingFacts: item.interesting_facts,
         nationality: item.nationality,
         languages: item.languages,
@@ -62,7 +62,7 @@ const AdminCelebrities = () => {
         signature: item.signature ? 
           (typeof item.signature === 'string' ? 
             JSON.parse(item.signature) : 
-            item.signature as Celebrity['signature']),
+            item.signature) as Celebrity['signature'],
         measurements: item.measurements,
         dietFitness: item.diet_fitness,
         styleEvolution: item.style_evolution,
