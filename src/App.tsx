@@ -18,6 +18,7 @@ import AffiliateDisclosure from "./pages/AffiliateDisclosure";
 import { HelmetProvider } from 'react-helmet-async';
 import { AdminAuthProvider } from './contexts/AdminAuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AdminLayout from "./components/admin/AdminLayout";
 
 // Admin pages
 import AdminDashboard from "./pages/AdminDashboard";
@@ -71,15 +72,15 @@ function App() {
               {/* Admin redirect - make this an exact match */}
               <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
               
-              {/* All other admin routes use AdminLayout which checks authentication */}
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/outfits" element={<AdminOutfits />} />
-              <Route path="/admin/tags" element={<AdminTags />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
-              <Route path="/admin/import-data" element={<AdminImportData />} />
-              <Route path="/admin/newsletter" element={<AdminNewsletterSubscribers />} />
-              <Route path="/admin/celebrities" element={<AdminCelebrities />} />
-              <Route path="/admin/blog" element={<AdminBlog />} />
+              {/* All admin routes wrapped with AdminLayout */}
+              <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+              <Route path="/admin/outfits" element={<AdminLayout><AdminOutfits /></AdminLayout>} />
+              <Route path="/admin/tags" element={<AdminLayout><AdminTags /></AdminLayout>} />
+              <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
+              <Route path="/admin/import-data" element={<AdminLayout><AdminImportData /></AdminLayout>} />
+              <Route path="/admin/newsletter" element={<AdminLayout><AdminNewsletterSubscribers /></AdminLayout>} />
+              <Route path="/admin/celebrities" element={<AdminLayout><AdminCelebrities /></AdminLayout>} />
+              <Route path="/admin/blog" element={<AdminLayout><AdminBlog /></AdminLayout>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
