@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Celebrity } from "@/types/data";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +12,7 @@ import {
   GraduationCap,
   Link,
   Award,
-  User
+  User as UserIcon
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -124,7 +123,7 @@ const CelebrityInfoSection: React.FC<CelebrityInfoSectionProps> = ({ celebrity }
                 
                 {celebrity.height && (
                   <li className="flex items-start">
-                    <User className="h-5 w-5 text-primary mr-3 mt-0.5" />
+                    <UserIcon className="h-5 w-5 text-primary mr-3 mt-0.5" />
                     <div>
                       <span className="block text-sm text-muted-foreground">Height</span>
                       <span className="font-medium">{celebrity.height}</span>

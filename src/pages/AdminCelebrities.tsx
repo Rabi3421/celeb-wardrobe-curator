@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Celebrity } from "@/types/data";
@@ -138,12 +137,24 @@ const AdminCelebrities: React.FC = () => {
         // Create proper socialMedia object that conforms to the Celebrity type definition
         const socialMedia = typeof celebrity.social_media === 'object' && celebrity.social_media !== null
           ? {
-              instagram: celebrity.social_media.instagram as string | undefined,
-              twitter: celebrity.social_media.twitter as string | undefined,
-              facebook: celebrity.social_media.facebook as string | undefined,
-              youtube: celebrity.social_media.youtube as string | undefined,
-              tiktok: celebrity.social_media.tiktok as string | undefined,
-              website: celebrity.social_media.website as string | undefined
+              instagram: typeof celebrity.social_media === 'object' && 'instagram' in celebrity.social_media 
+                ? (celebrity.social_media.instagram as string) || undefined 
+                : undefined,
+              twitter: typeof celebrity.social_media === 'object' && 'twitter' in celebrity.social_media 
+                ? (celebrity.social_media.twitter as string) || undefined 
+                : undefined,
+              facebook: typeof celebrity.social_media === 'object' && 'facebook' in celebrity.social_media 
+                ? (celebrity.social_media.facebook as string) || undefined 
+                : undefined,
+              youtube: typeof celebrity.social_media === 'object' && 'youtube' in celebrity.social_media 
+                ? (celebrity.social_media.youtube as string) || undefined 
+                : undefined,
+              tiktok: typeof celebrity.social_media === 'object' && 'tiktok' in celebrity.social_media 
+                ? (celebrity.social_media.tiktok as string) || undefined 
+                : undefined,
+              website: typeof celebrity.social_media === 'object' && 'website' in celebrity.social_media 
+                ? (celebrity.social_media.website as string) || undefined 
+                : undefined
             }
           : {};
           
