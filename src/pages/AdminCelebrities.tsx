@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Celebrity } from "@/types/data";
@@ -631,7 +632,7 @@ const AdminCelebrities: React.FC = () => {
                         <FormItem>
                           <FormLabel>Height</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="e.g., 5' 9\" (175 cm)" />
+                            <Input {...field} placeholder="e.g., 5' 9&quot; (175 cm)" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -685,7 +686,7 @@ const AdminCelebrities: React.FC = () => {
                       <FormItem>
                         <FormLabel>Education</FormLabel>
                         <FormDescription>
-                          Details about the celebrity's educational background
+                          Details about the celebrity&apos;s educational background
                         </FormDescription>
                         <FormControl>
                           <Textarea 
@@ -726,7 +727,7 @@ const AdminCelebrities: React.FC = () => {
                     name="awards"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Awards & Recognition</FormLabel>
+                        <FormLabel>Awards &amp; Recognition</FormLabel>
                         <FormControl>
                           <Textarea 
                             placeholder="List major awards, nominations, and honors received"
