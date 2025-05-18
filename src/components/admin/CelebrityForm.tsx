@@ -1,17 +1,16 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Award, Calendar, Globe, Image, Info, Star, Music, Film, 
+  Award, Calendar, Globe, Image, Info, Star,
   Camera, Instagram, Twitter, Facebook, Youtube, TikTok, 
-  Link, DollarSign, User, Languages
+  Link as LinkIcon, DollarSign, User, Languages
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Celebrity } from '@/types/data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { addCelebrity } from '@/services/api';
@@ -632,7 +631,7 @@ const CelebrityForm: React.FC<CelebrityFormProps> = ({ onSuccess }) => {
               
               <div className="grid gap-2">
                 <Label htmlFor="socialMedia.website">
-                  <Link className="inline mr-2 h-4 w-4" />
+                  <LinkIcon className="inline mr-2 h-4 w-4" />
                   Website
                 </Label>
                 <Input 
