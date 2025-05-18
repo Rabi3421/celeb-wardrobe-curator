@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Celebrity } from "@/types/data";
 import {
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Edit, Trash, Eye, Loader2, Calendar, MapPin } from "lucide-react";
+import { Plus, Search, Edit, Trash, Eye, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -21,9 +20,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { toast } from "@/components/ui/use-toast";
 import { 
@@ -499,7 +496,7 @@ const AdminCelebrities: React.FC = () => {
                 <TabsList className="mb-4">
                   <TabsTrigger value="basic">Basic Info</TabsTrigger>
                   <TabsTrigger value="biography">Biography</TabsTrigger>
-                  <TabsTrigger value="career">Career & Personal</TabsTrigger>
+                  <TabsTrigger value="career">Career &amp; Personal</TabsTrigger>
                   <TabsTrigger value="social">Social Media</TabsTrigger>
                 </TabsList>
                 
