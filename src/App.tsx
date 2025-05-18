@@ -38,58 +38,52 @@ function App() {
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/celebrities" element={<Celebrities />} />
-            
-            {/* Support both ID and slug-based routes for celebrities */}
-            <Route path="/celebrity/:id" element={<CelebrityProfile />} />
-            <Route path="/celebrity/s/:slug" element={<CelebrityProfile />} />
-            
-            <Route path="/outfits" element={<Outfits />} />
-            
-            {/* Support both ID and slug-based routes for outfits */}
-            <Route path="/outfit/:id" element={<OutfitDetail />} />
-            <Route path="/outfit/s/:slug" element={<OutfitDetail />} />
-            
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<BlogPost />} />
-            <Route path="/blog-topics" element={<BlogTopics />} />
-            <Route path="/blog-topic/:topic" element={<BlogTopic />} />
-            <Route path="/category/:category" element={<CategoryDetail />} />
-            <Route path="/categories" element={<Categories />} />
-            <Route path="/categories/:category" element={<Categories />} />
-            <Route path="/privacy-policy" element={<Privacy />} />
-            <Route path="/terms-of-service" element={<Terms />} />
-            <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
-            
-            {/* Admin routes */}
-            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="/admin/login" element={
-              <AdminAuthProvider>
-                <AdminLogin />
-              </AdminAuthProvider>
-            } />
-            
-            {/* Protected admin routes */}
-            <Route path="/admin/*" element={
-              <AdminAuthProvider>
-                <Routes>
-                  <Route path="/dashboard" element={<AdminDashboard />} />
-                  <Route path="/outfits" element={<AdminOutfits />} />
-                  <Route path="/tags" element={<AdminTags />} />
-                  <Route path="/settings" element={<AdminSettings />} />
-                  <Route path="/import-data" element={<AdminImportData />} />
-                  <Route path="/newsletter" element={<AdminNewsletterSubscribers />} />
-                  <Route path="/celebrities" element={<AdminCelebrities />} />
-                  <Route path="/blog" element={<AdminBlog />} />
-                </Routes>
-              </AdminAuthProvider>
-            } />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AdminAuthProvider>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/celebrities" element={<Celebrities />} />
+              
+              {/* Support both ID and slug-based routes for celebrities */}
+              <Route path="/celebrity/:id" element={<CelebrityProfile />} />
+              <Route path="/celebrity/s/:slug" element={<CelebrityProfile />} />
+              
+              <Route path="/outfits" element={<Outfits />} />
+              
+              {/* Support both ID and slug-based routes for outfits */}
+              <Route path="/outfit/:id" element={<OutfitDetail />} />
+              <Route path="/outfit/s/:slug" element={<OutfitDetail />} />
+              
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogPost />} />
+              <Route path="/blog-topics" element={<BlogTopics />} />
+              <Route path="/blog-topic/:topic" element={<BlogTopic />} />
+              <Route path="/category/:category" element={<CategoryDetail />} />
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/categories/:category" element={<Categories />} />
+              <Route path="/privacy-policy" element={<Privacy />} />
+              <Route path="/terms-of-service" element={<Terms />} />
+              <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
+              
+              {/* Admin login route - accessible without authentication */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              
+              {/* Admin redirect */}
+              <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+              
+              {/* All other admin routes use AdminLayout which checks authentication */}
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/outfits" element={<AdminOutfits />} />
+              <Route path="/admin/tags" element={<AdminTags />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/admin/import-data" element={<AdminImportData />} />
+              <Route path="/admin/newsletter" element={<AdminNewsletterSubscribers />} />
+              <Route path="/admin/celebrities" element={<AdminCelebrities />} />
+              <Route path="/admin/blog" element={<AdminBlog />} />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AdminAuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </HelmetProvider>

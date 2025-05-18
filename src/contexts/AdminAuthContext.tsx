@@ -17,6 +17,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        console.log("Auth state changed:", event, currentSession);
         setSession(currentSession);
         
         if (currentSession?.user) {
@@ -30,9 +31,11 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             lastLogin: new Date().toISOString()
           };
           
+          console.log("Setting user data:", userData);
           setUser(userData);
           setIsAuthenticated(true);
         } else {
+          console.log("No session or user, clearing auth state");
           setUser(null);
           setIsAuthenticated(false);
         }
@@ -44,6 +47,8 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Check for existing session on mount
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log("Initial session check:", session);
+      
       if (session) {
         setSession(session);
         
@@ -57,6 +62,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           lastLogin: new Date().toISOString()
         };
         
+        console.log("Setting initial user data:", userData);
         setUser(userData);
         setIsAuthenticated(true);
       }
@@ -90,6 +96,8 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
 
       if (data.user) {
+        console.log("Login successful, user data:", data.user);
+        
         // Check if user exists in admin_users table or create a new entry
         const { data: adminUser, error: adminError } = await supabase
           .from('admin_users')
@@ -159,6 +167,11 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         variant: "destructive",
       });
     } else {
+      console.log("User logged out successfully");
+      setUser(null);
+      setIsAuthenticated(false);
+      setSession(null);
+      
       toast({
         title: "Logged out",
         description: "You have been logged out successfully",

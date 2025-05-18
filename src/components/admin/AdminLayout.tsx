@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { 
@@ -27,12 +27,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const location = useLocation();
   const { user, logout, isAuthenticated } = useAdminAuth();
   
-  React.useEffect(() => {
+  useEffect(() => {
+    // Add console logs to help debug the authentication state
+    console.log("AdminLayout - isAuthenticated:", isAuthenticated);
+    console.log("AdminLayout - current path:", location.pathname);
+    console.log("AdminLayout - user:", user);
+    
     // If not authenticated and not on login page, redirect to login
     if (!isAuthenticated && !location.pathname.includes('/admin/login')) {
+      console.log("Redirecting to login page due to no authentication");
       navigate("/admin/login");
     }
-  }, [isAuthenticated, navigate, location.pathname]);
+  }, [isAuthenticated, navigate, location.pathname, user]);
 
   const navItems = [
     { path: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
@@ -49,7 +55,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     navigate("/admin/login");
   };
 
-  // If not authenticated, don't render admin layout
+  // If not authenticated, don't render admin layout - but don't redirect here
+  // We handle redirection in the useEffect instead
   if (!isAuthenticated) return null;
 
   return (

@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,14 @@ const AdminLogin: React.FC = () => {
     },
   });
 
-  // We'll handle redirect in useEffect separately - remove the redirect when component mounts
+  // Add useEffect to redirect when authentication state changes
+  useEffect(() => {
+    console.log("AdminLogin - isAuthenticated:", isAuthenticated);
+    if (isAuthenticated) {
+      console.log("User is authenticated, redirecting to dashboard");
+      navigate("/admin/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   const createTestUser = async (email: string, password: string) => {
     try {
@@ -125,6 +131,7 @@ const AdminLogin: React.FC = () => {
             // Attempt login again after creating user
             const retrySuccess = await login(data.email, data.password);
             if (retrySuccess) {
+              console.log("Login successful after creating test user");
               navigate("/admin/dashboard");
               return;
             }
@@ -137,6 +144,7 @@ const AdminLogin: React.FC = () => {
           variant: "destructive",
         });
       } else {
+        console.log("Login successful, navigating to dashboard");
         navigate("/admin/dashboard");
       }
     } finally {
