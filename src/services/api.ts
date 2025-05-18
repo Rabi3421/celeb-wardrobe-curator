@@ -28,6 +28,7 @@ export const fetchCelebrities = async (): Promise<{data: Celebrity[], error: any
       careerHighlights: item.career_highlights,
       personalLife: item.personal_life,
       awards: item.awards,
+      // Fix the type assertion syntax - move the semicolon outside the parentheses
       socialMedia: item.social_media ? 
         (typeof item.social_media === 'string' ? 
           JSON.parse(item.social_media) : 
@@ -41,6 +42,7 @@ export const fetchCelebrities = async (): Promise<{data: Celebrity[], error: any
       businessVentures: item.business_ventures,
       controversies: item.controversies,
       fanbaseNickname: item.fanbase_nickname,
+      // Fix the type assertion syntax
       signature: item.signature ? 
         (typeof item.signature === 'string' ? 
           JSON.parse(item.signature) : 
@@ -94,6 +96,7 @@ export const getCelebrityById = async (id: string): Promise<{data: Celebrity | n
       careerHighlights: data.career_highlights,
       personalLife: data.personal_life,
       awards: data.awards,
+      // Fix the type assertion syntax
       socialMedia: data.social_media ? 
         (typeof data.social_media === 'string' ? 
           JSON.parse(data.social_media) : 
@@ -107,6 +110,7 @@ export const getCelebrityById = async (id: string): Promise<{data: Celebrity | n
       businessVentures: data.business_ventures,
       controversies: data.controversies,
       fanbaseNickname: data.fanbase_nickname,
+      // Fix the type assertion syntax
       signature: data.signature ? 
         (typeof data.signature === 'string' ? 
           JSON.parse(data.signature) : 

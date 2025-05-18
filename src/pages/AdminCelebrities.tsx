@@ -46,6 +46,7 @@ const AdminCelebrities = () => {
         careerHighlights: item.career_highlights,
         personalLife: item.personal_life,
         awards: item.awards,
+        // Fix the type assertion syntax
         socialMedia: item.social_media ? 
           (typeof item.social_media === 'string' ? 
             JSON.parse(item.social_media) : 
@@ -59,6 +60,7 @@ const AdminCelebrities = () => {
         businessVentures: item.business_ventures,
         controversies: item.controversies,
         fanbaseNickname: item.fanbase_nickname,
+        // Fix the type assertion syntax
         signature: item.signature ? 
           (typeof item.signature === 'string' ? 
             JSON.parse(item.signature) : 
