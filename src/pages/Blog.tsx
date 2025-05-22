@@ -25,9 +25,15 @@ const Blog: React.FC = () => {
   useEffect(() => {
     const loadBlogPosts = async () => {
       setIsLoading(true);
-      const data = await fetchBlogPosts();
-      setBlogPosts(data);
-      setIsLoading(false);
+      try {
+        const data = await fetchBlogPosts();
+        console.log("Fetched blog posts:", data);
+        setBlogPosts(data);
+      } catch (error) {
+        console.error("Error loading blog posts:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     loadBlogPosts();
@@ -136,6 +142,8 @@ const Blog: React.FC = () => {
     );
   }
 
+  console.log("Blog posts in render:", blogPosts.length, blogPosts);
+
   return (
     <PageLayout>
       <div className="container-custom py-12">
@@ -181,33 +189,39 @@ const Blog: React.FC = () => {
         <div className="mb-12">
           <SectionHeader title="Featured Stories" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            {featuredPosts.map((post) => (
-              <div key={post.id} className="animate-fade-in">
-                <div className="outfit-card h-full overflow-hidden group transition-all duration-300 hover:shadow-xl">
-                  <div className="relative">
-                    <img
-                      src={post.image}
-                      alt={post.title}
-                      className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
-                      <div className="flex items-center justify-between text-xs text-white mb-2">
-                        <span>{post.date}</span>
-                        <span className="bg-primary/80 px-2 py-0.5 rounded-full">
-                          {post.category}
-                        </span>
+            {featuredPosts.length > 0 ? (
+              featuredPosts.map((post) => (
+                <div key={post.id} className="animate-fade-in">
+                  <div className="outfit-card h-full overflow-hidden group transition-all duration-300 hover:shadow-xl">
+                    <div className="relative">
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
+                        <div className="flex items-center justify-between text-xs text-white mb-2">
+                          <span>{post.date}</span>
+                          <span className="bg-primary/80 px-2 py-0.5 rounded-full">
+                            {post.category}
+                          </span>
+                        </div>
+                        <h2 className="font-serif font-medium text-2xl text-white mb-2">
+                          {post.title}
+                        </h2>
+                        <p className="text-white/80 text-sm line-clamp-2">
+                          {post.excerpt}
+                        </p>
                       </div>
-                      <h2 className="font-serif font-medium text-2xl text-white mb-2">
-                        {post.title}
-                      </h2>
-                      <p className="text-white/80 text-sm line-clamp-2">
-                        {post.excerpt}
-                      </p>
                     </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-8">
+                <p className="text-muted-foreground">No featured posts available yet.</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -258,17 +272,25 @@ const Blog: React.FC = () => {
 
             <TabsContent value="all" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {blogPosts.slice(0, isExpanded ? blogPosts.length : initialPostsCount).map((post) => (
-                  <BlogPostCard
-                    key={post.id}
-                    id={post.id}
-                    title={post.title}
-                    excerpt={post.excerpt}
-                    image={post.image}
-                    date={post.date}
-                    category={post.category}
-                  />
-                ))}
+                {blogPosts.length > 0 ? (
+                  blogPosts.slice(0, isExpanded ? blogPosts.length : initialPostsCount).map((post) => (
+                    <BlogPostCard
+                      key={post.id}
+                      id={post.id}
+                      title={post.title}
+                      excerpt={post.excerpt}
+                      image={post.image}
+                      date={post.date}
+                      category={post.category}
+                      slug={post.slug}
+                      author={post.author}
+                    />
+                  ))
+                ) : (
+                  <div className="col-span-3 text-center py-8">
+                    <p className="text-muted-foreground">No blog posts available yet.</p>
+                  </div>
+                )}
               </div>
               {!isExpanded && blogPosts.length > initialPostsCount && (
                 <div className="flex justify-center mt-8">

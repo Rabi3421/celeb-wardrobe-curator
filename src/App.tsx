@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Celebrities from "./pages/Celebrities";
@@ -54,10 +53,12 @@ function App() {
               <Route path="/outfit/:id" element={<OutfitDetail />} />
               <Route path="/outfit/s/:slug" element={<OutfitDetail />} />
               
+              {/* Blog routes */}
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:id" element={<BlogPost />} />
-              <Route path="/blog-topics" element={<BlogTopics />} />
-              <Route path="/blog-topic/:topic" element={<BlogTopic />} />
+              <Route path="/blog/topics" element={<BlogTopics />} />
+              <Route path="/blog/topic/:topic" element={<BlogTopic />} />
+              
               <Route path="/category/:category" element={<CategoryDetail />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/categories/:category" element={<Categories />} />
@@ -65,6 +66,7 @@ function App() {
               <Route path="/terms-of-service" element={<Terms />} />
               <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
               
+              {/* Admin routes */}
               {/* Admin login route - accessible without authentication */}
               <Route path="/admin/login" element={<AdminLogin />} />
               

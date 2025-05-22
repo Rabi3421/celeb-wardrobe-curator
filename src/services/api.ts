@@ -466,7 +466,7 @@ export const fetchOutfitById = async (id: string): Promise<Outfit | null> => {
 // Fetch blog posts
 export const fetchBlogPosts = async (limit?: number, categoryFilter?: string): Promise<BlogPost[]> => {
   try {
-    let query = supabase.from('blog_posts').select('*');
+    let query = supabase.from('blog_posts').select('*').order('date', { ascending: false });
     
     if (limit) {
       query = query.limit(limit);
@@ -479,6 +479,7 @@ export const fetchBlogPosts = async (limit?: number, categoryFilter?: string): P
     const { data, error } = await query;
 
     if (error) {
+      console.error('Error fetching blog posts:', error);
       throw error;
     }
 
