@@ -32,7 +32,7 @@ const Index: React.FC = () => {
       setIsLoading(true);
       const [celebritiesData, outfitsData, blogPostsData, productsData] = await Promise.all([
         fetchCelebrities(),
-        fetchOutfits(),
+        fetchOutfits(3),
         fetchBlogPosts(),
         fetchAffiliateProducts()
       ]);
