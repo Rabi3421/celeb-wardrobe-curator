@@ -25,7 +25,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   author = "Celebrity Persona"
 }) => {
   // Use slug if available, otherwise fallback to ID for SEO-friendly URLs
-  const postLink = slug ? `/blog/${slug}` : `/blog/${id}`;
+  const postLink = slug ? `/blog/s/${slug}` : `/blog/${id}`;
   
   // Format the date for better readability and SEO
   const formattedDate = new Date(date).toLocaleDateString('en-US', {

@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Celebrities from "./pages/Celebrities";
@@ -56,6 +57,7 @@ function App() {
               {/* Blog routes */}
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:id" element={<BlogPost />} />
+              <Route path="/blog/s/:slug" element={<BlogPost />} />
               <Route path="/blog/topics" element={<BlogTopics />} />
               <Route path="/blog/topic/:topic" element={<BlogTopic />} />
               

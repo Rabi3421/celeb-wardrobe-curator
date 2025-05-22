@@ -1,22 +1,73 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "@/components/layout/PageLayout";
-import { blogPosts } from "@/data/mockData";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageSquare, Clock, Calendar, User, ArrowLeft, Share } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO/SEO";
+import { supabase } from "@/integrations/supabase/client";
+import { BlogPost as BlogPostType } from "@/types/data";
 
 const BlogPost: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const post = blogPosts.find((post) => post.id === id);
+  const { id, slug } = useParams<{ id?: string; slug?: string }>();
+  const [post, setPost] = useState<BlogPostType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   
   const [likes, setLikes] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState<Array<{author: string, text: string, date: string}>>([]);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPostType[]>([]);
+
+  useEffect(() => {
+    const fetchBlogPost = async () => {
+      setIsLoading(true);
+      try {
+        let query = supabase.from('blog_posts').select('*');
+        
+        // Fetch by slug if available, otherwise try by ID
+        if (slug) {
+          query = query.eq('slug', slug);
+        } else if (id) {
+          query = query.eq('id', id);
+        }
+
+        const { data, error } = await query.single();
+        
+        if (error) {
+          console.error("Error fetching blog post:", error);
+          setPost(null);
+        } else {
+          console.log("Fetched blog post:", data);
+          setPost(data);
+          
+          // Fetch related posts based on category
+          if (data) {
+            const { data: relatedData, error: relatedError } = await supabase
+              .from('blog_posts')
+              .select('*')
+              .eq('category', data.category)
+              .neq('id', data.id)
+              .limit(3);
+              
+            if (!relatedError && relatedData) {
+              setRelatedPosts(relatedData);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error in blog post fetch:", error);
+        setPost(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchBlogPost();
+  }, [id, slug]);
 
   // Function to handle post like
   const handleLike = () => {
@@ -60,6 +111,16 @@ const BlogPost: React.FC = () => {
     });
   };
 
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="container-custom py-16 text-center">
+          <p className="text-muted-foreground">Loading blog post...</p>
+        </div>
+      </PageLayout>
+    );
+  }
+
   if (!post) {
     return (
       <PageLayout>
@@ -72,6 +133,9 @@ const BlogPost: React.FC = () => {
           <p className="text-muted-foreground">
             The blog post you're looking for doesn't exist or has been removed.
           </p>
+          <Link to="/blog" className="btn-primary mt-4 inline-block">
+            Return to Blog
+          </Link>
         </div>
       </PageLayout>
     );
@@ -104,11 +168,6 @@ const BlogPost: React.FC = () => {
     }
   };
 
-  // Get related posts (just for example - in real app would use tags/categories)
-  const relatedPosts = blogPosts
-    .filter(p => p.id !== post.id && p.category === post.category)
-    .slice(0, 3);
-
   // Related topics based on the post category
   const relatedTopics = [
     { name: post?.category || "Fashion", slug: (post?.category || "fashion").toLowerCase().replace(/ /g, "-") },
@@ -117,7 +176,7 @@ const BlogPost: React.FC = () => {
   ];
 
   // Keywords for the blog post based on title and category
-  const keywords = `${post.title}, ${post.category}, celebrity fashion, ${post.author}, fashion blog`;
+  const keywords = post.keywords || `${post.title}, ${post.category}, celebrity fashion, ${post.author}, fashion blog`;
 
   return (
     <PageLayout>
@@ -305,7 +364,7 @@ const BlogPost: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {relatedPosts.map(relatedPost => (
                   <Card key={relatedPost.id} className="overflow-hidden">
-                    <Link to={`/blog/${relatedPost.id}`} className="block">
+                    <Link to={`/blog/s/${relatedPost.slug}`} className="block">
                       <div className="aspect-video overflow-hidden">
                         <img 
                           src={relatedPost.image} 
