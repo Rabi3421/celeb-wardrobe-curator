@@ -46,13 +46,28 @@ const CelebrityProfile: React.FC = () => {
     queryFn: async () => {
       if (!identifier) return null;
       
-      // Try fetching by slug first if that's what we have, otherwise by ID
-      const celebData = slug 
-        ? await fetchCelebrityBySlug(slug)
-        : await getCelebrityById(id!);
+      console.log("Fetching celebrity with identifier:", identifier);
       
-      if (!celebData) throw new Error("Celebrity not found");
-      return celebData;
+      try {
+        // Check if the identifier is a UUID (for id-based routes)
+        const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(identifier);
+        
+        // If it's a UUID, fetch by ID, otherwise fetch by slug
+        const celebData = isUuid 
+          ? await getCelebrityById(identifier)
+          : await fetchCelebrityBySlug(identifier);
+        
+        if (!celebData) {
+          console.error("Celebrity not found for identifier:", identifier);
+          throw new Error("Celebrity not found");
+        }
+        
+        console.log("Found celebrity:", celebData.name);
+        return celebData;
+      } catch (error) {
+        console.error("Error fetching celebrity:", error);
+        throw error;
+      }
     }
   });
 

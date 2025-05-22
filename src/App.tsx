@@ -44,9 +44,12 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/celebrities" element={<Celebrities />} />
               
-              {/* Support both ID and slug-based routes for celebrities */}
-              <Route path="/celebrity/:id" element={<CelebrityProfile />} />
-              <Route path="/celebrity/s/:slug" element={<CelebrityProfile />} />
+              {/* Support both slug and ID routes for celebrities */}
+              <Route path="/celebrity/:slug" element={<CelebrityProfile />} />
+              <Route path="/celebrity/id/:id" element={<CelebrityProfile />} />
+              
+              {/* Maintain backward compatibility with the old slug route */}
+              <Route path="/celebrity/s/:slug" element={<Navigate to="/celebrity/:slug" replace />} />
               
               <Route path="/outfits" element={<Outfits />} />
               

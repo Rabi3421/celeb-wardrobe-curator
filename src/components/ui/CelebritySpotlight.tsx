@@ -33,6 +33,10 @@ const CelebritySpotlight: React.FC<CelebritySpotlightProps> = ({
   description,
   products
 }) => {
+  // Determine if id is a slug or UUID
+  const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id);
+  const celebrityUrl = isUuid ? `/celebrity/id/${id}` : `/celebrity/${id}`;
+
   return (
     <div className="max-w-6xl mx-auto">
       <Card className="overflow-hidden border-none shadow-xl rounded-2xl bg-gradient-to-r from-pastel-pink/70 to-pastel-peach/70">
@@ -60,7 +64,7 @@ const CelebritySpotlight: React.FC<CelebritySpotlightProps> = ({
                 <BadgeCheck className="text-primary h-5 w-5" />
                 <span className="text-white text-sm font-medium">Verified Style</span>
               </div>
-              <Link to={`/celebrity/${id}`} className="block group">
+              <Link to={celebrityUrl} className="block group">
                 <h3 className="text-white font-serif font-medium text-2xl md:text-3xl group-hover:text-primary transition-colors">
                   {name}
                 </h3>
@@ -134,7 +138,7 @@ const CelebritySpotlight: React.FC<CelebritySpotlightProps> = ({
                 asChild
                 size="lg"
               >
-                <Link to={`/celebrity/${id}`}>View Full Profile</Link>
+                <Link to={celebrityUrl}>View Full Profile</Link>
               </Button>
               <Button 
                 variant="outline"
