@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Menu } from "lucide-react";
@@ -34,8 +35,12 @@ const Navbar: React.FC = () => {
       );
 
       if (matchedCelebrity) {
-        // If match found, navigate directly to the celebrity profile
-        navigate(`/celebrity/${matchedCelebrity.id}`);
+        // If match found, navigate using slug if available, fallback to ID
+        if (matchedCelebrity.slug) {
+          navigate(`/celebrity/${matchedCelebrity.slug}`);
+        } else {
+          navigate(`/celebrity/id/${matchedCelebrity.id}`);
+        }
       } else {
         // Otherwise, navigate to the search results page
         navigate(`/celebrities?search=${encodeURIComponent(searchTerm.trim())}`);
