@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AffiliateProduct, BlogPost, Celebrity, CategoryItem, Outfit } from "@/types/data";
 import { Json } from "@/integrations/supabase/types";
@@ -102,6 +103,26 @@ export const generateUniqueOutfitSlug = async (title: string, excludeId?: string
   return slug;
 };
 
+// Helper function to get outfit count for a celebrity
+const getOutfitCountForCelebrity = async (celebrityId: string): Promise<number> => {
+  try {
+    const { data, error, count } = await supabase
+      .from('outfits')
+      .select('*', { count: 'exact', head: true })
+      .eq('celebrity_id', celebrityId);
+
+    if (error) {
+      console.error('Error counting outfits for celebrity:', celebrityId, error);
+      return 0;
+    }
+
+    return count || 0;
+  } catch (error) {
+    console.error('Error counting outfits for celebrity:', celebrityId, error);
+    return 0;
+  }
+};
+
 // Fetch celebrities from the database
 export const fetchCelebrities = async (): Promise<Celebrity[]> => {
   try {
@@ -111,8 +132,8 @@ export const fetchCelebrities = async (): Promise<Celebrity[]> => {
       throw error;
     }
 
-    // Convert database fields to match our Celebrity type
-    const formattedData: Celebrity[] = data.map(item => {
+    // Convert database fields to match our Celebrity type and fetch outfit counts
+    const formattedData: Celebrity[] = await Promise.all(data.map(async (item) => {
       // Process social media and signature objects with proper typing
       const socialMediaDefault = { instagram: "", twitter: "", facebook: "", youtube: "", tiktok: "", website: "" };
       const signatureDefault = { look: "", accessories: "", designers: "", perfume: "" };
@@ -126,12 +147,15 @@ export const fetchCelebrities = async (): Promise<Celebrity[]> => {
         item.signature,
         signatureDefault
       );
+
+      // Get actual outfit count from outfits table
+      const actualOutfitCount = await getOutfitCountForCelebrity(item.id);
       
       return {
         id: item.id,
         name: item.name,
         image: item.image,
-        outfitCount: item.outfitcount || 0,
+        outfitCount: actualOutfitCount, // Use actual count instead of stored value
         bio: item.bio,
         category: item.category,
         styleType: item.style_type,
@@ -162,7 +186,7 @@ export const fetchCelebrities = async (): Promise<Celebrity[]> => {
         publicPerception: item.public_perception,
         brandEndorsements: item.brand_endorsements
       };
-    });
+    }));
 
     return formattedData;
   } catch (error) {
@@ -202,12 +226,15 @@ export const getCelebrityById = async (id: string): Promise<Celebrity | null> =>
       signatureDefault
     );
 
+    // Get actual outfit count
+    const actualOutfitCount = await getOutfitCountForCelebrity(data.id);
+
     // Convert database fields to match our Celebrity type
     const celebrity: Celebrity = {
       id: data.id,
       name: data.name,
       image: data.image,
-      outfitCount: data.outfitcount || 0,
+      outfitCount: actualOutfitCount, // Use actual count
       bio: data.bio,
       category: data.category,
       styleType: data.style_type,
@@ -379,11 +406,14 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
       signatureDefault
     );
 
+    // Get actual outfit count
+    const actualOutfitCount = await getOutfitCountForCelebrity(data.id);
+
     const celebrity: Celebrity = {
       id: data.id,
       name: data.name,
       image: data.image,
-      outfitCount: data.outfitcount || 0,
+      outfitCount: actualOutfitCount, // Use actual count
       bio: data.bio,
       category: data.category,
       styleType: data.style_type,
