@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -291,8 +292,102 @@ const CelebrityProfile: React.FC = () => {
         <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-pastel-pink/20 blur-3xl"></div>
       </section>
 
-      {/* Celebrity Content Tabs */}
+      {/* Outfits Section - Now displayed directly after profile */}
       <section className="container-custom py-12">
+        {/* Latest Look */}
+        {outfits.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <SectionHeader title="Latest Look" className="mb-0" />
+              <Badge variant="outline" className="text-xs font-medium py-1">
+                New
+              </Badge>
+            </div>
+            <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-r from-pastel-blue/30 to-pastel-lavender/30">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                <div className="relative aspect-[3/4]">
+                  <img 
+                    src={outfits[0].image} 
+                    alt={outfits[0].title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex flex-col justify-center p-8">
+                  <div className="mb-2">
+                    <Badge className="bg-pastel-mint text-primary-foreground border-none">
+                      {outfits[0].occasion || "Casual"}
+                    </Badge>
+                  </div>
+                  <h2 className="font-serif text-3xl font-medium mb-4">{outfits[0].title}</h2>
+                  <p className="text-muted-foreground mb-6">{outfits[0].description}</p>
+                  <div className="flex items-center space-x-4 mb-8">
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{outfits[0].date ? new Date(outfits[0].date).toLocaleDateString() : "Recent"}</span>
+                    </div>
+                    {outfits[0].tags && outfits[0].tags.length > 0 && (
+                      <div className="flex items-center space-x-2">
+                        <Link className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{outfits[0].tags[0]}</span>
+                      </div>
+                    )}
+                  </div>
+                  <Button 
+                    className="bg-primary text-white hover:bg-primary/90 w-fit" 
+                    asChild
+                    size="lg"
+                  >
+                    <a href={`/outfit/${outfits[0].slug || outfits[0].id}`}>View Outfit Details</a>
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+        
+        {/* All Outfits */}
+        {isLoadingOutfits ? (
+          <div className="text-center py-8">
+            <div className="h-8 w-8 animate-spin mx-auto border-4 border-primary border-t-transparent rounded-full"></div>
+            <p className="text-muted-foreground mt-4">Loading outfits...</p>
+          </div>
+        ) : outfits.length > 0 ? (
+          <div>
+            <SectionHeader 
+              title="All Outfits" 
+              subtitle={`Browse ${celebrity.name}'s complete collection of ${outfits.length} outfits`} 
+            />
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+              {outfits.map((outfit) => (
+                <OutfitCard
+                  key={outfit.id}
+                  id={outfit.id}
+                  image={outfit.image}
+                  celebrity={outfit.celebrity || celebrity.name}
+                  celebrityId={outfit.celebrityId}
+                  title={outfit.title}
+                  description={outfit.description}
+                  date={outfit.date}
+                  occasion={outfit.occasion}
+                  slug={outfit.slug}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-muted/20 rounded-lg">
+            <Shirt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-medium mb-2">No outfits found</h3>
+            <p className="text-muted-foreground">
+              No outfits have been added for {celebrity.name} yet.
+            </p>
+          </div>
+        )}
+      </section>
+
+      {/* Celebrity Information Tabs */}
+      <section className="container-custom py-12 border-t">
         <Tabs defaultValue="info" className="w-full" onValueChange={setActiveTab}>
           <div className="border-b mb-8">
             <TabsList className="w-full justify-start bg-transparent h-12">
@@ -302,13 +397,6 @@ const CelebrityProfile: React.FC = () => {
               >
                 <User className="h-4 w-4 mr-2" />
                 Biography
-              </TabsTrigger>
-              <TabsTrigger 
-                value="outfits"
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
-              >
-                <Shirt className="h-4 w-4 mr-2" />
-                Outfits
               </TabsTrigger>
               <TabsTrigger 
                 value="style"
@@ -330,146 +418,6 @@ const CelebrityProfile: React.FC = () => {
           {/* Biography & Information Tab */}
           <TabsContent value="info">
             <CelebrityInfoSection celebrity={celebrity} />
-          </TabsContent>
-          
-          {/* Outfits Tab */}
-          <TabsContent value="outfits" className="space-y-12">
-            {/* Latest Look */}
-            {outfits.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <SectionHeader title="Latest Look" className="mb-0" />
-                  <Badge variant="outline" className="text-xs font-medium py-1">
-                    New
-                  </Badge>
-                </div>
-                <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-r from-pastel-blue/30 to-pastel-lavender/30">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-                    <div className="relative aspect-[3/4]">
-                      <img 
-                        src={outfits[0].image} 
-                        alt={outfits[0].title}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex flex-col justify-center p-8">
-                      <div className="mb-2">
-                        <Badge className="bg-pastel-mint text-primary-foreground border-none">
-                          {outfits[0].occasion || "Casual"}
-                        </Badge>
-                      </div>
-                      <h2 className="font-serif text-3xl font-medium mb-4">{outfits[0].title}</h2>
-                      <p className="text-muted-foreground mb-6">{outfits[0].description}</p>
-                      <div className="flex items-center space-x-4 mb-8">
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{outfits[0].date ? new Date(outfits[0].date).toLocaleDateString() : "Recent"}</span>
-                        </div>
-                        {outfits[0].tags && outfits[0].tags.length > 0 && (
-                          <div className="flex items-center space-x-2">
-                            <Link className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm">{outfits[0].tags[0]}</span>
-                          </div>
-                        )}
-                      </div>
-                      <Button 
-                        className="bg-primary text-white hover:bg-primary/90 w-fit" 
-                        asChild
-                        size="lg"
-                      >
-                        <a href={`/outfit/${outfits[0].slug || outfits[0].id}`}>View Outfit Details</a>
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            )}
-            
-            {/* All Outfits */}
-            {isLoadingOutfits ? (
-              <div className="text-center py-8">
-                <div className="h-8 w-8 animate-spin mx-auto border-4 border-primary border-t-transparent rounded-full"></div>
-                <p className="text-muted-foreground mt-4">Loading outfits...</p>
-              </div>
-            ) : outfits.length > 0 ? (
-              <div>
-                <SectionHeader 
-                  title="All Outfits" 
-                  subtitle={`Browse ${celebrity.name}'s complete collection of ${outfits.length} outfits`} 
-                />
-                
-                {/* Group outfits by occasion */}
-                {(() => {
-                  // Group outfits by occasion
-                  const occasionGroups: Record<string, Outfit[]> = {};
-                  
-                  outfits.forEach(outfit => {
-                    const occasion = outfit.occasion || "Other";
-                    if (!occasionGroups[occasion]) {
-                      occasionGroups[occasion] = [];
-                    }
-                    occasionGroups[occasion].push(outfit);
-                  });
-
-                  return (
-                    <Tabs defaultValue={Object.keys(occasionGroups)[0] || "all"} className="mt-8">
-                      <div className="flex justify-between items-center mb-6 flex-wrap">
-                        <div className="flex items-center gap-3 mb-4 md:mb-0">
-                          <h3 className="font-medium">Filter by occasion:</h3>
-                          <TabsList className="bg-muted/50 p-1">
-                            {Object.keys(occasionGroups).map((occasion) => (
-                              <TabsTrigger
-                                key={occasion}
-                                value={occasion}
-                                className="data-[state=active]:bg-white"
-                              >
-                                {occasion}
-                              </TabsTrigger>
-                            ))}
-                          </TabsList>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" className="h-9">
-                            <Grid3x3 className="h-4 w-4 mr-2" />
-                            Grid
-                          </Button>
-                        </div>
-                      </div>
-
-                      {Object.entries(occasionGroups).map(([occasion, outfitList]) => (
-                        <TabsContent key={occasion} value={occasion} className="mt-0">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                            {outfitList.map((outfit) => (
-                              <OutfitCard
-                                key={outfit.id}
-                                id={outfit.id}
-                                image={outfit.image}
-                                celebrity={outfit.celebrity || celebrity.name}
-                                celebrityId={outfit.celebrityId}
-                                title={outfit.title}
-                                description={outfit.description}
-                                date={outfit.date}
-                                occasion={outfit.occasion}
-                                slug={outfit.slug}
-                              />
-                            ))}
-                          </div>
-                        </TabsContent>
-                      ))}
-                    </Tabs>
-                  );
-                })()}
-              </div>
-            ) : (
-              <div className="text-center py-12 bg-muted/20 rounded-lg">
-                <Shirt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-medium mb-2">No outfits found</h3>
-                <p className="text-muted-foreground">
-                  No outfits have been added for {celebrity.name} yet.
-                </p>
-              </div>
-            )}
           </TabsContent>
           
           {/* Style Analysis Tab */}
