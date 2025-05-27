@@ -36,6 +36,7 @@ const Index: React.FC = () => {
         fetchAffiliateProducts()
       ]);
 
+      console.log("Loaded celebrities:", celebritiesData.length);
       setCelebrities(celebritiesData);
       setOutfits(outfitsData);
       setBlogPosts(blogPostsData);
@@ -51,6 +52,8 @@ const Index: React.FC = () => {
   const featuredCelebrities = celebrities.slice(0, 4);
   const topCelebrities = celebrities.slice(0, 4); // Top 4 celebrities for the profiles section
   const recentBlogPosts = blogPosts.slice(0, 3);
+
+  console.log("Top celebrities for display:", topCelebrities.length);
 
   // Keep the hardcoded testimonials for now, as they're not part of the core data model
   const testimonials = [
@@ -310,26 +313,36 @@ const Index: React.FC = () => {
         </div>
       </section>
 
-      {/* Celebrity Profiles Section */}
-      <section className="py-16 bg-secondary">
+      {/* Featured Celebrity Profiles Section - Made more visible */}
+      <section className="py-16 bg-muted/50">
         <div className="container-custom">
           <SectionHeader
             title="Featured Celebrity Profiles"
             viewAllLink="/celebrities"
             viewAllText="View All Profiles"
           />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            {topCelebrities.map((celebrity) => (
-              <CelebrityCard
-                key={celebrity.id}
-                id={celebrity.id}
-                name={celebrity.name}
-                image={celebrity.image}
-                outfitCount={celebrity.outfitCount || 0}
-                slug={celebrity.slug}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Loading celebrities...</p>
+            </div>
+          ) : topCelebrities.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+              {topCelebrities.map((celebrity) => (
+                <CelebrityCard
+                  key={celebrity.id}
+                  id={celebrity.id}
+                  name={celebrity.name}
+                  image={celebrity.image}
+                  outfitCount={celebrity.outfitCount || 0}
+                  slug={celebrity.slug}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No celebrities available at the moment.</p>
+            </div>
+          )}
         </div>
       </section>
 
