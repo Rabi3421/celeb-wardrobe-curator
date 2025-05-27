@@ -17,6 +17,91 @@ function parseJsonField<T>(jsonValue: Json | null, defaultValue: T): T {
   return jsonValue as unknown as T;
 }
 
+// Enhanced slug generation function
+export const generateSlug = (text: string): string => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove special characters except hyphens and spaces
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+};
+
+// Check if slug already exists in celebrities table
+export const checkCelebritySlugExists = async (slug: string, excludeId?: string): Promise<boolean> => {
+  try {
+    let query = supabase.from('celebrities').select('id').eq('slug', slug);
+    
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error checking celebrity slug:', error);
+      return false;
+    }
+    
+    return data.length > 0;
+  } catch (error) {
+    console.error('Error checking celebrity slug:', error);
+    return false;
+  }
+};
+
+// Check if slug already exists in outfits table
+export const checkOutfitSlugExists = async (slug: string, excludeId?: string): Promise<boolean> => {
+  try {
+    let query = supabase.from('outfits').select('id').eq('slug', slug);
+    
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error checking outfit slug:', error);
+      return false;
+    }
+    
+    return data.length > 0;
+  } catch (error) {
+    console.error('Error checking outfit slug:', error);
+    return false;
+  }
+};
+
+// Generate unique slug for celebrity
+export const generateUniqueCelebritySlug = async (name: string, excludeId?: string): Promise<string> => {
+  let baseSlug = generateSlug(name);
+  let slug = baseSlug;
+  let counter = 1;
+  
+  while (await checkCelebritySlugExists(slug, excludeId)) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+  
+  return slug;
+};
+
+// Generate unique slug for outfit
+export const generateUniqueOutfitSlug = async (title: string, excludeId?: string): Promise<string> => {
+  let baseSlug = generateSlug(title);
+  let slug = baseSlug;
+  let counter = 1;
+  
+  while (await checkOutfitSlugExists(slug, excludeId)) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+  
+  return slug;
+};
+
 // Fetch celebrities from the database
 export const fetchCelebrities = async (): Promise<Celebrity[]> => {
   try {
@@ -167,6 +252,12 @@ export const fetchCelebrityById = getCelebrityById;
 // Add celebrity
 export const addCelebrity = async (celebrity: Partial<Celebrity>): Promise<{success: boolean, error: any, data?: any}> => {
   try {
+    // Generate unique slug if not provided
+    let slug = celebrity.slug;
+    if (!slug && celebrity.name) {
+      slug = await generateUniqueCelebritySlug(celebrity.name);
+    }
+
     // Format the data for the database
     const dbData = {
       name: celebrity.name,
@@ -174,7 +265,7 @@ export const addCelebrity = async (celebrity: Partial<Celebrity>): Promise<{succ
       bio: celebrity.bio,
       category: celebrity.category,
       style_type: celebrity.styleType,
-      slug: celebrity.slug,
+      slug: slug,
       birthdate: celebrity.birthdate,
       birthplace: celebrity.birthplace,
       height: celebrity.height,
@@ -218,11 +309,43 @@ export const addCelebrity = async (celebrity: Partial<Celebrity>): Promise<{succ
   }
 };
 
-export const generateSlug = (name: string): string => {
-  return name
-    .toLowerCase()
-    .replace(/ /g, '-')
-    .replace(/[^\w-]+/g, '');
+// Add outfit function
+export const addOutfit = async (outfit: Partial<Outfit>): Promise<{success: boolean, error: any, data?: any}> => {
+  try {
+    // Generate unique slug if not provided
+    let slug = outfit.slug;
+    if (!slug && outfit.title) {
+      slug = await generateUniqueOutfitSlug(outfit.title);
+    }
+
+    // Format the data for the database
+    const dbData = {
+      title: outfit.title,
+      image: outfit.image,
+      description: outfit.description,
+      full_description: outfit.fullDescription,
+      date: outfit.date,
+      celebrity_id: outfit.celebrityId,
+      occasion: outfit.occasion,
+      tags: outfit.tags || [],
+      slug: slug,
+      affiliate_link: outfit.affiliateLink,
+    };
+
+    const { data, error } = await supabase
+      .from('outfits')
+      .insert([dbData])
+      .select();
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true, error: null, data };
+  } catch (error) {
+    console.error('Error adding outfit:', error);
+    return { success: false, error };
+  }
 };
 
 // Fetch celebrity by slug
@@ -601,7 +724,12 @@ export default {
   fetchCelebrityById,
   fetchCelebrityBySlug,
   addCelebrity,
+  addOutfit,
   generateSlug,
+  generateUniqueCelebritySlug,
+  generateUniqueOutfitSlug,
+  checkCelebritySlugExists,
+  checkOutfitSlugExists,
   fetchOutfits,
   fetchOutfitBySlug,
   fetchOutfitById,

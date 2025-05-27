@@ -44,18 +44,15 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/celebrities" element={<Celebrities />} />
               
-              {/* Support both slug and ID routes for celebrities */}
+              {/* Celebrity routes - slug-based as primary */}
               <Route path="/celebrity/:slug" element={<CelebrityProfile />} />
               <Route path="/celebrity/id/:id" element={<CelebrityProfile />} />
               
-              {/* Maintain backward compatibility with the old slug route */}
-              <Route path="/celebrity/s/:slug" element={<Navigate to="/celebrity/:slug" replace />} />
-              
               <Route path="/outfits" element={<Outfits />} />
               
-              {/* Support both ID and slug-based routes for outfits */}
-              <Route path="/outfit/:id" element={<OutfitDetail />} />
-              <Route path="/outfit/s/:slug" element={<OutfitDetail />} />
+              {/* Outfit routes - slug-based as primary */}
+              <Route path="/outfit/:slug" element={<OutfitDetail />} />
+              <Route path="/outfit/id/:id" element={<OutfitDetail />} />
               
               {/* Blog routes */}
               <Route path="/blog" element={<Blog />} />
@@ -72,13 +69,8 @@ function App() {
               <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
               
               {/* Admin routes */}
-              {/* Admin login route - accessible without authentication */}
               <Route path="/admin/login" element={<AdminLogin />} />
-              
-              {/* Admin redirect - make this an exact match */}
               <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-              
-              {/* All other admin routes use AdminLayout which checks authentication */}
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/outfits" element={<AdminOutfits />} />
               <Route path="/admin/tags" element={<AdminTags />} />

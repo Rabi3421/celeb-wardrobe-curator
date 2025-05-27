@@ -26,9 +26,9 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
   occasion,
   slug
 }) => {
-  // Always prioritize slug-based URLs if available, fall back to ID-based URLs
-  const outfitUrl = slug ? `/outfit/s/${slug}` : `/outfit/${id}`;
-  const celebrityUrl = `/celebrity/s/${celebrityId}`;
+  // Always use slug if available, fall back to ID
+  const outfitUrl = slug ? `/outfit/${slug}` : `/outfit/${id}`;
+  const celebrityUrl = `/celebrity/${celebrityId}`;
 
   return (
     <div className="outfit-card rounded-lg shadow-sm overflow-hidden bg-white animate-fade-in">

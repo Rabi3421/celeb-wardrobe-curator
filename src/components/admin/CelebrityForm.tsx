@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -14,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { addCelebrity, generateSlug } from '@/services/api';
+import { addCelebrity, generateUniqueCelebritySlug } from '@/services/api';
 
 interface CelebrityFormProps {
   onSuccess: () => void;
@@ -28,6 +27,7 @@ const CelebrityForm: React.FC<CelebrityFormProps> = ({ onSuccess }) => {
     bio: '',
     category: '',
     styleType: '',
+    slug: '',
     socialMedia: {
       instagram: '',
       twitter: '',
@@ -62,6 +62,22 @@ const CelebrityForm: React.FC<CelebrityFormProps> = ({ onSuccess }) => {
         ...prev,
         [name]: value
       }));
+    }
+  };
+
+  // Auto-generate slug when name changes
+  const handleNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setFormState(prev => ({ ...prev, name }));
+    
+    // Auto-generate slug if name is provided and slug is empty
+    if (name && !formState.slug) {
+      try {
+        const generatedSlug = await generateUniqueCelebritySlug(name);
+        setFormState(prev => ({ ...prev, slug: generatedSlug }));
+      } catch (error) {
+        console.error('Error generating slug:', error);
+      }
     }
   };
   
@@ -109,9 +125,9 @@ const CelebrityForm: React.FC<CelebrityFormProps> = ({ onSuccess }) => {
     e.preventDefault();
     
     try {
-      // Generate a slug for the celebrity if not provided
+      // Generate a slug if not provided and name exists
       if (!formState.slug && formState.name) {
-        formState.slug = generateSlug(formState.name);
+        formState.slug = await generateUniqueCelebritySlug(formState.name);
       }
       
       const result = await addCelebrity(formState);
@@ -125,6 +141,7 @@ const CelebrityForm: React.FC<CelebrityFormProps> = ({ onSuccess }) => {
           bio: '',
           category: '',
           styleType: '',
+          slug: '',
           socialMedia: {
             instagram: '',
             twitter: '',
@@ -174,8 +191,26 @@ const CelebrityForm: React.FC<CelebrityFormProps> = ({ onSuccess }) => {
                   id="name" 
                   name="name" 
                   value={formState.name || ''} 
-                  onChange={handleChange} 
+                  onChange={handleNameChange}
+                  required
                 />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="slug">
+                  <LinkIcon className="inline mr-2 h-4 w-4" />
+                  Slug (URL-friendly name)
+                </Label>
+                <Input 
+                  id="slug" 
+                  name="slug" 
+                  value={formState.slug || ''} 
+                  onChange={handleChange}
+                  placeholder="Auto-generated from name"
+                />
+                <p className="text-xs text-muted-foreground">
+                  This will be used in the URL: /celebrity/{formState.slug || 'slug-name'}
+                </p>
               </div>
               
               <div className="grid gap-2">
