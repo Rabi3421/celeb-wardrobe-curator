@@ -88,7 +88,6 @@ const SeasonalTrendsCard: React.FC = () => {
           </div>
           <Button 
             variant="outline" 
-            size="sm" 
             className="w-full group-hover:bg-primary group-hover:text-white transition-colors"
             onClick={() => setShowTrendsDialog(true)}
           >
@@ -111,7 +110,7 @@ const SeasonalTrendsCard: React.FC = () => {
                 <div className="border-b pb-4">
                   <h3 className="font-medium text-xl mb-2 flex items-center">
                     {selectedTrendData.name}
-                    <Badge className={selectedTrendData.color} variant="secondary" size="sm">
+                    <Badge className={selectedTrendData.color} variant="secondary">
                       Trending
                     </Badge>
                   </h3>
@@ -149,7 +148,7 @@ const SeasonalTrendsCard: React.FC = () => {
                     <p className="text-muted-foreground text-sm mb-3">{trend.description}</p>
                     <div className="flex flex-wrap gap-1">
                       {trend.celebrities.map((celebrity) => (
-                        <Badge key={celebrity} variant="outline" size="sm">
+                        <Badge key={celebrity} variant="outline">
                           {celebrity}
                         </Badge>
                       ))}
