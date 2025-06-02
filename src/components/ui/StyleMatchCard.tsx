@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bookmark, User, Heart, Star } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 const StyleMatchCard: React.FC = () => {
@@ -177,6 +176,12 @@ const StyleMatchCard: React.FC = () => {
               <Bookmark className="h-6 w-6 mr-2 text-primary" />
               {selectedStyle ? 'Your Style Match' : 'Style Match Quiz'}
             </DialogTitle>
+            <DialogDescription>
+              {selectedStyle 
+                ? `Congratulations! We've found your celebrity style match. Discover your fashion personality and get personalized style tips.`
+                : `Take our quick 3-question quiz to discover which celebrity's style matches your personality and get personalized fashion advice.`
+              }
+            </DialogDescription>
           </DialogHeader>
           
           {selectedStyle ? (

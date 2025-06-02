@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import OutfitCard from "@/components/ui/OutfitCard";
@@ -6,11 +5,12 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import SeasonalTrendsCard from "@/components/ui/SeasonalTrendsCard";
 import StyleMatchCard from "@/components/ui/StyleMatchCard";
 import ShoppingGuidesCard from "@/components/ui/ShoppingGuidesCard";
+import SEO from "@/components/SEO/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Calendar, Heart, Tag } from "lucide-react";
+import { Search, Calendar, Heart, Tag, Home, ChevronRight } from "lucide-react";
 import { fetchOutfits } from "@/services/api";
 import { Outfit } from "@/types/data";
 import { useToast } from "@/hooks/use-toast";
@@ -71,10 +71,64 @@ const Outfits: React.FC = () => {
 
   // Featured outfit (could be based on any criteria)
   const featuredOutfit = outfits.length > 0 ? outfits[0] : null;
+
+  // Breadcrumbs for SEO
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Outfits", url: "/outfits" }
+  ];
+
+  // Generate structured data for outfit listings
+  const outfitListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Celebrity Outfit Inspirations",
+    "description": "Browse through our curated collection of celebrity outfits for your daily style inspiration.",
+    "numberOfItems": filteredOutfits.length,
+    "itemListElement": filteredOutfits.slice(0, 20).map((outfit, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Article",
+        "name": outfit.title,
+        "description": outfit.description,
+        "image": outfit.image,
+        "author": {
+          "@type": "Person",
+          "name": outfit.celebrity
+        },
+        "url": `${window.location.origin}/outfit/${outfit.id}`
+      }
+    }))
+  };
+
+  // FAQ Schema for common questions
+  const faqSchema = [
+    {
+      question: "How can I recreate celebrity outfits on a budget?",
+      answer: "Look for affordable alternatives at fast fashion retailers, thrift stores, and online marketplaces. Focus on similar silhouettes, colors, and styling rather than exact designer pieces."
+    },
+    {
+      question: "Where do celebrities get their outfits?",
+      answer: "Celebrities often work with stylists who source outfits from luxury designers, emerging brands, vintage pieces, and custom-made garments for red carpet events and public appearances."
+    },
+    {
+      question: "Can I buy the exact outfits celebrities wear?",
+      answer: "Some celebrity outfits are available for purchase, especially from mainstream brands. We provide affiliate links when possible to help you shop similar or exact pieces."
+    }
+  ];
   
   if (isLoading) {
     return (
       <PageLayout>
+        <SEO
+          title="Celebrity Outfit Inspirations | CelebrityPersona"
+          description="Browse through our curated collection of celebrity outfits for your daily style inspiration. From red carpet looks to casual street style."
+          keywords="celebrity outfits, celebrity fashion, style inspiration, celebrity looks"
+          breadcrumbs={breadcrumbs}
+          faqSchema={faqSchema}
+          jsonLd={outfitListSchema}
+        />
         <div className="container-custom py-16 text-center">
           <p className="text-muted-foreground">Loading outfits...</p>
         </div>
@@ -84,6 +138,30 @@ const Outfits: React.FC = () => {
   
   return (
     <PageLayout>
+      <SEO
+        title="Celebrity Outfit Inspirations | CelebrityPersona"
+        description="Browse through our curated collection of celebrity outfits for your daily style inspiration. From red carpet looks to casual street style - find your next fashion statement."
+        keywords="celebrity outfits, celebrity fashion, style inspiration, celebrity looks, red carpet fashion, street style"
+        breadcrumbs={breadcrumbs}
+        faqSchema={faqSchema}
+        jsonLd={outfitListSchema}
+        ogImage="/images/hero_img.webp"
+      />
+
+      {/* Breadcrumbs */}
+      <div className="bg-gray-50 py-3">
+        <div className="container-custom">
+          <nav className="flex items-center space-x-2 text-sm">
+            <a href="/" className="text-muted-foreground hover:text-primary flex items-center">
+              <Home className="h-4 w-4 mr-1" />
+              Home
+            </a>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            <span className="text-primary font-medium">Outfits</span>
+          </nav>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-pastel-peach to-pastel-pink py-16">
         <div className="container-custom text-center">

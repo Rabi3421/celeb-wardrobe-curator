@@ -3,303 +3,205 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingBag, Heart, ExternalLink, DollarSign, Star } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { ShoppingBag, Heart, Star, ExternalLink } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 const ShoppingGuidesCard: React.FC = () => {
   const [showGuidesDialog, setShowGuidesDialog] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [selectedGuide, setSelectedGuide] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const guides = [
+  const shoppingGuides = [
     {
-      id: "zendaya-red-carpet",
-      title: "Zendaya's Red Carpet Look",
+      id: "red-carpet",
+      title: "Red Carpet Glamour",
       celebrity: "Zendaya",
-      occasion: "Met Gala 2024",
-      image: "https://images.unsplash.com/photo-1618932260643-eee4a2f652a6?q=80&w=1980&auto=format&fit=crop&ixlib=rb-4.0.3",
-      totalPrice: "$313",
+      description: "Recreate stunning red carpet looks on any budget",
       items: [
-        { name: "Emerald statement dress", price: "$189", retailer: "ASOS", inStock: true },
-        { name: "Crystal drop earrings", price: "$45", retailer: "H&M", inStock: true },
-        { name: "Metallic strappy heels", price: "$79", retailer: "Zara", inStock: false }
+        { name: "Sequin Evening Dress", price: "$89", retailer: "ASOS", originalPrice: "$2,500" },
+        { name: "Statement Earrings", price: "$25", retailer: "H&M", originalPrice: "$850" },
+        { name: "Strappy Heels", price: "$45", retailer: "Target", originalPrice: "$1,200" }
       ],
-      description: "Recreate Zendaya's stunning emerald Met Gala look with these affordable alternatives."
+      totalSavings: "$4,391",
+      image: "/images/zendaya_red_carpet_look.avif"
     },
     {
-      id: "rihanna-street",
-      title: "Rihanna's Street Style",
+      id: "street-style",
+      title: "Effortless Street Style",
       celebrity: "Rihanna",
-      occasion: "NYC Street Style",
-      image: "https://images.unsplash.com/photo-1622495546323-5dac33dedb50?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3",
-      totalPrice: "$278",
+      description: "Master casual-chic with these versatile pieces",
       items: [
-        { name: "Oversized bomber jacket", price: "$155", retailer: "Urban Outfitters", inStock: true },
-        { name: "Graphic vintage tee", price: "$38", retailer: "Thrift Store", inStock: true },
-        { name: "Wide-leg cargo pants", price: "$85", retailer: "Nike", inStock: true }
+        { name: "Oversized Blazer", price: "$49", retailer: "Zara", originalPrice: "$890" },
+        { name: "High-Waist Jeans", price: "$39", retailer: "Uniqlo", originalPrice: "$295" },
+        { name: "Designer-Inspired Sneakers", price: "$65", retailer: "Steve Madden", originalPrice: "$750" }
       ],
-      description: "Get Rihanna's effortless street style with bold statement pieces."
+      totalSavings: "$1,821",
+      image: "/images/Rihanna.jpeg"
     },
     {
-      id: "timothee-casual",
-      title: "Timothée's Casual Edit",
-      celebrity: "Timothée Chalamet",
-      occasion: "Off-duty Style",
-      image: "https://images.unsplash.com/photo-1503185912284-5271ff81b9a8?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3",
-      totalPrice: "$247",
+      id: "minimalist",
+      title: "Minimalist Chic",
+      celebrity: "Gwyneth Paltrow",
+      description: "Clean lines and neutral tones for timeless elegance",
       items: [
-        { name: "Fitted knit sweater", price: "$68", retailer: "Uniqlo", inStock: true },
-        { name: "Slim-fit chinos", price: "$59", retailer: "J.Crew", inStock: true },
-        { name: "Chelsea boots", price: "$120", retailer: "Doc Martens", inStock: true }
+        { name: "Cashmere-Look Sweater", price: "$35", retailer: "COS", originalPrice: "$495" },
+        { name: "Tailored Trousers", price: "$55", retailer: "Mango", originalPrice: "$650" },
+        { name: "Leather-Look Loafers", price: "$42", retailer: "ASOS", originalPrice: "$525" }
       ],
-      description: "Channel Timothée's European-inspired casual sophistication."
+      totalSavings: "$1,538",
+      image: "/placeholder.svg"
     }
   ];
 
-  const toggleFavorite = (guideId: string) => {
-    setFavorites(prev => 
-      prev.includes(guideId) 
+  const handleFavorite = (guideId: string) => {
+    setFavorites(prev => {
+      const newFavorites = prev.includes(guideId) 
         ? prev.filter(id => id !== guideId)
-        : [...prev, guideId]
-    );
-    
-    const guide = guides.find(g => g.id === guideId);
-    toast({
-      title: favorites.includes(guideId) ? "Removed from Wishlist" : "Added to Wishlist",
-      description: favorites.includes(guideId) 
-        ? `${guide?.title} has been removed from your wishlist.`
-        : `${guide?.title} has been added to your wishlist!`,
+        : [...prev, guideId];
+      
+      toast({
+        description: prev.includes(guideId) 
+          ? "Removed from favorites" 
+          : "Added to favorites!",
+      });
+      
+      return newFavorites;
     });
   };
-
-  const handleShopCollection = (guide: any) => {
-    toast({
-      title: "Redirecting to Shop",
-      description: `Taking you to shop ${guide.title} collection...`,
-    });
-    // In a real app, this would redirect to the shopping page
-  };
-
-  const selectedGuideData = guides.find(g => g.id === selectedGuide);
 
   return (
     <>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
-        <div className="bg-gradient-to-br from-pastel-blue to-pastel-purple h-36 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-pastel-mint to-pastel-yellow h-36 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 flex items-end p-4">
             <ShoppingBag className="h-8 w-8 text-white group-hover:scale-110 transition-transform" />
           </div>
           <div className="absolute top-4 right-4">
             <Badge variant="secondary" className="bg-white/20 text-white">
-              <DollarSign className="h-3 w-3 mr-1" />
-              Affordable
+              3 Guides
             </Badge>
           </div>
         </div>
         <CardHeader>
           <CardTitle className="text-lg group-hover:text-primary transition-colors flex items-center">
             Shopping Guides
-            <Star className="h-4 w-4 ml-2 text-yellow-500 fill-current" />
+            <ExternalLink className="h-4 w-4 ml-2 text-green-500" />
           </CardTitle>
-          <CardDescription>Celebrity-inspired collections you can shop</CardDescription>
+          <CardDescription>Shop celebrity looks for less</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3 mb-4">
-            {guides.slice(0, 3).map((guide) => (
-              <div key={guide.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
-                    <img src={guide.image} alt={guide.celebrity} className="w-full h-full object-cover" />
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Featured Collections</span>
+              <Badge variant="secondary">Save 80%+</Badge>
+            </div>
+            <div className="space-y-2">
+              {shoppingGuides.slice(0, 2).map((guide) => (
+                <div key={guide.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span className="text-sm font-medium">{guide.title}</span>
                   </div>
-                  <div>
-                    <span className="text-sm font-medium block">{guide.title}</span>
-                    <span className="text-xs text-muted-foreground">{guide.totalPrice} total</span>
-                  </div>
+                  <span className="text-xs text-green-600 font-medium">Save {guide.totalSavings}</span>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7"
-                  onClick={() => toggleFavorite(guide.id)}
-                >
-                  <Heart className={`h-4 w-4 transition-colors ${
-                    favorites.includes(guide.id) ? 'text-red-500 fill-current' : 'text-muted-foreground'
-                  }`} />
-                </Button>
+              ))}
+            </div>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="flex items-center space-x-2 mb-1">
+                <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                <span className="text-sm font-medium">Shopable Collections</span>
               </div>
-            ))}
+              <p className="text-xs text-muted-foreground">
+                Direct links to affordable alternatives for celebrity outfits
+              </p>
+            </div>
           </div>
           <Button 
             variant="outline" 
-            size="sm" 
             className="w-full group-hover:bg-primary group-hover:text-white transition-colors"
             onClick={() => setShowGuidesDialog(true)}
           >
-            Browse All Collections
+            Browse All Guides
           </Button>
         </CardContent>
       </Card>
 
       <Dialog open={showGuidesDialog} onOpenChange={setShowGuidesDialog}>
-        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-serif flex items-center">
               <ShoppingBag className="h-6 w-6 mr-2 text-primary" />
-              Celebrity Style Shopping Guides
+              Celebrity Shopping Guides
             </DialogTitle>
+            <DialogDescription>
+              Discover affordable alternatives to recreate your favorite celebrity looks. All items are carefully curated with direct shopping links.
+            </DialogDescription>
           </DialogHeader>
-          
-          {selectedGuideData ? (
-            <div className="py-4 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <img 
-                    src={selectedGuideData.image} 
-                    alt={selectedGuideData.title}
-                    className="w-full h-64 object-cover rounded-lg"
-                  />
-                  <div>
-                    <h3 className="text-xl font-semibold">{selectedGuideData.title}</h3>
-                    <p className="text-muted-foreground">{selectedGuideData.description}</p>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <Badge variant="outline">{selectedGuideData.celebrity}</Badge>
-                      <Badge variant="secondary">{selectedGuideData.occasion}</Badge>
+          <div className="space-y-6 py-4">
+            {shoppingGuides.map((guide) => (
+              <div key={guide.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <h3 className="font-medium text-lg">{guide.title}</h3>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleFavorite(guide.id)}
+                        className="p-1 h-auto"
+                      >
+                        <Heart 
+                          className={`h-4 w-4 ${
+                            favorites.includes(guide.id) 
+                              ? 'fill-red-500 text-red-500' 
+                              : 'text-gray-400'
+                          }`} 
+                        />
+                      </Button>
                     </div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Inspired by {guide.celebrity}
+                    </p>
+                    <p className="text-sm mb-3">{guide.description}</p>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      Total Savings: {guide.totalSavings}
+                    </Badge>
+                  </div>
+                  <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden ml-4">
+                    <img
+                      src={guide.image}
+                      alt={guide.title}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-medium">Complete Look</h4>
-                      <span className="text-lg font-semibold text-primary">{selectedGuideData.totalPrice}</span>
-                    </div>
-                    <div className="space-y-3">
-                      {selectedGuideData.items.map((item, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 border rounded">
-                          <div className="flex-1">
-                            <div className="text-sm font-medium">{item.name}</div>
-                            <div className="text-xs text-muted-foreground">{item.retailer}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium">{item.price}</div>
-                            <Badge 
-                              variant={item.inStock ? "secondary" : "destructive"} 
-                              className="text-xs"
-                            >
-                              {item.inStock ? "In Stock" : "Out of Stock"}
-                            </Badge>
-                          </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">Shopping List:</h4>
+                  {guide.items.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <div className="flex-1">
+                        <span className="text-sm font-medium">{item.name}</span>
+                        <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                          <span>{item.retailer}</span>
+                          <span>•</span>
+                          <span className="line-through">{item.originalPrice}</span>
                         </div>
-                      ))}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium text-green-600">{item.price}</span>
+                        <Button size="sm" variant="outline" className="h-6 px-2 text-xs">
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          Shop
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    <Button 
-                      className="flex-1"
-                      onClick={() => handleShopCollection(selectedGuideData)}
-                    >
-                      <ShoppingBag className="h-4 w-4 mr-2" />
-                      Shop Collection
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      size="icon"
-                      onClick={() => toggleFavorite(selectedGuideData.id)}
-                    >
-                      <Heart className={`h-4 w-4 ${
-                        favorites.includes(selectedGuideData.id) ? 'text-red-500 fill-current' : ''
-                      }`} />
-                    </Button>
-                  </div>
+                  ))}
                 </div>
               </div>
-              
-              <Button 
-                variant="outline" 
-                onClick={() => setSelectedGuide(null)}
-                className="w-full"
-              >
-                ← Back to All Guides
-              </Button>
-            </div>
-          ) : (
-            <div className="py-4 space-y-6">
-              <div className="grid gap-4">
-                {guides.map((guide) => (
-                  <div 
-                    key={guide.id}
-                    className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => setSelectedGuide(guide.id)}
-                  >
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div className="aspect-square sm:aspect-auto">
-                        <img 
-                          src={guide.image} 
-                          alt={guide.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="col-span-2 p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h3 className="font-medium text-lg">{guide.title}</h3>
-                            <p className="text-sm text-muted-foreground">{guide.description}</p>
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFavorite(guide.id);
-                            }}
-                          >
-                            <Heart className={`h-4 w-4 ${
-                              favorites.includes(guide.id) ? 'text-red-500 fill-current' : 'text-muted-foreground'
-                            }`} />
-                          </Button>
-                        </div>
-                        
-                        <div className="space-y-2 mb-4">
-                          {guide.items.slice(0, 2).map((item, index) => (
-                            <div key={index} className="flex items-center justify-between text-sm">
-                              <span>{item.name}</span>
-                              <span className="font-medium">{item.price}</span>
-                            </div>
-                          ))}
-                          {guide.items.length > 2 && (
-                            <div className="text-xs text-muted-foreground">
-                              +{guide.items.length - 2} more items
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex space-x-2">
-                            <Badge variant="outline">{guide.celebrity}</Badge>
-                            <Badge variant="secondary">{guide.occasion}</Badge>
-                          </div>
-                          <span className="text-lg font-semibold text-primary">{guide.totalPrice}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          <DialogFooter>
-            <Button 
-              onClick={() => setShowGuidesDialog(false)}
-              className="w-full sm:w-auto"
-            >
-              Close
-            </Button>
-          </DialogFooter>
+            ))}
+          </div>
         </DialogContent>
       </Dialog>
     </>

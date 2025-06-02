@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Palette, TrendingUp, Sparkles, Calendar } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const SeasonalTrendsCard: React.FC = () => {
   const [showTrendsDialog, setShowTrendsDialog] = useState(false);
@@ -103,6 +102,12 @@ const SeasonalTrendsCard: React.FC = () => {
               <Palette className="h-6 w-6 mr-2 text-primary" />
               Spring/Summer 2025 Trends
             </DialogTitle>
+            <DialogDescription>
+              {selectedTrendData 
+                ? `Explore the latest details about ${selectedTrendData.name} and see which celebrities are embracing this trend.`
+                : "Discover the hottest fashion trends of Spring/Summer 2025, featuring celebrity favorites and style inspirations."
+              }
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-6 py-4">
             {selectedTrendData ? (
