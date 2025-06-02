@@ -1,7 +1,8 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { getEnhancedKeywordString, seoFaqData } from '@/data/enhancedSeoKeywords';
+import { generateCanonicalUrl, generateHreflangLinks, HreflangLink } from '@/utils/seoUrlOptimizer';
+import { generateReviewSchema, generateSocialInteractionSchema, SocialProofMetrics, ReviewData } from '@/utils/socialProofSchema';
 
 interface EnhancedSEOProps {
   title?: string;
@@ -63,6 +64,19 @@ interface EnhancedSEOProps {
       image?: string;
     }>;
   };
+  // New SEO features
+  hreflangLinks?: HreflangLink[];
+  socialProofMetrics?: SocialProofMetrics;
+  reviewData?: ReviewData[];
+  alternateUrls?: Array<{media: string, href: string}>;
+  prevPage?: string;
+  nextPage?: string;
+  robotsContent?: string;
+  contentLanguage?: string;
+  geoTargeting?: {
+    country?: string;
+    region?: string;
+  };
 }
 
 const EnhancedSEO: React.FC<EnhancedSEOProps> = ({
@@ -91,13 +105,26 @@ const EnhancedSEO: React.FC<EnhancedSEOProps> = ({
   productSchema,
   reviewSchema,
   howToSchema,
+  hreflangLinks,
+  socialProofMetrics,
+  reviewData,
+  alternateUrls,
+  prevPage,
+  nextPage,
+  robotsContent,
+  contentLanguage = 'en',
+  geoTargeting,
 }) => {
   const siteUrl = window.location.origin;
-  const currentUrl = canonical || window.location.href;
+  const currentPath = window.location.pathname;
+  const currentUrl = canonical || generateCanonicalUrl(currentPath);
   
   // Use enhanced keyword generator if keywords not explicitly provided
   const keywordsContent = keywords || getEnhancedKeywordString(category, celebrity);
   
+  // Generate hreflang links if not provided
+  const hreflangLinksData = hreflangLinks || generateHreflangLinks(currentPath);
+
   // Generate breadcrumb schema if provided
   const breadcrumbSchema = breadcrumbs ? {
     "@context": "https://schema.org",
@@ -201,6 +228,13 @@ const EnhancedSEO: React.FC<EnhancedSEOProps> = ({
     }))
   } : null;
   
+  // Generate review schema from provided data
+  const reviewSchemaFromData = reviewData ? generateReviewSchema(reviewData) : null;
+  
+  // Generate social interaction schema
+  const socialInteractionSchema = socialProofMetrics ? 
+    generateSocialInteractionSchema(title, currentUrl, socialProofMetrics) : null;
+
   // Organization schema for brand identity
   const organizationSchema = {
     "@context": "https://schema.org",
@@ -240,7 +274,9 @@ const EnhancedSEO: React.FC<EnhancedSEOProps> = ({
     ...(itemListSchemaData ? [itemListSchemaData] : []),
     ...(productSchemaData ? [productSchemaData] : []),
     ...(reviewSchemaData ? [reviewSchemaData] : []),
-    ...(howToSchemaData ? [howToSchemaData] : [])
+    ...(howToSchemaData ? [howToSchemaData] : []),
+    ...(reviewSchemaFromData ? [reviewSchemaFromData] : []),
+    ...(socialInteractionSchema ? [socialInteractionSchema] : [])
   ].filter(Boolean);
   
   return (
@@ -255,7 +291,26 @@ const EnhancedSEO: React.FC<EnhancedSEOProps> = ({
       {/* Enhanced meta tags for better SEO */}
       <meta name="theme-color" content="#f8f9fa" />
       <meta name="application-name" content="CelebrityPersona" />
+      <meta httpEquiv="content-language" content={contentLanguage} />
       
+      {/* Geo targeting */}
+      {geoTargeting?.country && <meta name="geo.country" content={geoTargeting.country} />}
+      {geoTargeting?.region && <meta name="geo.region" content={geoTargeting.region} />}
+      
+      {/* Pagination meta tags */}
+      {prevPage && <link rel="prev" href={prevPage} />}
+      {nextPage && <link rel="next" href={nextPage} />}
+      
+      {/* Alternate URLs for mobile/AMP versions */}
+      {alternateUrls?.map((alt, index) => (
+        <link key={index} rel="alternate" media={alt.media} href={alt.href} />
+      ))}
+      
+      {/* Hreflang tags for international SEO */}
+      {hreflangLinksData.map((link, index) => (
+        <link key={index} rel="alternate" hrefLang={link.hreflang} href={link.href} />
+      ))}
+
       {/* Open Graph Tags */}
       <meta property="og:url" content={currentUrl} />
       <meta property="og:type" content={ogType} />
@@ -282,16 +337,23 @@ const EnhancedSEO: React.FC<EnhancedSEOProps> = ({
       {author && <meta property="article:author" content={author} />}
       
       {/* Additional meta tags for SEO */}
-      <meta name="language" content="en" />
+      <meta name="language" content={contentLanguage} />
       <meta name="revisit-after" content="7 days" />
       <meta name="rating" content="general" />
+      <meta name="distribution" content="global" />
+      <meta name="coverage" content="worldwide" />
       
-      {/* Robots meta tag */}
+      {/* Enhanced robots meta tag */}
       {noIndex ? (
         <meta name="robots" content="noindex, nofollow" />
       ) : (
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta name="robots" content={robotsContent || "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"} />
       )}
+      
+      {/* Additional SEO meta tags */}
+      <meta name="language" content={contentLanguage} />
+      <meta name="revisit-after" content="7 days" />
+      <meta name="rating" content="general" />
       
       {/* JSON-LD Structured Data */}
       {allSchemas.map((schema, index) => (

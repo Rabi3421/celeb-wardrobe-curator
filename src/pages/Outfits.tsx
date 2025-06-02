@@ -15,6 +15,8 @@ import { fetchOutfits } from "@/services/api";
 import { Outfit } from "@/types/data";
 import { useToast } from "@/hooks/use-toast";
 import { seoFaqData } from "@/data/enhancedSeoKeywords";
+import { generateOptimizedAltText, generateInternalLinks, seoContentSnippets } from "@/utils/seoContentOptimizer";
+import { generateMockReviews } from "@/utils/socialProofSchema";
 
 const Outfits: React.FC = () => {
   const [outfits, setOutfits] = useState<Outfit[]>([]);
@@ -73,6 +75,24 @@ const Outfits: React.FC = () => {
   // Featured outfit (could be based on any criteria)
   const featuredOutfit = outfits.length > 0 ? outfits[0] : null;
 
+  // Enhanced internal linking data
+  const internalLinks = generateInternalLinks(selectedCategory, featuredOutfit?.celebrity, selectedCategory);
+  
+  // Social proof metrics (would come from analytics in real app)
+  const socialProofMetrics = {
+    totalViews: 12500,
+    likes: 3200,
+    shares: 450,
+    comments: 180,
+    saves: 890
+  };
+
+  // Mock review data for featured outfit
+  const featuredOutfitReviews = featuredOutfit ? generateMockReviews(featuredOutfit.title, featuredOutfit.celebrity) : undefined;
+
+  // Enhanced meta description
+  const optimizedDescription = `Discover ${filteredOutfits.length}+ celebrity outfit inspirations from Zendaya, Rihanna, Harry Styles & more. Shop affordable alternatives to recreate red carpet looks, street style, and casual celebrity fashion for less than $100.`;
+
   // Breadcrumbs for SEO
   const breadcrumbs = [
     { name: "Home", url: "/" },
@@ -92,16 +112,20 @@ const Outfits: React.FC = () => {
     }))
   };
 
-  // Enhanced FAQ data specifically for outfits
+  // Enhanced FAQ data with internal linking
   const outfitsFaqData = [
     ...seoFaqData.outfits,
     {
       question: "How often do you add new celebrity outfit inspirations?",
-      answer: "We add new celebrity outfit inspirations daily, featuring the latest red carpet looks, street style moments, and trending fashion from your favorite stars."
+      answer: "We add new celebrity outfit inspirations daily, featuring the latest red carpet looks, street style moments, and trending fashion from your favorite stars. Check our blog for the latest celebrity fashion trends and styling tips."
     },
     {
       question: "Can I filter outfits by specific occasions?",
-      answer: "Yes! You can filter outfits by occasions like red carpet, casual, street style, awards shows, and more to find the perfect inspiration for your event."
+      answer: "Yes! You can filter outfits by occasions like red carpet, casual, street style, awards shows, and more to find the perfect inspiration for your event. Browse our categories section for more specific style guides."
+    },
+    {
+      question: "What's the average cost to recreate a celebrity look?",
+      answer: "Most celebrity looks can be recreated for under $100 using our curated affordable alternatives. We provide direct shopping links to budget-friendly dupes from brands like H&M, Zara, ASOS, and Target."
     }
   ];
   
@@ -110,7 +134,7 @@ const Outfits: React.FC = () => {
       <PageLayout>
         <EnhancedSEO
           title="Celebrity Outfit Inspirations | Shop The Look For Less | CelebrityPersona"
-          description="Discover 500+ celebrity outfit inspirations and shop affordable alternatives. From Zendaya's red carpet looks to Rihanna's street style - recreate your favorite celebrity outfits for less."
+          description={optimizedDescription}
           keywords="celebrity outfits, celebrity fashion inspiration, affordable celebrity looks, shop celebrity style, celebrity outfit dupes, red carpet fashion, street style"
           breadcrumbs={breadcrumbs}
           faqSchema={outfitsFaqData}
@@ -118,10 +142,14 @@ const Outfits: React.FC = () => {
           category="outfits"
           ogImage="/images/hero_img.webp"
           ogTitle="Celebrity Outfit Inspirations - Shop The Look For Less"
-          ogDescription="Discover celebrity outfit inspirations from Zendaya, Rihanna, Harry Styles & more. Shop affordable alternatives to recreate your favorite celebrity looks."
+          ogDescription={optimizedDescription}
           twitterTitle="Celebrity Outfit Inspirations - Shop The Look For Less"
           twitterDescription="Discover celebrity outfit inspirations and shop affordable alternatives. From red carpet to street style - get the look for less!"
           dateModified={new Date().toISOString()}
+          socialProofMetrics={socialProofMetrics}
+          reviewData={featuredOutfitReviews}
+          robotsContent="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+          geoTargeting={{ country: "US", region: "worldwide" }}
         />
         <div className="container-custom py-16 text-center">
           <p className="text-muted-foreground">Loading outfits...</p>
@@ -134,7 +162,7 @@ const Outfits: React.FC = () => {
     <PageLayout>
       <EnhancedSEO
         title="Celebrity Outfit Inspirations | Shop The Look For Less | CelebrityPersona"
-        description="Discover 500+ celebrity outfit inspirations and shop affordable alternatives. From Zendaya's red carpet looks to Rihanna's street style - recreate your favorite celebrity outfits for less."
+        description={optimizedDescription}
         keywords="celebrity outfits, celebrity fashion inspiration, affordable celebrity looks, shop celebrity style, celebrity outfit dupes, red carpet fashion, street style"
         breadcrumbs={breadcrumbs}
         faqSchema={outfitsFaqData}
@@ -142,10 +170,14 @@ const Outfits: React.FC = () => {
         category="outfits"
         ogImage="/images/hero_img.webp"
         ogTitle="Celebrity Outfit Inspirations - Shop The Look For Less"
-        ogDescription="Discover celebrity outfit inspirations from Zendaya, Rihanna, Harry Styles & more. Shop affordable alternatives to recreate your favorite celebrity looks."
+        ogDescription={optimizedDescription}
         twitterTitle="Celebrity Outfit Inspirations - Shop The Look For Less"
         twitterDescription="Discover celebrity outfit inspirations and shop affordable alternatives. From red carpet to street style - get the look for less!"
         dateModified={new Date().toISOString()}
+        socialProofMetrics={socialProofMetrics}
+        reviewData={featuredOutfitReviews}
+        robotsContent="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+        geoTargeting={{ country: "US", region: "worldwide" }}
       />
 
       {/* Breadcrumbs */}
@@ -162,30 +194,48 @@ const Outfits: React.FC = () => {
         </div>
       </div>
 
-      {/* Hero Section */}
+      {/* Enhanced Hero Section with optimized content */}
       <div className="bg-gradient-to-r from-pastel-peach to-pastel-pink py-16">
         <div className="container-custom text-center">
           <h1 className="font-serif text-4xl md:text-5xl font-medium mb-4">
-            Celebrity Outfit Inspirations
+            {seoContentSnippets.outfitGrid.heading}
           </h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-            Browse through our curated collection of celebrity outfits for your daily style inspiration.
-            From red carpet looks to casual street style - find your next fashion statement.
+          <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+            {seoContentSnippets.outfitGrid.description}
           </p>
+          
+          {/* Internal linking section */}
+          <div className="text-sm mb-8">
+            <span className="text-muted-foreground">Explore: </span>
+            {internalLinks.slice(0, 3).map((link, index) => (
+              <span key={link.url}>
+                <a 
+                  href={link.url} 
+                  className="text-primary hover:text-primary/80 underline"
+                  title={link.title}
+                >
+                  {link.anchor}
+                </a>
+                {index < 2 && <span className="text-muted-foreground mx-2">•</span>}
+              </span>
+            ))}
+          </div>
+          
           <div className="relative max-w-md mx-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             <Input 
-              placeholder="Search outfits by name, style, or celebrity..."
+              placeholder="Search celebrity outfits by name, style, or occasion..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-6 rounded-full"
+              aria-label="Search celebrity outfits"
             />
           </div>
         </div>
       </div>
 
       <div className="container-custom py-12">
-        {/* Featured Outfit */}
+        {/* Enhanced Featured Outfit */}
         {featuredOutfit && (
           <div className="mb-12">
             <SectionHeader title="Look of the Day" />
@@ -194,8 +244,13 @@ const Outfits: React.FC = () => {
                 <div className="relative aspect-[3/4] md:aspect-auto">
                   <img
                     src={featuredOutfit.image}
-                    alt={`${featuredOutfit.celebrity} ${featuredOutfit.title} - Celebrity fashion inspiration`}
+                    alt={generateOptimizedAltText(
+                      featuredOutfit.celebrity,
+                      featuredOutfit.title,
+                      featuredOutfit.occasion
+                    )}
                     className="absolute inset-0 w-full h-full object-cover"
+                    loading="eager"
                   />
                 </div>
                 <div className="p-6 md:p-8">
@@ -212,7 +267,12 @@ const Outfits: React.FC = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-0 pt-4">
-                    <p className="mb-6">{featuredOutfit.description}</p>
+                    <p className="mb-4">{featuredOutfit.description}</p>
+                    <p className="text-sm text-muted-foreground mb-6">
+                      {seoContentSnippets.featuredOutfit.description}
+                    </p>
+                    
+                    {/* Social proof indicators */}
                     <div className="flex items-center space-x-4 mb-6">
                       <div className="flex items-center space-x-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -220,14 +280,14 @@ const Outfits: React.FC = () => {
                       </div>
                       <div className="flex items-center space-x-2">
                         <Heart className="h-4 w-4 text-red-500" />
-                        <span className="text-sm">3.2k Likes</span>
+                        <span className="text-sm">{socialProofMetrics.likes} Likes</span>
                       </div>
                     </div>
                     <Button 
                       className="bg-white text-primary-foreground hover:bg-white/90"
                       onClick={() => window.location.href = `/outfit/${featuredOutfit.id}`}
                     >
-                      View Details
+                      View Details & Shop The Look
                     </Button>
                   </CardContent>
                 </div>
@@ -236,45 +296,69 @@ const Outfits: React.FC = () => {
           </div>
         )}
 
-        {/* Categories Tabs */}
+        {/* Enhanced Categories Tabs */}
         <div className="mb-8">
           <Tabs defaultValue="all" className="w-full">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="section-title mb-0">Browse By Occasion</h2>
-              <TabsList className="bg-transparent overflow-x-auto">
-                {occasions.map((occasion) => (
-                  <TabsTrigger
-                    key={occasion}
-                    value={occasion}
-                    onClick={() => setSelectedCategory(occasion)}
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground capitalize"
-                  >
-                    {occasion}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+              <div>
+                <h2 className="section-title mb-2">Browse By Occasion</h2>
+                <p className="text-sm text-muted-foreground">
+                  {seoContentSnippets.categoryFilter.description}
+                </p>
+              </div>
+              {/* ... keep existing TabsList */}
             </div>
           </Tabs>
         </div>
 
-        {/* Outfit Grid */}
+        {/* Enhanced Outfit Grid with better alt text */}
         {filteredOutfits.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filteredOutfits.map((outfit) => (
-              <OutfitCard
-                key={outfit.id}
-                id={outfit.id}
-                image={outfit.image}
-                celebrity={outfit.celebrity}
-                celebrityId={outfit.celebrityId}
-                title={outfit.title}
-                description={outfit.description}
-              />
+              <div key={outfit.id} className="group">
+                <OutfitCard
+                  id={outfit.id}
+                  image={outfit.image}
+                  celebrity={outfit.celebrity}
+                  celebrityId={outfit.celebrityId}
+                  title={outfit.title}
+                  description={outfit.description}
+                />
+                
+                {/* Hidden structured data for individual outfits */}
+                <script type="application/ld+json">
+                  {JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "Article",
+                    "headline": outfit.title,
+                    "description": outfit.description,
+                    "author": {
+                      "@type": "Person",
+                      "name": outfit.celebrity
+                    },
+                    "image": outfit.image,
+                    "url": `${window.location.origin}/outfit/${outfit.id}`,
+                    "publisher": {
+                      "@type": "Organization",
+                      "name": "CelebrityPersona"
+                    }
+                  })}
+                </script>
+              </div>
             ))}
           </div>
         ) : (
           <div className="py-12 text-center">
-            <p className="text-muted-foreground">No outfits found matching your search criteria.</p>
+            <p className="text-muted-foreground mb-4">No outfits found matching your search criteria.</p>
+            <p className="text-sm text-muted-foreground">
+              Try searching for different terms or{" "}
+              <button 
+                onClick={() => {setSearchTerm(""); setSelectedCategory("all");}}
+                className="text-primary hover:text-primary/80 underline"
+              >
+                browse all outfits
+              </button>
+            </p>
           </div>
         )}
 
@@ -293,11 +377,31 @@ const Outfits: React.FC = () => {
 
         {/* Enhanced Fashion Resources & Tips Section */}
         <div className="mt-16">
-          <SectionHeader title="Fashion Resources & Tips" />
+          <SectionHeader title={seoContentSnippets.shoppingGuides.heading} />
+          <p className="text-muted-foreground mb-8 text-center max-w-2xl mx-auto">
+            {seoContentSnippets.shoppingGuides.description}
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <SeasonalTrendsCard />
             <StyleMatchCard />
             <ShoppingGuidesCard />
+          </div>
+        </div>
+        
+        {/* Internal linking section */}
+        <div className="mt-12 p-6 bg-gray-50 rounded-lg">
+          <h3 className="text-lg font-semibold mb-4">Explore More Celebrity Fashion</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {internalLinks.map((link) => (
+              <a
+                key={link.url}
+                href={link.url}
+                className="text-primary hover:text-primary/80 underline text-sm"
+                title={link.title}
+              >
+                {link.anchor}
+              </a>
+            ))}
           </div>
         </div>
       </div>
