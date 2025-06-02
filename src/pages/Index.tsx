@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import SEO from "@/components/SEO/SEO";
@@ -16,7 +17,6 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import StyleQuiz from "@/components/ui/StyleQuiz";
 
 const Index: React.FC = () => {
   const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
@@ -328,16 +328,8 @@ const Index: React.FC = () => {
         </div>
       </section>
 
-      {/* Style Quiz Section */}
-      <section className="container-custom py-16">
-        <h2 className="section-title text-center mb-10">
-          Find Your Celebrity Style Match
-        </h2>
-        <StyleQuiz />
-      </section>
-
       {/* Shop the Look Section */}
-      <section className="container-custom py-16 bg-muted/30">
+      <section className="container-custom py-16">
         <SectionHeader
           title="Shop the Celeb Look"
           viewAllLink="/shop"
