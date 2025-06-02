@@ -5,7 +5,7 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import SeasonalTrendsCard from "@/components/ui/SeasonalTrendsCard";
 import StyleMatchCard from "@/components/ui/StyleMatchCard";
 import ShoppingGuidesCard from "@/components/ui/ShoppingGuidesCard";
-import SEO from "@/components/SEO/SEO";
+import EnhancedSEO from "@/components/SEO/EnhancedSEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { Search, Calendar, Heart, Tag, Home, ChevronRight } from "lucide-react";
 import { fetchOutfits } from "@/services/api";
 import { Outfit } from "@/types/data";
 import { useToast } from "@/hooks/use-toast";
+import { seoFaqData } from "@/data/enhancedSeoKeywords";
 
 const Outfits: React.FC = () => {
   const [outfits, setOutfits] = useState<Outfit[]>([]);
@@ -78,56 +79,49 @@ const Outfits: React.FC = () => {
     { name: "Outfits", url: "/outfits" }
   ];
 
-  // Generate structured data for outfit listings
-  const outfitListSchema = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "Celebrity Outfit Inspirations",
-    "description": "Browse through our curated collection of celebrity outfits for your daily style inspiration.",
-    "numberOfItems": filteredOutfits.length,
-    "itemListElement": filteredOutfits.slice(0, 20).map((outfit, index) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "item": {
-        "@type": "Article",
-        "name": outfit.title,
-        "description": outfit.description,
-        "image": outfit.image,
-        "author": {
-          "@type": "Person",
-          "name": outfit.celebrity
-        },
-        "url": `${window.location.origin}/outfit/${outfit.id}`
-      }
+  // Enhanced structured data for outfit listings
+  const itemListSchema = {
+    name: "Celebrity Outfit Inspirations",
+    description: "Browse through our curated collection of celebrity outfits for your daily style inspiration.",
+    items: filteredOutfits.slice(0, 20).map((outfit) => ({
+      name: outfit.title,
+      description: outfit.description,
+      image: outfit.image,
+      url: `/outfit/${outfit.id}`,
+      author: outfit.celebrity
     }))
   };
 
-  // FAQ Schema for common questions
-  const faqSchema = [
+  // Enhanced FAQ data specifically for outfits
+  const outfitsFaqData = [
+    ...seoFaqData.outfits,
     {
-      question: "How can I recreate celebrity outfits on a budget?",
-      answer: "Look for affordable alternatives at fast fashion retailers, thrift stores, and online marketplaces. Focus on similar silhouettes, colors, and styling rather than exact designer pieces."
+      question: "How often do you add new celebrity outfit inspirations?",
+      answer: "We add new celebrity outfit inspirations daily, featuring the latest red carpet looks, street style moments, and trending fashion from your favorite stars."
     },
     {
-      question: "Where do celebrities get their outfits?",
-      answer: "Celebrities often work with stylists who source outfits from luxury designers, emerging brands, vintage pieces, and custom-made garments for red carpet events and public appearances."
-    },
-    {
-      question: "Can I buy the exact outfits celebrities wear?",
-      answer: "Some celebrity outfits are available for purchase, especially from mainstream brands. We provide affiliate links when possible to help you shop similar or exact pieces."
+      question: "Can I filter outfits by specific occasions?",
+      answer: "Yes! You can filter outfits by occasions like red carpet, casual, street style, awards shows, and more to find the perfect inspiration for your event."
     }
   ];
   
   if (isLoading) {
     return (
       <PageLayout>
-        <SEO
-          title="Celebrity Outfit Inspirations | CelebrityPersona"
-          description="Browse through our curated collection of celebrity outfits for your daily style inspiration. From red carpet looks to casual street style."
-          keywords="celebrity outfits, celebrity fashion, style inspiration, celebrity looks"
+        <EnhancedSEO
+          title="Celebrity Outfit Inspirations | Shop The Look For Less | CelebrityPersona"
+          description="Discover 500+ celebrity outfit inspirations and shop affordable alternatives. From Zendaya's red carpet looks to Rihanna's street style - recreate your favorite celebrity outfits for less."
+          keywords="celebrity outfits, celebrity fashion inspiration, affordable celebrity looks, shop celebrity style, celebrity outfit dupes, red carpet fashion, street style"
           breadcrumbs={breadcrumbs}
-          faqSchema={faqSchema}
-          jsonLd={outfitListSchema}
+          faqSchema={outfitsFaqData}
+          itemListSchema={itemListSchema}
+          category="outfits"
+          ogImage="/images/hero_img.webp"
+          ogTitle="Celebrity Outfit Inspirations - Shop The Look For Less"
+          ogDescription="Discover celebrity outfit inspirations from Zendaya, Rihanna, Harry Styles & more. Shop affordable alternatives to recreate your favorite celebrity looks."
+          twitterTitle="Celebrity Outfit Inspirations - Shop The Look For Less"
+          twitterDescription="Discover celebrity outfit inspirations and shop affordable alternatives. From red carpet to street style - get the look for less!"
+          dateModified={new Date().toISOString()}
         />
         <div className="container-custom py-16 text-center">
           <p className="text-muted-foreground">Loading outfits...</p>
@@ -138,14 +132,20 @@ const Outfits: React.FC = () => {
   
   return (
     <PageLayout>
-      <SEO
-        title="Celebrity Outfit Inspirations | CelebrityPersona"
-        description="Browse through our curated collection of celebrity outfits for your daily style inspiration. From red carpet looks to casual street style - find your next fashion statement."
-        keywords="celebrity outfits, celebrity fashion, style inspiration, celebrity looks, red carpet fashion, street style"
+      <EnhancedSEO
+        title="Celebrity Outfit Inspirations | Shop The Look For Less | CelebrityPersona"
+        description="Discover 500+ celebrity outfit inspirations and shop affordable alternatives. From Zendaya's red carpet looks to Rihanna's street style - recreate your favorite celebrity outfits for less."
+        keywords="celebrity outfits, celebrity fashion inspiration, affordable celebrity looks, shop celebrity style, celebrity outfit dupes, red carpet fashion, street style"
         breadcrumbs={breadcrumbs}
-        faqSchema={faqSchema}
-        jsonLd={outfitListSchema}
+        faqSchema={outfitsFaqData}
+        itemListSchema={itemListSchema}
+        category="outfits"
         ogImage="/images/hero_img.webp"
+        ogTitle="Celebrity Outfit Inspirations - Shop The Look For Less"
+        ogDescription="Discover celebrity outfit inspirations from Zendaya, Rihanna, Harry Styles & more. Shop affordable alternatives to recreate your favorite celebrity looks."
+        twitterTitle="Celebrity Outfit Inspirations - Shop The Look For Less"
+        twitterDescription="Discover celebrity outfit inspirations and shop affordable alternatives. From red carpet to street style - get the look for less!"
+        dateModified={new Date().toISOString()}
       />
 
       {/* Breadcrumbs */}
@@ -194,7 +194,7 @@ const Outfits: React.FC = () => {
                 <div className="relative aspect-[3/4] md:aspect-auto">
                   <img
                     src={featuredOutfit.image}
-                    alt={featuredOutfit.title}
+                    alt={`${featuredOutfit.celebrity} ${featuredOutfit.title} - Celebrity fashion inspiration`}
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 </div>
