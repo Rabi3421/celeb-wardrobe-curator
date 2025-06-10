@@ -35,6 +35,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { generateUniqueOutfitSlug } from "@/services/api";
 
 interface SupabaseOutfit extends Omit<Outfit, 'id' | 'celebrityId' | 'celebrity'> {
   id: string;
@@ -158,6 +159,9 @@ const AdminOutfits: React.FC = () => {
   // Add outfit mutation
   const addOutfitMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Generate unique slug from title
+      const slug = await generateUniqueOutfitSlug(data.title);
+      
       // First insert the outfit
       const { data: newOutfit, error: outfitError } = await supabase
         .from('outfits')
@@ -170,6 +174,7 @@ const AdminOutfits: React.FC = () => {
           occasion: data.occasion || null,
           date: data.date || null,
           affiliate_link: data.affiliateLink || null,
+          slug: slug, // Use the generated slug
         }])
         .select('*')
         .single();
@@ -201,7 +206,7 @@ const AdminOutfits: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['outfit-tags'] });
       toast({
         title: "Outfit added",
-        description: "Your outfit has been added successfully",
+        description: "Your outfit has been added successfully with a unique slug",
       });
       reset();
     },
@@ -218,6 +223,12 @@ const AdminOutfits: React.FC = () => {
   // Update outfit mutation
   const updateOutfitMutation = useMutation({
     mutationFn: async (data: any) => {
+      // Generate unique slug if title changed
+      let slug = data.slug;
+      if (!slug || (editOutfit && data.title !== editOutfit.title)) {
+        slug = await generateUniqueOutfitSlug(data.title, data.id);
+      }
+      
       // First update the outfit
       const { error: outfitError } = await supabase
         .from('outfits')
@@ -230,6 +241,7 @@ const AdminOutfits: React.FC = () => {
           occasion: data.occasion || null,
           date: data.date || null,
           affiliate_link: data.affiliateLink || null,
+          slug: slug, // Use the generated or existing slug
         })
         .eq('id', data.id);
 
@@ -326,7 +338,7 @@ const AdminOutfits: React.FC = () => {
     }
 
     if (editOutfit) {
-      updateOutfitMutation.mutate({ ...data, id: editOutfit.id });
+      updateOutfitMutation.mutate({ ...data, id: editOutfit.id, slug: editOutfit.slug });
     } else {
       addOutfitMutation.mutate(data);
     }
@@ -692,3 +704,5 @@ const AdminOutfits: React.FC = () => {
 };
 
 export default AdminOutfits;
+
+}
