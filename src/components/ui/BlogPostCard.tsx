@@ -10,6 +10,8 @@ interface BlogPostCardProps {
   image: string;
   date: string;
   category: string;
+  slug?: string;
+  author?: string;
 }
 
 const BlogPostCard: React.FC<BlogPostCardProps> = ({
@@ -18,7 +20,9 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   excerpt,
   image,
   date,
-  category
+  category,
+  slug,
+  author
 }) => {
   const { trackEvent } = useAnalytics();
 
@@ -36,7 +40,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
 
   return (
     <Link 
-      to={`/blog/${id}`} 
+      to={`/blog/${slug || id}`} 
       className="group block"
       onClick={handleBlogClick}
     >

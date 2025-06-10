@@ -10,6 +10,9 @@ interface OutfitCardProps {
   celebrityId: string;
   title: string;
   description: string;
+  date?: string;
+  occasion?: string;
+  slug?: string;
 }
 
 const OutfitCard: React.FC<OutfitCardProps> = ({
@@ -18,7 +21,10 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
   celebrity,
   celebrityId,
   title,
-  description
+  description,
+  date,
+  occasion,
+  slug
 }) => {
   const { trackEvent } = useAnalytics();
 
@@ -36,7 +42,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
 
   return (
     <Link 
-      to={`/outfit/${id}`} 
+      to={`/outfit/${slug || id}`} 
       className="group block"
       onClick={handleOutfitClick}
     >

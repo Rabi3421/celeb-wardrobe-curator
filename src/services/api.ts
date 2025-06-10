@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AffiliateProduct, BlogPost, Celebrity, CategoryItem, Outfit } from "@/types/data";
 import { Json } from "@/integrations/supabase/types";
@@ -452,6 +451,46 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
   }
 };
 
+// Fetch blog post by ID
+export const fetchBlogPostById = async (id: string): Promise<BlogPost | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching blog post by ID:', error);
+      return null;
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      content: data.content,
+      excerpt: data.excerpt,
+      image: data.image,
+      date: data.date,
+      author: data.author,
+      category: data.category,
+      slug: data.slug || data.id,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      meta_description: data.meta_description || '',
+      structured_data: data.structured_data || '',
+      keywords: data.keywords || ''
+    };
+  } catch (error) {
+    console.error('Error fetching blog post by ID:', error);
+    return null;
+  }
+};
+
 // Subscribe to newsletter
 export const subscribeToNewsletter = async (email: string, source: string): Promise<{success: boolean, message: string}> => {
   try {
@@ -764,6 +803,7 @@ export default {
   fetchOutfitBySlug,
   fetchOutfitById,
   fetchBlogPosts,
+  fetchBlogPostById,
   fetchAffiliateProducts,
   fetchAffiliateProductsByOutfitId,
   fetchCategoryItems,
