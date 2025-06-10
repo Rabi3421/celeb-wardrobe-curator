@@ -335,7 +335,7 @@ export const addCelebrity = async (celebrity: Partial<Celebrity>): Promise<{succ
   }
 };
 
-// Add outfit function
+// Add outfit function with automatic slug generation
 export const addOutfit = async (outfit: Partial<Outfit>): Promise<{success: boolean, error: any, data?: any}> => {
   try {
     // Generate unique slug if not provided
