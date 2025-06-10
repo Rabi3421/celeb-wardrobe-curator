@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import PageLayout from "@/components/layout/PageLayout";
@@ -7,23 +8,25 @@ import { BlogPost as BlogPostType } from "@/types/data";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
 const BlogPost: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const [blogPost, setBlogPost] = useState<BlogPostType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { trackPageView } = useAnalytics();
 
   useEffect(() => {
     const fetchPost = async () => {
-      if (!id) return;
+      if (!slug) return;
       
       setIsLoading(true);
-      const post = await fetchBlogPostById(id);
+      // For now, we'll treat slug as ID since we need to update the API function
+      // to support fetching by slug. This maintains backward compatibility.
+      const post = await fetchBlogPostById(slug);
       setBlogPost(post);
       setIsLoading(false);
 
       if (post) {
-        trackPageView(`/blog/${id}`, {
-          blogPostId: id,
+        trackPageView(`/blog/${slug}`, {
+          blogPostId: post.id,
           title: post.title,
           category: post.category
         });
@@ -31,7 +34,7 @@ const BlogPost: React.FC = () => {
     };
 
     fetchPost();
-  }, [id, trackPageView]);
+  }, [slug, trackPageView]);
 
   if (isLoading) {
     return (

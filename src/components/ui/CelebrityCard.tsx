@@ -17,7 +17,7 @@ const CelebrityCard: React.FC<CelebrityCardProps> = ({
   outfitCount,
   slug
 }) => {
-  // Always use slug if available, fall back to ID
+  // Use slug if available, fallback to ID
   const celebrityUrl = slug ? `/celebrity/${slug}` : `/celebrity/${id}`;
 
   return (

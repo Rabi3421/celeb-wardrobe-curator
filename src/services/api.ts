@@ -804,6 +804,7 @@ export default {
   fetchOutfitById,
   fetchBlogPosts,
   fetchBlogPostById,
+  fetchBlogPostBySlug,
   fetchAffiliateProducts,
   fetchAffiliateProductsByOutfitId,
   fetchCategoryItems,

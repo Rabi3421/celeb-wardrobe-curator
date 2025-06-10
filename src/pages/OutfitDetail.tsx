@@ -11,19 +11,21 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 
 const OutfitDetail: React.FC = () => {
-  const { id, slug } = useParams<{ id?: string; slug?: string }>();
-  const identifier = slug || id;
+  const { slug } = useParams<{ slug: string }>();
   
-  // Query to fetch outfit data
+  // Query to fetch outfit data - try by slug first, then by ID if slug doesn't work
   const { data: outfit, isLoading: isLoadingOutfit, error: outfitError } = useQuery({
-    queryKey: ['outfit', identifier],
+    queryKey: ['outfit', slug],
     queryFn: async () => {
-      if (!identifier) throw new Error("Outfit ID or slug not found");
+      if (!slug) throw new Error("Outfit slug not found");
       
-      // Try fetching by slug first if that's what we have, otherwise by ID
-      const outfitData = slug 
-        ? await fetchOutfitBySlug(slug)
-        : await fetchOutfitById(id!);
+      // Try fetching by slug first
+      let outfitData = await fetchOutfitBySlug(slug);
+      
+      // If not found by slug, try by ID (for backward compatibility)
+      if (!outfitData) {
+        outfitData = await fetchOutfitById(slug);
+      }
       
       if (!outfitData) throw new Error("Outfit not found");
       return outfitData;
@@ -32,7 +34,7 @@ const OutfitDetail: React.FC = () => {
 
   // Query to fetch affiliate products for this outfit
   const { data: products = [], isLoading: isLoadingProducts } = useQuery({
-    queryKey: ['outfit', identifier, 'products'],
+    queryKey: ['outfit', slug, 'products'],
     queryFn: async () => {
       if (!outfit) return [];
       return fetchAffiliateProductsByOutfitId(outfit.id);
@@ -89,7 +91,7 @@ const OutfitDetail: React.FC = () => {
       <div className="container-custom py-8 md:py-16">
         <div className="mb-6">
           <Link
-            to={`/celebrity/s/${outfit.celebrityId}`}
+            to={`/celebrity/${outfit.celebrityId}`}
             className="text-sm font-medium text-primary-foreground hover:underline inline-flex items-center"
           >
             <svg

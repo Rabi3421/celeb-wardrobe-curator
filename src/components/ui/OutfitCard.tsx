@@ -41,11 +41,14 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
     });
   };
 
+  // Use slug if available, fallback to id
+  const outfitUrl = slug ? `/outfit/${slug}` : `/outfit/${id}`;
+
   return (
     <div className="group relative bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-border/40 hover:border-primary/20 transform hover:-translate-y-1">
       {/* Image Container */}
       <Link 
-        to={`/outfit/${slug || id}`} 
+        to={outfitUrl} 
         onClick={handleOutfitClick}
         className="block relative overflow-hidden"
       >
@@ -102,7 +105,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
 
         {/* Product Title */}
         <Link 
-          to={`/outfit/${slug || id}`} 
+          to={outfitUrl} 
           onClick={handleOutfitClick}
           className="block mb-3 group/title"
         >
@@ -129,7 +132,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
 
         {/* CTA Button */}
         <Link 
-          to={`/outfit/${slug || id}`} 
+          to={outfitUrl} 
           onClick={handleOutfitClick}
           className="block w-full text-center bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
         >

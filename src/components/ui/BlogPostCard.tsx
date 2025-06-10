@@ -38,9 +38,12 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
     });
   };
 
+  // Use slug if available, fallback to id
+  const blogUrl = slug ? `/blog/${slug}` : `/blog/${id}`;
+
   return (
     <Link 
-      to={`/blog/${slug || id}`} 
+      to={blogUrl} 
       className="group block"
       onClick={handleBlogClick}
     >
