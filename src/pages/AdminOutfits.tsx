@@ -704,5 +704,3 @@ const AdminOutfits: React.FC = () => {
 };
 
 export default AdminOutfits;
-
-}
