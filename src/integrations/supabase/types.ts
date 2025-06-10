@@ -80,6 +80,86 @@ export type Database = {
           },
         ]
       }
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          page_url: string
+          referrer: string | null
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          page_url: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          page_url?: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      blog_analytics: {
+        Row: {
+          blog_post_id: string | null
+          clicks_count: number | null
+          created_at: string
+          id: string
+          last_updated: string
+          read_time_avg: number | null
+          shares_count: number | null
+          views_count: number | null
+        }
+        Insert: {
+          blog_post_id?: string | null
+          clicks_count?: number | null
+          created_at?: string
+          id?: string
+          last_updated?: string
+          read_time_avg?: number | null
+          shares_count?: number | null
+          views_count?: number | null
+        }
+        Update: {
+          blog_post_id?: string | null
+          clicks_count?: number | null
+          created_at?: string
+          id?: string
+          last_updated?: string
+          read_time_avg?: number | null
+          shares_count?: number | null
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_analytics_blog_post_id_fkey"
+            columns: ["blog_post_id"]
+            isOneToOne: true
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author: string
@@ -411,12 +491,106 @@ export type Database = {
           },
         ]
       }
+      product_analytics: {
+        Row: {
+          clicks_count: number | null
+          conversion_count: number | null
+          created_at: string
+          id: string
+          last_updated: string
+          product_id: string
+          product_type: string
+          revenue: number | null
+          views_count: number | null
+        }
+        Insert: {
+          clicks_count?: number | null
+          conversion_count?: number | null
+          created_at?: string
+          id?: string
+          last_updated?: string
+          product_id: string
+          product_type: string
+          revenue?: number | null
+          views_count?: number | null
+        }
+        Update: {
+          clicks_count?: number | null
+          conversion_count?: number | null
+          created_at?: string
+          id?: string
+          last_updated?: string
+          product_id?: string
+          product_type?: string
+          revenue?: number | null
+          views_count?: number | null
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          ip_address: string | null
+          pages_visited: number | null
+          referrer: string | null
+          session_duration: number | null
+          session_id: string
+          started_at: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          pages_visited?: number | null
+          referrer?: string | null
+          session_duration?: number | null
+          session_id: string
+          started_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          pages_visited?: number | null
+          referrer?: string | null
+          session_duration?: number | null
+          session_id?: string
+          started_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_blog_analytics: {
+        Args: {
+          p_blog_post_id: string
+          p_event_type: string
+          p_read_time?: number
+        }
+        Returns: undefined
+      }
+      update_product_analytics: {
+        Args: {
+          p_product_id: string
+          p_product_type: string
+          p_event_type: string
+          p_revenue?: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

@@ -1,328 +1,312 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { outfits, affiliateProducts, blogPosts, analyticsData } from "@/data/mockData";
+import { fetchDashboardAnalytics, DashboardAnalytics } from "@/services/analyticsApi";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Loader2 } from "lucide-react";
 
 const AdminDashboard: React.FC = () => {
-  const totalOutfits = outfits.length;
-  const totalProducts = affiliateProducts.length;
-  const totalRevenue = analyticsData.topPosts.reduce((sum, post) => sum + post.revenue, 0);
-  const totalClicks = analyticsData.topPosts.reduce((sum, post) => sum + post.clicks, 0);
+  const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadAnalytics = async () => {
+      try {
+        setIsLoading(true);
+        const data = await fetchDashboardAnalytics();
+        setAnalytics(data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load analytics:', err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAnalytics();
+    
+    // Refresh data every 5 minutes
+    const interval = setInterval(loadAnalytics, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Loading dashboard analytics...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error || !analytics) {
+    return (
+      <AdminLayout>
+        <div className="text-center py-12">
+          <p className="text-red-600 mb-4">{error || 'Failed to load analytics'}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="btn-primary"
+          >
+            Retry
+          </button>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  const chartConfig = {
+    views: { label: "Views", color: "#8884d8" },
+    clicks: { label: "Clicks", color: "#82ca9d" },
+    revenue: { label: "Revenue", color: "#ffc658" }
+  };
+
+  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1'];
 
   return (
     <AdminLayout>
-      <h1 className="font-serif text-2xl font-medium mb-6">Dashboard</h1>
+      <h1 className="font-serif text-2xl font-medium mb-6">Analytics Dashboard</h1>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-2xl shadow-sm">
           <h2 className="text-sm font-medium text-muted-foreground mb-1">Total Outfits</h2>
-          <p className="text-3xl font-medium">{totalOutfits}</p>
+          <p className="text-3xl font-medium">{analytics.totalOutfits}</p>
           <div className="mt-2 text-xs text-green-600">
-            +3 this week
+            Real-time data
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm">
           <h2 className="text-sm font-medium text-muted-foreground mb-1">Total Products</h2>
-          <p className="text-3xl font-medium">{totalProducts}</p>
+          <p className="text-3xl font-medium">{analytics.totalProducts}</p>
           <div className="mt-2 text-xs text-green-600">
-            +12 this week
+            Real-time data
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm">
-          <h2 className="text-sm font-medium text-muted-foreground mb-1">Affiliate Revenue</h2>
-          <p className="text-3xl font-medium">${totalRevenue.toFixed(2)}</p>
+          <h2 className="text-sm font-medium text-muted-foreground mb-1">Total Revenue</h2>
+          <p className="text-3xl font-medium">${analytics.totalRevenue.toFixed(2)}</p>
           <div className="mt-2 text-xs text-green-600">
-            +$125.40 this week
+            From affiliate clicks
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm">
-          <h2 className="text-sm font-medium text-muted-foreground mb-1">Affiliate Clicks</h2>
-          <p className="text-3xl font-medium">{totalClicks}</p>
+          <h2 className="text-sm font-medium text-muted-foreground mb-1">Total Clicks</h2>
+          <p className="text-3xl font-medium">{analytics.totalClicks}</p>
           <div className="mt-2 text-xs text-green-600">
-            +45 this week
+            User interactions
           </div>
         </div>
       </div>
 
-      {/* Recent Activities and Top Performers */}
+      {/* User Engagement Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-2xl shadow-sm">
+          <h2 className="text-sm font-medium text-muted-foreground mb-1">Active Users</h2>
+          <p className="text-3xl font-medium">{analytics.totalUsers}</p>
+          <div className="mt-2 text-xs text-muted-foreground">
+            Unique users with sessions
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-2xl shadow-sm">
+          <h2 className="text-sm font-medium text-muted-foreground mb-1">Total Sessions</h2>
+          <p className="text-3xl font-medium">{analytics.totalSessions}</p>
+          <div className="mt-2 text-xs text-muted-foreground">
+            User browsing sessions
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        {/* Top Products Performance */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm">
+          <h2 className="font-serif text-lg font-medium mb-4">Top Products Performance</h2>
+          {analytics.productPerformance.length > 0 ? (
+            <ChartContainer config={chartConfig} className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={analytics.productPerformance.slice(0, 5)}>
+                  <XAxis 
+                    dataKey="title" 
+                    tick={{ fontSize: 12 }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="views" fill="#8884d8" name="Views" />
+                  <Bar dataKey="clicks" fill="#82ca9d" name="Clicks" />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+              No product performance data available yet
+            </div>
+          )}
+        </div>
+
+        {/* Retailer Performance */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm">
+          <h2 className="font-serif text-lg font-medium mb-4">Retailer Performance</h2>
+          {analytics.retailerPerformance.length > 0 ? (
+            <ChartContainer config={chartConfig} className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={analytics.retailerPerformance}
+                    dataKey="clicks"
+                    nameKey="retailer"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label={(entry) => `${entry.retailer}: ${entry.clicks}`}
+                  >
+                    {analytics.retailerPerformance.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+              No retailer performance data available yet
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Recent Activities and Blog Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Recent Activities */}
         <div className="bg-white p-6 rounded-2xl shadow-sm">
           <h2 className="font-serif text-lg font-medium mb-4">Recent Activities</h2>
           <div className="space-y-4">
-            <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-secondary/50 transition-colors">
-              <div className="w-10 h-10 bg-pastel-blue rounded-full flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-primary-foreground"
-                >
-                  <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-                  <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
-                  <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
-                </svg>
+            {analytics.recentActivities.length > 0 ? (
+              analytics.recentActivities.slice(0, 5).map((activity, index) => (
+                <div key={index} className="flex items-center gap-4 p-3 rounded-lg hover:bg-secondary/50 transition-colors">
+                  <div className="w-10 h-10 bg-pastel-blue rounded-full flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-primary-foreground"
+                    >
+                      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                      <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                      <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{activity.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(activity.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No recent activities yet
               </div>
-              <div>
-                <p className="font-medium text-sm">New affiliate revenue: $45.20</p>
-                <p className="text-xs text-muted-foreground">Today at 10:30 AM</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-secondary/50 transition-colors">
-              <div className="w-10 h-10 bg-pastel-pink rounded-full flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-primary-foreground"
-                >
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium text-sm">New outfit published: "Met Gala 2023 Red Carpet Look"</p>
-                <p className="text-xs text-muted-foreground">Yesterday at 5:45 PM</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-secondary/50 transition-colors">
-              <div className="w-10 h-10 bg-pastel-lavender rounded-full flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-primary-foreground"
-                >
-                  <path d="M14 19a6 6 0 0 0-12 0" />
-                  <circle cx="8" cy="9" r="4" />
-                  <path d="M22 19a6 6 0 0 0-6-6 4 4 0 1 0 0-8" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium text-sm">New celebrity added: "Timothée Chalamet"</p>
-                <p className="text-xs text-muted-foreground">May 5, 2023</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-secondary/50 transition-colors">
-              <div className="w-10 h-10 bg-pastel-peach rounded-full flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-primary-foreground"
-                >
-                  <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
-                  <line x1="16" x2="2" y1="8" y2="22" />
-                  <line x1="17.5" x2="9" y1="15" y2="15" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium text-sm">New blog post published: "Spring Fashion Trends From Celebrity Closets"</p>
-                <p className="text-xs text-muted-foreground">May 4, 2023</p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Top Performers */}
+        {/* Blog Performance */}
         <div className="bg-white p-6 rounded-2xl shadow-sm">
-          <h2 className="font-serif text-lg font-medium mb-4">Top Performing Posts</h2>
+          <h2 className="font-serif text-lg font-medium mb-4">Blog Performance</h2>
           <div className="overflow-x-auto">
+            {analytics.blogPerformance.length > 0 ? (
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-4">Post</th>
+                    <th className="text-center text-xs font-medium text-muted-foreground uppercase py-3 px-4">Views</th>
+                    <th className="text-center text-xs font-medium text-muted-foreground uppercase py-3 px-4">Avg Read Time</th>
+                    <th className="text-right text-xs font-medium text-muted-foreground uppercase py-3 px-4">Shares</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {analytics.blogPerformance.slice(0, 5).map((post, index) => (
+                    <tr key={index} className="border-b border-border">
+                      <td className="py-3 px-4">
+                        <p className="font-medium text-sm truncate max-w-[200px]">
+                          {post.title}
+                        </p>
+                      </td>
+                      <td className="py-3 px-4 text-center text-sm">
+                        {post.views}
+                      </td>
+                      <td className="py-3 px-4 text-center text-sm">
+                        {Math.floor(post.readTime / 60)}m {post.readTime % 60}s
+                      </td>
+                      <td className="py-3 px-4 text-right font-medium text-sm">
+                        {post.shares}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No blog performance data available yet
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Retailer Performance Table */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm">
+        <h2 className="font-serif text-lg font-medium mb-4">Detailed Retailer Performance</h2>
+        <div className="overflow-x-auto">
+          {analytics.retailerPerformance.length > 0 ? (
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-4">Post</th>
-                  <th className="text-center text-xs font-medium text-muted-foreground uppercase py-3 px-4">Views</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-4">Retailer</th>
                   <th className="text-center text-xs font-medium text-muted-foreground uppercase py-3 px-4">Clicks</th>
                   <th className="text-right text-xs font-medium text-muted-foreground uppercase py-3 px-4">Revenue</th>
                 </tr>
               </thead>
               <tbody>
-                {analyticsData.topPosts.map((post, index) => (
+                {analytics.retailerPerformance.map((retailer, index) => (
                   <tr key={index} className="border-b border-border">
                     <td className="py-3 px-4">
-                      <p className="font-medium text-sm truncate max-w-[200px]">
-                        {post.title}
-                      </p>
+                      <div className="font-medium text-sm">{retailer.retailer}</div>
                     </td>
                     <td className="py-3 px-4 text-center text-sm">
-                      {post.views}
-                    </td>
-                    <td className="py-3 px-4 text-center text-sm">
-                      {post.clicks}
+                      {retailer.clicks}
                     </td>
                     <td className="py-3 px-4 text-right font-medium text-sm">
-                      ${post.revenue.toFixed(2)}
+                      ${retailer.revenue.toFixed(2)}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm mb-8">
-        <h2 className="font-serif text-lg font-medium mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          <button className="p-4 rounded-xl border border-border hover:border-primary-foreground transition-colors flex flex-col items-center justify-center gap-2">
-            <div className="w-10 h-10 bg-pastel-pink rounded-full flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-primary-foreground"
-              >
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="12" x2="12" y1="18" y2="12" />
-                <line x1="9" x2="15" y1="15" y2="15" />
-              </svg>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No retailer performance data available yet
             </div>
-            <span className="text-sm font-medium">New Outfit</span>
-          </button>
-          <button className="p-4 rounded-xl border border-border hover:border-primary-foreground transition-colors flex flex-col items-center justify-center gap-2">
-            <div className="w-10 h-10 bg-pastel-lavender rounded-full flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-primary-foreground"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </div>
-            <span className="text-sm font-medium">New Celebrity</span>
-          </button>
-          <button className="p-4 rounded-xl border border-border hover:border-primary-foreground transition-colors flex flex-col items-center justify-center gap-2">
-            <div className="w-10 h-10 bg-pastel-blue rounded-full flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-primary-foreground"
-              >
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-              </svg>
-            </div>
-            <span className="text-sm font-medium">New Blog Post</span>
-          </button>
-          <button className="p-4 rounded-xl border border-border hover:border-primary-foreground transition-colors flex flex-col items-center justify-center gap-2">
-            <div className="w-10 h-10 bg-pastel-peach rounded-full flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-primary-foreground"
-              >
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-            </div>
-            <span className="text-sm font-medium">View Analytics</span>
-          </button>
-          <button className="p-4 rounded-xl border border-border hover:border-primary-foreground transition-colors flex flex-col items-center justify-center gap-2">
-            <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-muted-foreground"
-              >
-                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-            </div>
-            <span className="text-sm font-medium">Settings</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Retailer Performance */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm">
-        <h2 className="font-serif text-lg font-medium mb-4">Retailer Performance</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left text-xs font-medium text-muted-foreground uppercase py-3 px-4">Retailer</th>
-                <th className="text-center text-xs font-medium text-muted-foreground uppercase py-3 px-4">Clicks</th>
-                <th className="text-right text-xs font-medium text-muted-foreground uppercase py-3 px-4">Revenue</th>
-              </tr>
-            </thead>
-            <tbody>
-              {analyticsData.retailerPerformance.map((retailer, index) => (
-                <tr key={index} className="border-b border-border">
-                  <td className="py-3 px-4">
-                    <div className="font-medium text-sm">{retailer.retailer}</div>
-                  </td>
-                  <td className="py-3 px-4 text-center text-sm">
-                    {retailer.clicks}
-                  </td>
-                  <td className="py-3 px-4 text-right font-medium text-sm">
-                    ${retailer.revenue.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          )}
         </div>
       </div>
     </AdminLayout>

@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { generateOptimizedMetaDescription, generateOptimizedTitle, generateInternalLinks } from "@/utils/seoContentOptimizer";
 import { generateMockReviews } from "@/utils/socialProofSchema";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const Index: React.FC = () => {
   const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
@@ -27,6 +28,7 @@ const Index: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const { trackPageView } = useAnalytics();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,7 +48,13 @@ const Index: React.FC = () => {
     };
 
     fetchData();
-  }, []);
+    
+    // Track homepage view
+    trackPageView("/", {
+      page: "homepage",
+      timestamp: new Date().toISOString()
+    });
+  }, [trackPageView]);
 
   // Get featured data to display
   const featuredOutfits = outfits.slice(0, 6);
@@ -333,6 +341,7 @@ const Index: React.FC = () => {
               price={product.price}
               retailer={product.retailer}
               affiliateLink={product.affiliateLink}
+              productId={product.id}
             />
           ))}
         </div>

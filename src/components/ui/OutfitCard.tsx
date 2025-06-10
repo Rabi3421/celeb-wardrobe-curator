@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Calendar } from "lucide-react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface OutfitCardProps {
   id: string;
@@ -10,9 +10,6 @@ interface OutfitCardProps {
   celebrityId: string;
   title: string;
   description: string;
-  date?: string;
-  occasion?: string;
-  slug?: string;
 }
 
 const OutfitCard: React.FC<OutfitCardProps> = ({
@@ -21,60 +18,53 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
   celebrity,
   celebrityId,
   title,
-  description,
-  date,
-  occasion,
-  slug
+  description
 }) => {
-  // Always use slug if available, fall back to ID
-  const outfitUrl = slug ? `/outfit/${slug}` : `/outfit/${id}`;
-  const celebrityUrl = `/celebrity/${celebrityId}`;
+  const { trackEvent } = useAnalytics();
+
+  const handleOutfitClick = () => {
+    trackEvent({
+      eventType: 'outfit_view',
+      metadata: {
+        outfitId: id,
+        title,
+        celebrity,
+        celebrityId
+      }
+    });
+  };
 
   return (
-    <div className="outfit-card rounded-lg shadow-sm overflow-hidden bg-white animate-fade-in">
-      <Link to={outfitUrl}>
-        <div className="relative aspect-[3/4] overflow-hidden">
+    <Link 
+      to={`/outfit/${id}`} 
+      className="group block"
+      onClick={handleOutfitClick}
+    >
+      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+        <div className="aspect-[3/4] overflow-hidden">
           <img
             src={image}
-            alt={`${celebrity} wearing ${title} - Celebrity fashion inspiration`}
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-            loading="lazy"
+            alt={`${celebrity} - ${title}`}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          {occasion && (
-            <span className="absolute top-2 right-2 bg-primary/80 text-white text-xs px-2 py-0.5 rounded-full">
-              {occasion}
-            </span>
-          )}
         </div>
-      </Link>
-      <div className="p-4">
-        <Link to={celebrityUrl} className="block">
-          <h3 className="font-medium text-sm text-primary-foreground hover:underline">
+        <div className="p-4">
+          <Link
+            to={`/celebrity/${celebrityId}`}
+            className="text-sm text-muted-foreground hover:text-primary-foreground transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
             {celebrity}
-          </h3>
-        </Link>
-        <Link to={outfitUrl}>
-          <h2 className="font-serif font-medium text-lg mt-1 line-clamp-1 hover:text-primary transition-colors">
+          </Link>
+          <h3 className="font-serif text-lg font-medium mt-1 mb-2 line-clamp-2">
             {title}
-          </h2>
-          <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
+          </h3>
+          <p className="text-sm text-muted-foreground line-clamp-2">
             {description}
           </p>
-        </Link>
-        {date && (
-          <div className="flex items-center text-xs text-muted-foreground mt-2">
-            <Calendar className="h-3 w-3 mr-1" />
-            <time dateTime={new Date(date).toISOString()}>
-              {new Date(date).toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-              })}
-            </time>
-          </div>
-        )}
+        </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
