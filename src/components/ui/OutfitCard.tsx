@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { Heart, Eye } from "lucide-react";
+import { Heart, ShoppingBag } from "lucide-react";
 
 interface OutfitCardProps {
   id: string;
@@ -42,28 +42,29 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
   };
 
   return (
-    <div className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-border/50">
+    <div className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-border/20 hover:border-primary/30">
       {/* Product Image */}
       <Link 
         to={`/outfit/${slug || id}`} 
         onClick={handleOutfitClick}
-        className="block relative"
+        className="block relative overflow-hidden"
       >
-        <div className="aspect-[3/4] overflow-hidden bg-muted/20">
+        <div className="aspect-[4/5] overflow-hidden bg-muted/10">
           <img
             src={image}
             alt={`${celebrity} - ${title}`}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
-          {/* Overlay with quick actions */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300">
-            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300">
+            {/* Quick action buttons */}
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
               <div className="flex flex-col gap-2">
-                <button className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
+                <button className="w-9 h-9 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white shadow-lg transition-all hover:scale-110">
                   <Heart className="w-4 h-4 text-muted-foreground" />
                 </button>
-                <button className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
-                  <Eye className="w-4 h-4 text-muted-foreground" />
+                <button className="w-9 h-9 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white shadow-lg transition-all hover:scale-110">
+                  <ShoppingBag className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
             </div>
@@ -71,7 +72,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
           {/* Occasion badge */}
           {occasion && (
             <div className="absolute top-3 left-3">
-              <span className="bg-white/90 text-xs font-medium px-2 py-1 rounded-full text-foreground">
+              <span className="bg-primary/90 backdrop-blur-sm text-white text-xs font-medium px-3 py-1 rounded-full">
                 {occasion}
               </span>
             </div>
@@ -81,10 +82,10 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
 
       {/* Product Info */}
       <div className="p-4">
-        {/* Celebrity Name */}
+        {/* Celebrity Brand */}
         <Link
           to={`/celebrity/${celebrityId}`}
-          className="inline-block text-xs font-medium text-primary hover:text-primary/80 transition-colors uppercase tracking-wide mb-2"
+          className="inline-block text-xs font-semibold text-primary hover:text-primary/80 transition-colors uppercase tracking-wider mb-2"
           onClick={(e) => e.stopPropagation()}
         >
           {celebrity}
@@ -94,35 +95,37 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
         <Link 
           to={`/outfit/${slug || id}`} 
           onClick={handleOutfitClick}
+          className="block"
         >
-          <h3 className="font-medium text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="font-medium text-foreground text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors leading-relaxed">
             {title}
           </h3>
         </Link>
 
-        {/* Description */}
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-          {description}
-        </p>
+        {/* Price-like styling for description */}
+        <div className="mb-3">
+          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+            {description}
+          </p>
+        </div>
 
-        {/* Date */}
+        {/* Date as release date */}
         {date && (
-          <div className="text-xs text-muted-foreground">
-            {new Date(date).toLocaleDateString('en-US', { 
+          <div className="text-xs text-muted-foreground mb-3 font-medium">
+            Released {new Date(date).toLocaleDateString('en-US', { 
               month: 'short', 
-              day: 'numeric', 
               year: 'numeric' 
             })}
           </div>
         )}
 
-        {/* View Details Button */}
+        {/* CTA Button */}
         <Link 
           to={`/outfit/${slug || id}`} 
           onClick={handleOutfitClick}
-          className="mt-3 block w-full text-center py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+          className="block w-full text-center bg-primary text-white py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-primary/90 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
         >
-          View Details
+          Shop This Look
         </Link>
       </div>
     </div>
