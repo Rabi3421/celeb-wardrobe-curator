@@ -451,6 +451,46 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
   }
 };
 
+// Fetch blog post by slug
+export const fetchBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (error) {
+      console.error('Error fetching blog post by slug:', error);
+      return null;
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      content: data.content,
+      excerpt: data.excerpt,
+      image: data.image,
+      date: data.date,
+      author: data.author,
+      category: data.category,
+      slug: data.slug || data.id,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      meta_description: data.meta_description || '',
+      structured_data: data.structured_data || '',
+      keywords: data.keywords || ''
+    };
+  } catch (error) {
+    console.error('Error fetching blog post by slug:', error);
+    return null;
+  }
+};
+
 // Fetch blog post by ID
 export const fetchBlogPostById = async (id: string): Promise<BlogPost | null> => {
   try {
