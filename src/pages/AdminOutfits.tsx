@@ -105,6 +105,7 @@ const AdminOutfits: React.FC = () => {
         occasion: outfit.occasion,
         date: outfit.date,
         affiliateLink: outfit.affiliate_link,
+        slug: outfit.slug, // Include the slug
       }));
     }
   });
@@ -463,7 +464,7 @@ const AdminOutfits: React.FC = () => {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button size="sm" variant="outline" asChild>
-                          <a href={`/outfit/${outfit.id}`} target="_blank" rel="noopener noreferrer">
+                          <a href={`/outfit/${outfit.slug || outfit.id}`} target="_blank" rel="noopener noreferrer">
                             <Eye className="h-4 w-4" />
                           </a>
                         </Button>
