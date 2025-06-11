@@ -29,6 +29,7 @@ import AdminImportData from "./pages/AdminImportData";
 import AdminNewsletterSubscribers from "./pages/AdminNewsletterSubscribers";
 import AdminCelebrities from "./pages/AdminCelebrities";
 import AdminBlog from "./pages/AdminBlog";
+import AdminAnalytics from "./pages/AdminAnalytics";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -72,6 +73,7 @@ function App() {
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/analytics" element={<AdminAnalytics />} />
               <Route path="/admin/outfits" element={<AdminOutfits />} />
               <Route path="/admin/tags" element={<AdminTags />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
