@@ -323,6 +323,7 @@ const Outfits: React.FC = () => {
                   celebrityId={outfit.celebrityId}
                   title={outfit.title}
                   description={outfit.description}
+                  slug={outfit.slug}
                 />
                 
                 {/* Hidden structured data for individual outfits */}

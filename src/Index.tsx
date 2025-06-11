@@ -53,7 +53,7 @@ const Index: React.FC = () => {
   const topCelebrities = celebrities.slice(0, 4); // Top 4 celebrities for the profiles section
   const recentBlogPosts = blogPosts.slice(0, 3);
 
-  console.log("Top celebrities for display:", topCelebrities.length);
+  console.log("Top celebrities for display:", featuredOutfits);
 
   // Keep the hardcoded testimonials for now, as they're not part of the core data model
   const testimonials = [
@@ -308,6 +308,7 @@ const Index: React.FC = () => {
               celebrityId={outfit.celebrityId}
               title={outfit.title}
               description={outfit.description}
+              slug={outfit.slug}
             />
           ))}
         </div>

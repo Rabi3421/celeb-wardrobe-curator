@@ -40,7 +40,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
       }
     });
   };
-
+console.log("slug:",slug)
   // Use slug if available, fallback to id
   const outfitUrl = slug ? `/outfit/${slug}` : `/outfit/${id}`;
 
