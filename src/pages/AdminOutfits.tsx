@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -604,7 +604,7 @@ const AdminOutfits: React.FC = () => {
 
       {/* Add/Edit Form Dialog */}
       <Dialog open={showAddEditForm} onOpenChange={setShowAddEditForm}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>
               {editOutfit ? "Edit Outfit" : "Add New Outfit"}
@@ -614,7 +614,7 @@ const AdminOutfits: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           
-          <ScrollArea className="flex-1 pr-4">
+          <ScrollArea className="flex-1 max-h-[70vh] pr-4">
             <form id="outfit-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
               {/* Media Upload Section */}
               <div data-media-uploader>
@@ -760,7 +760,7 @@ const AdminOutfits: React.FC = () => {
             </form>
           </ScrollArea>
           
-          <DialogFooter className="pt-2">
+          <DialogFooter className="pt-4 border-t">
             <Button variant="outline" onClick={() => setShowAddEditForm(false)}>
               Cancel
             </Button>
