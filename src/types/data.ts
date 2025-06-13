@@ -1,4 +1,3 @@
-
 // Celebrity type
 export interface Celebrity {
   id: string;
@@ -48,10 +47,10 @@ export interface Celebrity {
   brandEndorsements?: string;
 }
 
-// Outfit type
+// Outfit type with enhanced media support
 export interface Outfit {
   id: string;
-  image: string;
+  image: string; // Keep for backward compatibility
   celebrityId: string;
   celebrity: string;
   title: string;
@@ -62,6 +61,18 @@ export interface Outfit {
   tags?: string[];
   slug?: string;
   affiliateLink?: string;
+  media?: OutfitMedia[]; // New field for multiple media
+}
+
+// New type for outfit media
+export interface OutfitMedia {
+  id: string;
+  outfitId: string;
+  mediaUrl: string;
+  mediaType: 'image' | 'video';
+  displayOrder: number;
+  isPrimary: boolean;
+  createdAt: string;
 }
 
 // Affiliate product type

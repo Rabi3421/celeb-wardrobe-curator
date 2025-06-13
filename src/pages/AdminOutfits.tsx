@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import MediaUploader from "@/components/admin/MediaUploader";
 import { Outfit, Celebrity } from "@/types/data";
 import {
   Table,
@@ -37,6 +38,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { generateUniqueOutfitSlug } from "@/services/api";
 
+interface MediaFile {
+  id?: string;
+  file?: File;
+  url: string;
+  type: 'image' | 'video';
+  displayOrder: number;
+  isPrimary: boolean;
+}
+
 interface SupabaseOutfit extends Omit<Outfit, 'id' | 'celebrityId' | 'celebrity'> {
   id: string;
   celebrity_id: string;
@@ -48,6 +58,7 @@ const AdminOutfits: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [outfitToDelete, setOutfitToDelete] = useState<Outfit | null>(null);
   const [showAddEditForm, setShowAddEditForm] = useState(false);
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const queryClient = useQueryClient();
 
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
@@ -157,7 +168,7 @@ const AdminOutfits: React.FC = () => {
     outfit.celebrity.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Add outfit mutation
+  // Add outfit mutation with media support
   const addOutfitMutation = useMutation({
     mutationFn: async (data: any) => {
       // Generate unique slug from title
@@ -168,20 +179,53 @@ const AdminOutfits: React.FC = () => {
         .from('outfits')
         .insert([{
           title: data.title,
-          image: data.image,
+          image: data.image || '', // Keep for backward compatibility
           celebrity_id: data.celebrityId,
           description: data.description,
           full_description: data.fullDescription || null,
           occasion: data.occasion || null,
           date: data.date || null,
           affiliate_link: data.affiliateLink || null,
-          slug: slug, // Use the generated slug
+          slug: slug,
         }])
         .select('*')
         .single();
 
       if (outfitError) {
         throw outfitError;
+      }
+
+      // Upload and save media files
+      if (mediaFiles.length > 0) {
+        const mediaUploader = document.querySelector('[data-media-uploader]') as any;
+        const uploadedMedia = await mediaUploader?.uploadAllMedia?.() || [];
+        
+        if (uploadedMedia.length > 0) {
+          const mediaInserts = uploadedMedia.map((media: MediaFile, index: number) => ({
+            outfit_id: newOutfit.id,
+            media_url: media.url,
+            media_type: media.type,
+            display_order: index,
+            is_primary: media.isPrimary
+          }));
+
+          const { error: mediaError } = await supabase
+            .from('outfit_media')
+            .insert(mediaInserts);
+
+          if (mediaError) {
+            console.error('Error inserting media:', mediaError);
+          }
+
+          // Update outfit with primary image for backward compatibility
+          const primaryImage = uploadedMedia.find(m => m.isPrimary)?.url || uploadedMedia[0]?.url;
+          if (primaryImage) {
+            await supabase
+              .from('outfits')
+              .update({ image: primaryImage })
+              .eq('id', newOutfit.id);
+          }
+        }
       }
 
       // If there are tags, insert them
@@ -207,9 +251,10 @@ const AdminOutfits: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['outfit-tags'] });
       toast({
         title: "Outfit added",
-        description: "Your outfit has been added successfully with a unique slug",
+        description: "Your outfit has been added successfully with media files",
       });
       reset();
+      setMediaFiles([]);
     },
     onError: (error) => {
       console.error('Error adding outfit:', error);
@@ -221,7 +266,7 @@ const AdminOutfits: React.FC = () => {
     }
   });
 
-  // Update outfit mutation
+  // Update outfit mutation with media support
   const updateOutfitMutation = useMutation({
     mutationFn: async (data: any) => {
       // Generate unique slug if title changed
@@ -235,19 +280,58 @@ const AdminOutfits: React.FC = () => {
         .from('outfits')
         .update({
           title: data.title,
-          image: data.image,
+          image: data.image || '', // Keep for backward compatibility
           celebrity_id: data.celebrityId,
           description: data.description,
           full_description: data.fullDescription || null,
           occasion: data.occasion || null,
           date: data.date || null,
           affiliate_link: data.affiliateLink || null,
-          slug: slug, // Use the generated or existing slug
+          slug: slug,
         })
         .eq('id', data.id);
 
       if (outfitError) {
         throw outfitError;
+      }
+
+      // Handle media files if they've been updated
+      if (mediaFiles.length > 0) {
+        // Delete existing media
+        await supabase
+          .from('outfit_media')
+          .delete()
+          .eq('outfit_id', data.id);
+
+        const mediaUploader = document.querySelector('[data-media-uploader]') as any;
+        const uploadedMedia = await mediaUploader?.uploadAllMedia?.() || [];
+        
+        if (uploadedMedia.length > 0) {
+          const mediaInserts = uploadedMedia.map((media: MediaFile, index: number) => ({
+            outfit_id: data.id,
+            media_url: media.url,
+            media_type: media.type,
+            display_order: index,
+            is_primary: media.isPrimary
+          }));
+
+          const { error: mediaError } = await supabase
+            .from('outfit_media')
+            .insert(mediaInserts);
+
+          if (mediaError) {
+            console.error('Error inserting media:', mediaError);
+          }
+
+          // Update outfit with primary image for backward compatibility
+          const primaryImage = uploadedMedia.find(m => m.isPrimary)?.url || uploadedMedia[0]?.url;
+          if (primaryImage) {
+            await supabase
+              .from('outfits')
+              .update({ image: primaryImage })
+              .eq('id', data.id);
+          }
+        }
       }
 
       // Delete existing tags for this outfit
@@ -286,6 +370,7 @@ const AdminOutfits: React.FC = () => {
         description: "Your outfit has been updated successfully",
       });
       setEditOutfit(null);
+      setMediaFiles([]);
       reset();
     },
     onError: (error) => {
@@ -358,7 +443,7 @@ const AdminOutfits: React.FC = () => {
     }
   };
 
-  const handleEdit = (outfit: Outfit) => {
+  const handleEdit = async (outfit: Outfit) => {
     setEditOutfit(outfit);
     
     // Set form values
@@ -372,12 +457,31 @@ const AdminOutfits: React.FC = () => {
     if (outfit.tags) {
       setValue('tagsString', outfit.tags.join(', '));
     }
+
+    // Load existing media for the outfit
+    const { data: existingMedia } = await supabase
+      .from('outfit_media')
+      .select('*')
+      .eq('outfit_id', outfit.id)
+      .order('display_order');
+
+    if (existingMedia) {
+      const formattedMedia: MediaFile[] = existingMedia.map(media => ({
+        id: media.id,
+        url: media.media_url,
+        type: media.media_type as 'image' | 'video',
+        displayOrder: media.display_order,
+        isPrimary: media.is_primary
+      }));
+      setMediaFiles(formattedMedia);
+    }
     
     setShowAddEditForm(true);
   };
   
   const handleAddNew = () => {
     setEditOutfit(null);
+    setMediaFiles([]);
     reset();
     setShowAddEditForm(true);
   };
@@ -500,18 +604,27 @@ const AdminOutfits: React.FC = () => {
 
       {/* Add/Edit Form Dialog */}
       <Dialog open={showAddEditForm} onOpenChange={setShowAddEditForm}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>
               {editOutfit ? "Edit Outfit" : "Add New Outfit"}
             </DialogTitle>
             <DialogDescription>
-              Fill in the details for the outfit.
+              Fill in the details for the outfit and upload images/videos.
             </DialogDescription>
           </DialogHeader>
           
           <ScrollArea className="flex-1 pr-4">
             <form id="outfit-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
+              {/* Media Upload Section */}
+              <div data-media-uploader>
+                <MediaUploader
+                  outfitId={editOutfit?.id}
+                  existingMedia={mediaFiles}
+                  onMediaChange={setMediaFiles}
+                />
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="title" className="font-medium">Title *</Label>
@@ -528,19 +641,18 @@ const AdminOutfits: React.FC = () => {
                   )}
                 </div>
 
+                {/* Keep image field for backward compatibility but make it optional */}
                 <div className="grid gap-2">
-                  <Label htmlFor="image" className="font-medium">Image URL *</Label>
+                  <Label htmlFor="image" className="font-medium">Fallback Image URL</Label>
                   <Input
                     id="image"
-                    {...register("image", { required: "Image URL is required" })}
+                    {...register("image")}
                     defaultValue={editOutfit?.image || ""}
-                    placeholder="https://example.com/image.jpg"
+                    placeholder="Optional: backup image URL"
                   />
-                  {errors.image && (
-                    <p className="text-sm text-red-500">
-                      {errors.image.message as string}
-                    </p>
-                  )}
+                  <p className="text-xs text-muted-foreground">
+                    This will be auto-populated from uploaded media
+                  </p>
                 </div>
 
                 <div className="grid gap-2">

@@ -3,12 +3,22 @@ import React from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "@/components/layout/PageLayout";
 import AffiliateProductCard from "@/components/ui/AffiliateProductCard";
+import MediaGallery from "@/components/ui/MediaGallery";
 import { fetchOutfitBySlug, fetchOutfitById, fetchAffiliateProductsByOutfitId } from "@/services/api";
 import { Outfit, AffiliateProduct } from "@/types/data";
 import { Loader2, ShoppingCart, ExternalLink } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface MediaItem {
+  id: string;
+  url: string;
+  type: 'image' | 'video';
+  isPrimary: boolean;
+  displayOrder: number;
+}
 
 const OutfitDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -32,6 +42,34 @@ const OutfitDetail: React.FC = () => {
     }
   });
 
+  // Query to fetch media for this outfit
+  const { data: mediaItems = [], isLoading: isLoadingMedia } = useQuery({
+    queryKey: ['outfit', slug, 'media'],
+    queryFn: async () => {
+      if (!outfit) return [];
+      
+      const { data, error } = await supabase
+        .from('outfit_media')
+        .select('*')
+        .eq('outfit_id', outfit.id)
+        .order('display_order');
+
+      if (error) {
+        console.error('Error fetching outfit media:', error);
+        return [];
+      }
+
+      return data.map(item => ({
+        id: item.id,
+        url: item.media_url,
+        type: item.media_type as 'image' | 'video',
+        isPrimary: item.is_primary,
+        displayOrder: item.display_order
+      }));
+    },
+    enabled: !!outfit
+  });
+
   // Query to fetch affiliate products for this outfit
   const { data: products = [], isLoading: isLoadingProducts } = useQuery({
     queryKey: ['outfit', slug, 'products'],
@@ -42,7 +80,7 @@ const OutfitDetail: React.FC = () => {
     enabled: !!outfit
   });
 
-  const isLoading = isLoadingOutfit || isLoadingProducts;
+  const isLoading = isLoadingOutfit || isLoadingProducts || isLoadingMedia;
 
   const handleBuyNowClick = () => {
     // If there's an affiliate link, open it in a new tab
@@ -86,6 +124,19 @@ const OutfitDetail: React.FC = () => {
     );
   }
 
+  // Create fallback media if no media items exist
+  const displayMedia: MediaItem[] = mediaItems.length > 0 
+    ? mediaItems 
+    : outfit.image 
+      ? [{
+          id: 'fallback',
+          url: outfit.image,
+          type: 'image' as const,
+          isPrimary: true,
+          displayOrder: 0
+        }]
+      : [];
+
   return (
     <PageLayout>
       <div className="container-custom py-8 md:py-16">
@@ -112,16 +163,20 @@ const OutfitDetail: React.FC = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-          {/* Left column - Image */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+          {/* Left column - Media Gallery */}
           <div>
-            <div className="rounded-2xl overflow-hidden shadow-lg">
-              <img
-                src={outfit.image}
-                alt={`${outfit.celebrity} wearing ${outfit.title} - Celebrity fashion inspiration`}
-                className="w-full h-auto object-cover"
+            {displayMedia.length > 0 ? (
+              <MediaGallery
+                media={displayMedia}
+                title={outfit.title}
+                celebrity={outfit.celebrity}
               />
-            </div>
+            ) : (
+              <div className="aspect-[4/5] bg-gray-100 rounded-2xl flex items-center justify-center">
+                <p className="text-muted-foreground">No media available</p>
+              </div>
+            )}
 
             <div className="mt-6 flex flex-wrap gap-2">
               {outfit.occasion && (
@@ -143,7 +198,7 @@ const OutfitDetail: React.FC = () => {
           {/* Right column - Details */}
           <div>
             <div className="mb-6">
-              <Link to={`/celebrity/s/${outfit.celebrityId}`}>
+              <Link to={`/celebrity/${outfit.celebrityId}`}>
                 <h3 className="font-medium text-sm text-primary-foreground hover:underline">
                   {outfit.celebrity}
                 </h3>
