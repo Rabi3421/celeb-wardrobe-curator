@@ -55,7 +55,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
         <img
           src={image}
           alt={`${celebrity} - ${title}`}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
         />
         
         {/* Wishlist Button */}
