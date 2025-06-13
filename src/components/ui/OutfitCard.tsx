@@ -45,12 +45,12 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
   const outfitUrl = slug ? `/outfit/${slug}` : `/outfit/${id}`;
 
   return (
-    <div className="group bg-white rounded-lg border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-      {/* Product Image */}
+    <div className="group bg-white rounded-xl border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden max-w-sm mx-auto">
+      {/* Product Image - Reduced height */}
       <Link 
         to={outfitUrl} 
         onClick={handleOutfitClick}
-        className="block relative aspect-[3/4] overflow-hidden bg-gray-50"
+        className="block relative aspect-[4/3] overflow-hidden bg-gray-50"
       >
         <img
           src={image}
@@ -59,31 +59,31 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
         />
         
         {/* Wishlist Button */}
-        <button className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-50">
+        <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-white hover:scale-110">
           <Heart className="w-4 h-4 text-gray-600 hover:text-red-500 transition-colors" />
         </button>
 
         {/* Occasion Badge */}
         {occasion && (
           <div className="absolute top-3 left-3">
-            <span className="bg-black text-white text-xs font-medium px-2 py-1 rounded">
+            <span className="bg-black/80 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-md">
               {occasion.toUpperCase()}
             </span>
           </div>
         )}
 
-        {/* Quick Add Overlay */}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button className="w-full bg-white text-black py-2 px-4 rounded font-medium text-sm hover:bg-gray-100 transition-colors flex items-center justify-center gap-2">
+        {/* Quick Shop Overlay */}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button className="w-full bg-white text-black py-2 px-3 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 shadow-md">
             <ShoppingBag className="w-4 h-4" />
             Quick Shop
           </button>
         </div>
       </Link>
 
-      {/* Product Info */}
+      {/* Product Info - Compact padding */}
       <div className="p-4">
-        {/* Celebrity Brand */}
+        {/* Celebrity Name */}
         <Link
           to={`/celebrity/${celebrityId}`}
           className="text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors mb-1 block"
@@ -98,13 +98,13 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
           onClick={handleOutfitClick}
           className="block mb-2"
         >
-          <h3 className="font-medium text-gray-900 text-sm leading-tight line-clamp-2 hover:text-gray-700 transition-colors">
+          <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 hover:text-gray-700 transition-colors">
             {title}
           </h3>
         </Link>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1 mb-2">
+        {/* Rating - Compact */}
+        <div className="flex items-center gap-1 mb-3">
           <div className="flex items-center">
             {[...Array(5)].map((_, i) => (
               <Star 
@@ -116,34 +116,29 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
           <span className="text-xs text-gray-500 ml-1">(4.0)</span>
         </div>
 
-        {/* Price Section */}
+        {/* Price Section - Simplified */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-gray-900">From $25</span>
+            <span className="text-lg font-bold text-gray-900">$25</span>
             <span className="text-sm text-gray-500 line-through">$89</span>
           </div>
-          <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded">
+          <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">
             72% OFF
           </span>
         </div>
 
-        {/* Description */}
-        <p className="text-xs text-gray-600 line-clamp-2 mb-3 leading-relaxed">
-          {description}
-        </p>
-
-        {/* Add to Cart Button */}
+        {/* Shop Button */}
         <Link 
           to={outfitUrl} 
           onClick={handleOutfitClick}
-          className="block w-full bg-black text-white text-center py-2.5 px-4 rounded font-medium text-sm hover:bg-gray-800 transition-colors"
+          className="block w-full bg-black text-white text-center py-2.5 px-4 rounded-lg font-medium text-sm hover:bg-gray-800 transition-colors mb-3"
         >
           Shop This Look
         </Link>
 
-        {/* Additional Info */}
+        {/* Additional Info - Compact */}
         {date && (
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
             <span className="text-xs text-gray-500">
               {new Date(date).toLocaleDateString('en-US', { 
                 month: 'short', 
