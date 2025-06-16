@@ -26,6 +26,7 @@ const Index: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [affiliateProducts, setAffiliateProducts] = useState<AffiliateProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const { trackPageView } = useAnalytics();
@@ -33,33 +34,83 @@ const Index: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const [celebritiesData, outfitsData, blogPostsData, productsData] = await Promise.all([
-        fetchCelebrities(),
-        fetchOutfits(3),
-        fetchBlogPosts(),
-        fetchAffiliateProducts()
-      ]);
+      setConnectionError(null);
+      
+      try {
+        console.log('Starting data fetch...');
+        
+        const [celebritiesData, outfitsData, blogPostsData, productsData] = await Promise.allSettled([
+          fetchCelebrities(),
+          fetchOutfits(3),
+          fetchBlogPosts(),
+          fetchAffiliateProducts()
+        ]);
 
-      setCelebrities(celebritiesData);
-      setOutfits(outfitsData);
-      setBlogPosts(blogPostsData);
-      setAffiliateProducts(productsData);
-      setIsLoading(false);
+        // Handle celebrities data
+        if (celebritiesData.status === 'fulfilled') {
+          console.log('Celebrities loaded:', celebritiesData.value.length);
+          setCelebrities(celebritiesData.value);
+        } else {
+          console.error('Failed to load celebrities:', celebritiesData.reason);
+        }
+
+        // Handle outfits data
+        if (outfitsData.status === 'fulfilled') {
+          console.log('Outfits loaded:', outfitsData.value.length);
+          setOutfits(outfitsData.value);
+        } else {
+          console.error('Failed to load outfits:', outfitsData.reason);
+        }
+
+        // Handle blog posts data
+        if (blogPostsData.status === 'fulfilled') {
+          console.log('Blog posts loaded:', blogPostsData.value.length);
+          setBlogPosts(blogPostsData.value);
+        } else {
+          console.error('Failed to load blog posts:', blogPostsData.reason);
+        }
+
+        // Handle affiliate products data
+        if (productsData.status === 'fulfilled') {
+          console.log('Affiliate products loaded:', productsData.value.length);
+          setAffiliateProducts(productsData.value);
+        } else {
+          console.error('Failed to load affiliate products:', productsData.reason);
+        }
+
+        // Check if all requests failed
+        const allFailed = [celebritiesData, outfitsData, blogPostsData, productsData]
+          .every(result => result.status === 'rejected');
+        
+        if (allFailed) {
+          setConnectionError('Unable to connect to the server. Please check your internet connection and try again.');
+        }
+
+      } catch (error) {
+        console.error('Error during data fetch:', error);
+        setConnectionError('Unable to load content. Please refresh the page and try again.');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchData();
     
     // Track homepage view
-    trackPageView("/", {
-      page: "homepage",
-      timestamp: new Date().toISOString()
-    });
+    try {
+      trackPageView("/", {
+        page: "homepage",
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error tracking page view:', error);
+    }
   }, [trackPageView]);
 
-  // Get featured data to display
-  const featuredOutfits = outfits.slice(0, 6);
-  const featuredCelebrities = celebrities.slice(0, 4);
-  const recentBlogPosts = blogPosts.slice(0, 3);
+  // Get featured data to display with validation
+  const featuredOutfits = outfits.filter(outfit => outfit && outfit.id && outfit.title).slice(0, 6);
+  const featuredCelebrities = celebrities.filter(celebrity => celebrity && celebrity.id && celebrity.name).slice(0, 4);
+  const recentBlogPosts = blogPosts.filter(post => post && post.id && post.title).slice(0, 3);
 
   // Keep the hardcoded testimonials for now, as they're not part of the core data model
   const testimonials = [
@@ -238,6 +289,22 @@ const Index: React.FC = () => {
         category="homepage"
         dateModified={new Date().toISOString()}
       />
+
+      {/* Connection Error Banner */}
+      {connectionError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mx-4 mt-4">
+          <p className="text-center">{connectionError}</p>
+          <div className="text-center mt-2">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="text-red-800 underline hover:text-red-900"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hero Banner */}
       <section className="bg-gradient-to-r from-pastel-lavender to-pastel-blue py-12 md:py-20 animate-fade-slide-up">
         <div className="container-custom flex flex-col md:flex-row items-center">
@@ -292,19 +359,31 @@ const Index: React.FC = () => {
           title="This Week's Star Styles"
           viewAllLink="/outfits"
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredOutfits.slice(0, 3).map((outfit) => (
-            <OutfitCard
-              key={outfit.id}
-              id={outfit.id}
-              image={outfit.image}
-              celebrity={outfit.celebrity}
-              celebrityId={outfit.celebrityId}
-              title={outfit.title}
-              description={outfit.description}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-gray-200 animate-pulse rounded-xl h-96"></div>
+            ))}
+          </div>
+        ) : featuredOutfits.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredOutfits.slice(0, 3).map((outfit) => (
+              <OutfitCard
+                key={outfit.id}
+                id={outfit.id}
+                image={outfit.image}
+                celebrity={outfit.celebrity}
+                celebrityId={outfit.celebrityId}
+                title={outfit.title}
+                description={outfit.description}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No featured outfits available at the moment.</p>
+          </div>
+        )}
       </section>
 
       {/* Categories Section */}
@@ -332,19 +411,31 @@ const Index: React.FC = () => {
           title="Shop the Celeb Look"
           viewAllLink="/shop"
         />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {affiliateProducts.slice(0, 4).map((product, index) => (
-            <AffiliateProductCard
-              key={index}
-              image={product.image}
-              title={product.title}
-              price={product.price}
-              retailer={product.retailer}
-              affiliateLink={product.affiliateLink}
-              productId={product.id}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-gray-200 animate-pulse rounded-xl h-64"></div>
+            ))}
+          </div>
+        ) : affiliateProducts.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {affiliateProducts.slice(0, 4).map((product, index) => (
+              <AffiliateProductCard
+                key={index}
+                image={product.image}
+                title={product.title}
+                price={product.price}
+                retailer={product.retailer}
+                affiliateLink={product.affiliateLink}
+                productId={product.id}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No products available at the moment.</p>
+          </div>
+        )}
       </section>
 
       {/* Celebrity Spotlight */}
@@ -385,19 +476,31 @@ const Index: React.FC = () => {
           title="Fashion Blog"
           viewAllLink="/blog"
         />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {recentBlogPosts.map((post) => (
-            <BlogPostCard
-              key={post.id}
-              id={post.id}
-              title={post.title}
-              excerpt={post.excerpt}
-              image={post.image}
-              date={post.date}
-              category={post.category}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-gray-200 animate-pulse rounded-xl h-64"></div>
+            ))}
+          </div>
+        ) : recentBlogPosts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {recentBlogPosts.map((post) => (
+              <BlogPostCard
+                key={post.id}
+                id={post.id}
+                title={post.title}
+                excerpt={post.excerpt}
+                image={post.image}
+                date={post.date}
+                category={post.category}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No blog posts available at the moment.</p>
+          </div>
+        )}
       </section>
 
       {/* Social Feed Section */}
