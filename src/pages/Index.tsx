@@ -32,19 +32,45 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true);
-      const [celebritiesData, outfitsData, blogPostsData, productsData] = await Promise.all([
-        fetchCelebrities(),
-        fetchOutfits(3),
-        fetchBlogPosts(),
-        fetchAffiliateProducts()
-      ]);
+      try {
+        setIsLoading(true);
+        console.log("Starting to fetch homepage data...");
+        
+        const [celebritiesData, outfitsData, blogPostsData, productsData] = await Promise.all([
+          fetchCelebrities().catch(err => {
+            console.error("Error fetching celebrities:", err);
+            return [];
+          }),
+          fetchOutfits(6).catch(err => {
+            console.error("Error fetching outfits:", err);
+            return [];
+          }),
+          fetchBlogPosts().catch(err => {
+            console.error("Error fetching blog posts:", err);
+            return [];
+          }),
+          fetchAffiliateProducts().catch(err => {
+            console.error("Error fetching products:", err);
+            return [];
+          })
+        ]);
 
-      setCelebrities(celebritiesData);
-      setOutfits(outfitsData);
-      setBlogPosts(blogPostsData);
-      setAffiliateProducts(productsData);
-      setIsLoading(false);
+        console.log("Fetched data:", {
+          celebrities: celebritiesData.length,
+          outfits: outfitsData.length,
+          blogPosts: blogPostsData.length,
+          products: productsData.length
+        });
+
+        setCelebrities(celebritiesData || []);
+        setOutfits(outfitsData || []);
+        setBlogPosts(blogPostsData || []);
+        setAffiliateProducts(productsData || []);
+      } catch (error) {
+        console.error("Error in fetchData:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchData();
@@ -56,10 +82,18 @@ const Index: React.FC = () => {
     });
   }, [trackPageView]);
 
-  // Get featured data to display
-  const featuredOutfits = outfits.slice(0, 6);
-  const featuredCelebrities = celebrities.slice(0, 4);
-  const recentBlogPosts = blogPosts.slice(0, 3);
+  // Get featured data to display with proper validation
+  const featuredOutfits = outfits.filter(outfit => 
+    outfit && outfit.id && outfit.image && outfit.celebrity && outfit.title
+  ).slice(0, 6);
+  
+  const featuredCelebrities = celebrities.filter(celebrity => 
+    celebrity && celebrity.id && celebrity.name && celebrity.image
+  ).slice(0, 4);
+  
+  const recentBlogPosts = blogPosts.filter(post => 
+    post && post.id && post.title && post.excerpt
+  ).slice(0, 3);
 
   // Keep the hardcoded testimonials for now, as they're not part of the core data model
   const testimonials = [
@@ -217,8 +251,42 @@ const Index: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <PageLayout>
+        {/* ... keep existing code (EnhancedSEO) */}
+        <EnhancedSEO
+          title={seoTitle}
+          description={seoDescription}
+          ogImage="/images/hero_img.jpg"
+          ogTitle="Celebrity Style Inspiration & Affordable Fashion Alternatives | CelebrityPersona"
+          ogDescription="Get the celebrity look for less! Browse our collection of celebrity-inspired fashion with affordable alternatives for every budget."
+          twitterCard="summary_large_image"
+          twitterTitle="Celebrity Style Inspiration & Affordable Alternatives"
+          twitterDescription="Discover and shop celebrity-inspired fashion at budget-friendly prices. Red carpet looks, street style, and more!"
+          twitterImage="/images/hero_img.jpg"
+          keywords="celebrity outfits, celebrity dresses, celebrity fashion, affordable celebrity style, celebrity party wear, red carpet looks, celebrity street style, celebrity accessories, celebrity inspired clothing, fashion dupes, affordable fashion alternatives"
+          breadcrumbs={breadcrumbData}
+          faqSchema={faqData}
+          itemListSchema={itemListSchema}
+          socialProofMetrics={socialProofMetrics}
+          reviewData={reviewData}
+          category="homepage"
+          dateModified={new Date().toISOString()}
+        />
+        <div className="container-custom py-16 text-center">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout>
+      {/* ... keep existing code (EnhancedSEO) */}
       <EnhancedSEO
         title={seoTitle}
         description={seoDescription}
@@ -238,6 +306,7 @@ const Index: React.FC = () => {
         category="homepage"
         dateModified={new Date().toISOString()}
       />
+      
       {/* Hero Banner */}
       <section className="bg-gradient-to-r from-pastel-lavender to-pastel-blue py-12 md:py-20 animate-fade-slide-up">
         <div className="container-custom flex flex-col md:flex-row items-center">
@@ -286,25 +355,35 @@ const Index: React.FC = () => {
         </div>
       </section>
 
-      {/* Trending Looks Section */}
+      {/* Trending Looks Section - Fixed */}
       <section className="container-custom py-16">
         <SectionHeader
           title="This Week's Star Styles"
           viewAllLink="/outfits"
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredOutfits.slice(0, 3).map((outfit) => (
-            <OutfitCard
-              key={outfit.id}
-              id={outfit.id}
-              image={outfit.image}
-              celebrity={outfit.celebrity}
-              celebrityId={outfit.celebrityId}
-              title={outfit.title}
-              description={outfit.description}
-            />
-          ))}
-        </div>
+        
+        {featuredOutfits.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredOutfits.slice(0, 3).map((outfit) => (
+              <OutfitCard
+                key={outfit.id}
+                id={outfit.id}
+                image={outfit.image}
+                celebrity={outfit.celebrity}
+                celebrityId={outfit.celebrityId}
+                title={outfit.title}
+                description={outfit.description}
+                slug={outfit.slug}
+                occasion={outfit.occasion}
+                date={outfit.date}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Loading star styles...</p>
+          </div>
+        )}
       </section>
 
       {/* Categories Section */}
@@ -344,6 +423,35 @@ const Index: React.FC = () => {
               productId={product.id}
             />
           ))}
+        </div>
+      </section>
+
+      {/* Featured Celebrity Profiles Section */}
+      <section className="py-16 bg-muted/50">
+        <div className="container-custom">
+          <SectionHeader
+            title="Featured Celebrity Profiles"
+            viewAllLink="/celebrities"
+            viewAllText="View All Profiles"
+          />
+          {featuredCelebrities.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+              {featuredCelebrities.map((celebrity) => (
+                <CelebrityCard
+                  key={celebrity.id}
+                  id={celebrity.id}
+                  name={celebrity.name}
+                  image={celebrity.image}
+                  outfitCount={celebrity.outfitCount || 0}
+                  slug={celebrity.slug}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Loading celebrity profiles...</p>
+            </div>
+          )}
         </div>
       </section>
 
