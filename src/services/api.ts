@@ -102,38 +102,67 @@ export const generateUniqueOutfitSlug = async (title: string, excludeId?: string
   return slug;
 };
 
-// Helper function to get outfit count for a celebrity
-const getOutfitCountForCelebrity = async (celebrityId: string): Promise<number> => {
+// Optimized helper function to get outfit counts for all celebrities at once
+const getBatchOutfitCounts = async (celebrityIds: string[]): Promise<Record<string, number>> => {
   try {
-    const { data, error, count } = await supabase
-      .from('outfits')
-      .select('*', { count: 'exact', head: true })
-      .eq('celebrity_id', celebrityId);
-
-    if (error) {
-      console.error('Error counting outfits for celebrity:', celebrityId, error);
-      return 0;
+    console.log('Fetching outfit counts for celebrities:', celebrityIds);
+    
+    if (celebrityIds.length === 0) {
+      return {};
     }
 
-    return count || 0;
+    const { data, error } = await supabase
+      .from('outfits')
+      .select('celebrity_id')
+      .in('celebrity_id', celebrityIds);
+
+    if (error) {
+      console.error('Error fetching outfit counts:', error);
+      return {};
+    }
+
+    // Count outfits per celebrity
+    const counts: Record<string, number> = {};
+    celebrityIds.forEach(id => counts[id] = 0); // Initialize all to 0
+    
+    data.forEach(outfit => {
+      counts[outfit.celebrity_id] = (counts[outfit.celebrity_id] || 0) + 1;
+    });
+
+    console.log('Outfit counts fetched successfully:', counts);
+    return counts;
   } catch (error) {
-    console.error('Error counting outfits for celebrity:', celebrityId, error);
-    return 0;
+    console.error('Error in getBatchOutfitCounts:', error);
+    return {};
   }
 };
 
-// Fetch celebrities from the database
+// Fetch celebrities from the database with optimized outfit counting
 export const fetchCelebrities = async (): Promise<Celebrity[]> => {
   try {
+    console.log('Starting to fetch celebrities...');
+    
     const { data, error } = await supabase.from('celebrities').select('*');
 
     if (error) {
+      console.error('Error fetching celebrities from database:', error);
       throw error;
     }
 
-    // Convert database fields to match our Celebrity type and fetch outfit counts
-    const formattedData: Celebrity[] = await Promise.all(data.map(async (item) => {
-      // Process social media and signature objects with proper typing
+    console.log(`Fetched ${data.length} celebrities from database`);
+
+    if (data.length === 0) {
+      return [];
+    }
+
+    // Get all celebrity IDs for batch outfit counting
+    const celebrityIds = data.map(item => item.id);
+    
+    // Fetch outfit counts in batch instead of individual requests
+    const outfitCounts = await getBatchOutfitCounts(celebrityIds);
+
+    // Convert database fields to match our Celebrity type
+    const formattedData: Celebrity[] = data.map((item) => {
       const socialMediaDefault = { instagram: "", twitter: "", facebook: "", youtube: "", tiktok: "", website: "" };
       const signatureDefault = { look: "", accessories: "", designers: "", perfume: "" };
       
@@ -147,14 +176,11 @@ export const fetchCelebrities = async (): Promise<Celebrity[]> => {
         signatureDefault
       );
 
-      // Get actual outfit count from outfits table
-      const actualOutfitCount = await getOutfitCountForCelebrity(item.id);
-      
       return {
         id: item.id,
         name: item.name,
         image: item.image,
-        outfitCount: actualOutfitCount, // Use actual count instead of stored value
+        outfitCount: outfitCounts[item.id] || 0, // Use batch-fetched count
         bio: item.bio,
         category: item.category,
         styleType: item.style_type,
@@ -166,7 +192,7 @@ export const fetchCelebrities = async (): Promise<Celebrity[]> => {
         careerHighlights: item.career_highlights,
         personalLife: item.personal_life,
         awards: item.awards,
-        socialMedia, // Properly typed
+        socialMedia,
         interestingFacts: item.interesting_facts,
         nationality: item.nationality,
         languages: item.languages,
@@ -176,7 +202,7 @@ export const fetchCelebrities = async (): Promise<Celebrity[]> => {
         businessVentures: item.business_ventures,
         controversies: item.controversies,
         fanbaseNickname: item.fanbase_nickname,
-        signature, // Properly typed
+        signature,
         measurements: item.measurements,
         dietFitness: item.diet_fitness,
         styleEvolution: item.style_evolution,
@@ -185,18 +211,22 @@ export const fetchCelebrities = async (): Promise<Celebrity[]> => {
         publicPerception: item.public_perception,
         brandEndorsements: item.brand_endorsements
       };
-    }));
+    });
 
+    console.log('Successfully formatted celebrity data');
     return formattedData;
   } catch (error) {
     console.error('Error fetching celebrities:', error);
+    // Return empty array instead of throwing to prevent app crashes
     return [];
   }
 };
 
-// Get celebrity by ID
+// Get celebrity by ID with better error handling
 export const getCelebrityById = async (id: string): Promise<Celebrity | null> => {
   try {
+    console.log('Fetching celebrity by ID:', id);
+    
     const { data, error } = await supabase
       .from('celebrities')
       .select('*')
@@ -204,10 +234,12 @@ export const getCelebrityById = async (id: string): Promise<Celebrity | null> =>
       .single();
 
     if (error) {
-      throw error;
+      console.error('Error fetching celebrity by ID:', error);
+      return null;
     }
 
     if (!data) {
+      console.log('No celebrity found with ID:', id);
       return null;
     }
 
@@ -225,15 +257,14 @@ export const getCelebrityById = async (id: string): Promise<Celebrity | null> =>
       signatureDefault
     );
 
-    // Get actual outfit count
-    const actualOutfitCount = await getOutfitCountForCelebrity(data.id);
+    // Get actual outfit count for this celebrity
+    const outfitCounts = await getBatchOutfitCounts([data.id]);
 
-    // Convert database fields to match our Celebrity type
     const celebrity: Celebrity = {
       id: data.id,
       name: data.name,
       image: data.image,
-      outfitCount: actualOutfitCount, // Use actual count
+      outfitCount: outfitCounts[data.id] || 0,
       bio: data.bio,
       category: data.category,
       styleType: data.style_type,
@@ -245,7 +276,7 @@ export const getCelebrityById = async (id: string): Promise<Celebrity | null> =>
       careerHighlights: data.career_highlights,
       personalLife: data.personal_life,
       awards: data.awards,
-      socialMedia, // Properly typed
+      socialMedia,
       interestingFacts: data.interesting_facts,
       nationality: data.nationality,
       languages: data.languages,
@@ -255,7 +286,7 @@ export const getCelebrityById = async (id: string): Promise<Celebrity | null> =>
       businessVentures: data.business_ventures,
       controversies: data.controversies,
       fanbaseNickname: data.fanbase_nickname,
-      signature, // Properly typed
+      signature,
       measurements: data.measurements,
       dietFitness: data.diet_fitness,
       styleEvolution: data.style_evolution,
@@ -374,9 +405,11 @@ export const addOutfit = async (outfit: Partial<Outfit>): Promise<{success: bool
   }
 };
 
-// Fetch celebrity by slug
+// Fetch celebrity by slug with better error handling
 export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | null> => {
   try {
+    console.log('Fetching celebrity by slug:', slug);
+    
     const { data, error } = await supabase
       .from('celebrities')
       .select('*')
@@ -384,10 +417,12 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
       .single();
 
     if (error) {
-      throw error;
+      console.error('Error fetching celebrity by slug:', error);
+      return null;
     }
 
     if (!data) {
+      console.log('No celebrity found with slug:', slug);
       return null;
     }
 
@@ -406,13 +441,13 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
     );
 
     // Get actual outfit count
-    const actualOutfitCount = await getOutfitCountForCelebrity(data.id);
+    const outfitCounts = await getBatchOutfitCounts([data.id]);
 
     const celebrity: Celebrity = {
       id: data.id,
       name: data.name,
       image: data.image,
-      outfitCount: actualOutfitCount, // Use actual count
+      outfitCount: outfitCounts[data.id] || 0,
       bio: data.bio,
       category: data.category,
       styleType: data.style_type,
@@ -424,7 +459,7 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
       careerHighlights: data.career_highlights,
       personalLife: data.personal_life,
       awards: data.awards,
-      socialMedia, // Properly typed
+      socialMedia,
       interestingFacts: data.interesting_facts,
       nationality: data.nationality,
       languages: data.languages,
@@ -434,7 +469,7 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
       businessVentures: data.business_ventures,
       controversies: data.controversies,
       fanbaseNickname: data.fanbase_nickname,
-      signature, // Properly typed
+      signature,
       measurements: data.measurements,
       dietFitness: data.diet_fitness,
       styleEvolution: data.style_evolution,
@@ -695,9 +730,11 @@ export const fetchOutfitById = async (id: string): Promise<Outfit | null> => {
   }
 };
 
-// Fetch blog posts
+// Fetch blog posts with better error handling
 export const fetchBlogPosts = async (limit?: number, categoryFilter?: string): Promise<BlogPost[]> => {
   try {
+    console.log('Fetching blog posts...');
+    
     let query = supabase.from('blog_posts').select('*').order('date', { ascending: false });
     
     if (limit) {
@@ -712,7 +749,7 @@ export const fetchBlogPosts = async (limit?: number, categoryFilter?: string): P
 
     if (error) {
       console.error('Error fetching blog posts:', error);
-      throw error;
+      return [];
     }
 
     // Format the blog posts
