@@ -44,15 +44,9 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
   // Use slug if available, fallback to id
   const outfitUrl = slug ? `/outfit/${slug}` : `/outfit/${id}`;
 
-  // Ensure we have valid data before rendering
-  if (!id || !image || !celebrity || !title) {
-    console.warn('OutfitCard: Missing required data', { id, image, celebrity, title });
-    return null;
-  }
-
   return (
     <div className="group bg-white rounded-xl border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden max-w-sm mx-auto">
-      {/* Product Image */}
+      {/* Product Image - Reduced height */}
       <Link 
         to={outfitUrl} 
         onClick={handleOutfitClick}
@@ -62,12 +56,6 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
           src={image}
           alt={`${celebrity} - ${title}`}
           className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
-          onError={(e) => {
-            console.error('Image failed to load:', image);
-            // Set fallback image
-            (e.target as HTMLImageElement).src = '/placeholder.svg';
-          }}
         />
         
         {/* Wishlist Button */}
@@ -93,7 +81,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
         </div>
       </Link>
 
-      {/* Product Info */}
+      {/* Product Info - Compact padding */}
       <div className="p-4">
         {/* Celebrity Name */}
         <Link
@@ -115,14 +103,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
           </h3>
         </Link>
 
-        {/* Description */}
-        {description && (
-          <p className="text-xs text-gray-600 mb-3 line-clamp-2">
-            {description}
-          </p>
-        )}
-
-        {/* Rating */}
+        {/* Rating - Compact */}
         <div className="flex items-center gap-1 mb-3">
           <div className="flex items-center">
             {[...Array(5)].map((_, i) => (
@@ -135,7 +116,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
           <span className="text-xs text-gray-500 ml-1">(4.0)</span>
         </div>
 
-        {/* Price Section */}
+        {/* Price Section - Simplified */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold text-gray-900">$25</span>
@@ -155,7 +136,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
           Shop This Look
         </Link>
 
-        {/* Additional Info */}
+        {/* Additional Info - Compact */}
         {date && (
           <div className="flex items-center justify-between pt-2 border-t border-gray-100">
             <span className="text-xs text-gray-500">
