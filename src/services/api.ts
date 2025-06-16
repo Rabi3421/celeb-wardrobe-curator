@@ -309,7 +309,7 @@ export const addCelebrity = async (celebrity: Partial<Celebrity>): Promise<{succ
       birthplace: celebrity.birthplace,
       height: celebrity.height,
       education: celebrity.education,
-      career_highlights: celebrityHighlights,
+      career_highlights: celebrity.careerHighlights,
       personal_life: celebrity.personalLife,
       awards: celebrity.awards,
       social_media: celebrity.socialMedia,
@@ -434,7 +434,7 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
       birthplace: data.birthplace,
       height: data.height,
       education: data.education,
-      careerHighlights: careerHighlights,
+      careerHighlights: data.career_highlights,
       personalLife: data.personal_life,
       awards: data.awards,
       socialMedia, // Properly typed
