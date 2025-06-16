@@ -17,30 +17,6 @@ function parseJsonField<T>(jsonValue: Json | null, defaultValue: T): T {
   return jsonValue as unknown as T;
 }
 
-// Enhanced retry function for Supabase operations
-async function retryOperation<T>(
-  operation: () => Promise<T>,
-  maxRetries: number = 3,
-  delay: number = 1000
-): Promise<T> {
-  let lastError: Error;
-  
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      return await operation();
-    } catch (error) {
-      lastError = error as Error;
-      console.warn(`Operation failed (attempt ${i + 1}/${maxRetries}):`, error);
-      
-      if (i < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
-      }
-    }
-  }
-  
-  throw lastError!;
-}
-
 // Enhanced slug generation function
 export const generateSlug = (text: string): string => {
   return text
@@ -54,7 +30,7 @@ export const generateSlug = (text: string): string => {
 
 // Check if slug already exists in celebrities table
 export const checkCelebritySlugExists = async (slug: string, excludeId?: string): Promise<boolean> => {
-  return retryOperation(async () => {
+  try {
     let query = supabase.from('celebrities').select('id').eq('slug', slug);
     
     if (excludeId) {
@@ -69,12 +45,15 @@ export const checkCelebritySlugExists = async (slug: string, excludeId?: string)
     }
     
     return data.length > 0;
-  });
+  } catch (error) {
+    console.error('Error checking celebrity slug:', error);
+    return false;
+  }
 };
 
 // Check if slug already exists in outfits table
 export const checkOutfitSlugExists = async (slug: string, excludeId?: string): Promise<boolean> => {
-  return retryOperation(async () => {
+  try {
     let query = supabase.from('outfits').select('id').eq('slug', slug);
     
     if (excludeId) {
@@ -89,7 +68,10 @@ export const checkOutfitSlugExists = async (slug: string, excludeId?: string): P
     }
     
     return data.length > 0;
-  });
+  } catch (error) {
+    console.error('Error checking outfit slug:', error);
+    return false;
+  }
 };
 
 // Generate unique slug for celebrity
@@ -122,7 +104,7 @@ export const generateUniqueOutfitSlug = async (title: string, excludeId?: string
 
 // Helper function to get outfit count for a celebrity
 const getOutfitCountForCelebrity = async (celebrityId: string): Promise<number> => {
-  return retryOperation(async () => {
+  try {
     const { data, error, count } = await supabase
       .from('outfits')
       .select('*', { count: 'exact', head: true })
@@ -134,20 +116,19 @@ const getOutfitCountForCelebrity = async (celebrityId: string): Promise<number> 
     }
 
     return count || 0;
-  });
+  } catch (error) {
+    console.error('Error counting outfits for celebrity:', celebrityId, error);
+    return 0;
+  }
 };
 
-// Fetch celebrities from the database with improved error handling
+// Fetch celebrities from the database
 export const fetchCelebrities = async (): Promise<Celebrity[]> => {
-  return retryOperation(async () => {
+  try {
     const { data, error } = await supabase.from('celebrities').select('*');
 
     if (error) {
       throw error;
-    }
-
-    if (!data) {
-      return [];
     }
 
     // Convert database fields to match our Celebrity type and fetch outfit counts
@@ -207,12 +188,15 @@ export const fetchCelebrities = async (): Promise<Celebrity[]> => {
     }));
 
     return formattedData;
-  }, 3, 1000);
+  } catch (error) {
+    console.error('Error fetching celebrities:', error);
+    return [];
+  }
 };
 
 // Get celebrity by ID
 export const getCelebrityById = async (id: string): Promise<Celebrity | null> => {
-  return retryOperation(async () => {
+  try {
     const { data, error } = await supabase
       .from('celebrities')
       .select('*')
@@ -282,7 +266,10 @@ export const getCelebrityById = async (id: string): Promise<Celebrity | null> =>
     };
 
     return celebrity;
-  }, 3, 1000);
+  } catch (error) {
+    console.error('Error fetching celebrity by ID:', error);
+    return null;
+  }
 };
 
 // Add the missing fetchCelebrityById function that's needed by CelebrityProfile component
@@ -290,7 +277,7 @@ export const fetchCelebrityById = getCelebrityById;
 
 // Add celebrity
 export const addCelebrity = async (celebrity: Partial<Celebrity>): Promise<{success: boolean, error: any, data?: any}> => {
-  return retryOperation(async () => {
+  try {
     // Generate unique slug if not provided
     let slug = celebrity.slug;
     if (!slug && celebrity.name) {
@@ -342,15 +329,15 @@ export const addCelebrity = async (celebrity: Partial<Celebrity>): Promise<{succ
     }
 
     return { success: true, error: null, data };
-  }, 3, 1000).catch(error => {
+  } catch (error) {
     console.error('Error adding celebrity:', error);
     return { success: false, error };
-  });
+  }
 };
 
 // Add outfit function with automatic slug generation
 export const addOutfit = async (outfit: Partial<Outfit>): Promise<{success: boolean, error: any, data?: any}> => {
-  return retryOperation(async () => {
+  try {
     // Generate unique slug if not provided
     let slug = outfit.slug;
     if (!slug && outfit.title) {
@@ -381,15 +368,15 @@ export const addOutfit = async (outfit: Partial<Outfit>): Promise<{success: bool
     }
 
     return { success: true, error: null, data };
-  }, 3, 1000).catch(error => {
+  } catch (error) {
     console.error('Error adding outfit:', error);
     return { success: false, error };
-  });
+  }
 };
 
 // Fetch celebrity by slug
 export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | null> => {
-  return retryOperation(async () => {
+  try {
     const { data, error } = await supabase
       .from('celebrities')
       .select('*')
@@ -458,12 +445,15 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
     };
 
     return celebrity;
-  }, 3, 1000);
+  } catch (error) {
+    console.error('Error fetching celebrity by slug:', error);
+    return null;
+  }
 };
 
 // Fetch blog post by slug
 export const fetchBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
-  return retryOperation(async () => {
+  try {
     const { data, error } = await supabase
       .from('blog_posts')
       .select('*')
@@ -495,12 +485,15 @@ export const fetchBlogPostBySlug = async (slug: string): Promise<BlogPost | null
       structured_data: data.structured_data || '',
       keywords: data.keywords || ''
     };
-  }, 3, 1000);
+  } catch (error) {
+    console.error('Error fetching blog post by slug:', error);
+    return null;
+  }
 };
 
 // Fetch blog post by ID
 export const fetchBlogPostById = async (id: string): Promise<BlogPost | null> => {
-  return retryOperation(async () => {
+  try {
     const { data, error } = await supabase
       .from('blog_posts')
       .select('*')
@@ -532,12 +525,15 @@ export const fetchBlogPostById = async (id: string): Promise<BlogPost | null> =>
       structured_data: data.structured_data || '',
       keywords: data.keywords || ''
     };
-  }, 3, 1000);
+  } catch (error) {
+    console.error('Error fetching blog post by ID:', error);
+    return null;
+  }
 };
 
 // Subscribe to newsletter
 export const subscribeToNewsletter = async (email: string, source: string): Promise<{success: boolean, message: string}> => {
-  return retryOperation(async () => {
+  try {
     // Check if email is already subscribed
     const { data: existingSubscribers, error: checkError } = await supabase
       .from('newsletter_subscribers')
@@ -568,15 +564,15 @@ export const subscribeToNewsletter = async (email: string, source: string): Prom
     }
 
     return { success: true, message: 'Thank you for subscribing to our newsletter!' };
-  }, 3, 1000).catch(error => {
+  } catch (error) {
     console.error('Error during newsletter subscription:', error);
     return { success: false, message: 'An error occurred during subscription. Please try again later.' };
-  });
+  }
 };
 
-// Fetch outfits with improved error handling
+// Fetch outfits
 export const fetchOutfits = async (limit?: number, celebrityId?: string): Promise<Outfit[]> => {
-  return retryOperation(async () => {
+  try {
     let query = supabase.from('outfits').select('*');
 
     if (limit) {
@@ -593,12 +589,11 @@ export const fetchOutfits = async (limit?: number, celebrityId?: string): Promis
       throw error;
     }
 
-    if (!data) {
-      return [];
-    }
-
     // Convert database fields to match our Outfit type
     const formattedData: Outfit[] = data.map(item => {
+      // Add celebrity property that's required in Outfit type
+      // Since we don't have celebrity name in outfits table, we'll set it empty here
+      // It should be populated elsewhere in the app by looking up the celebrity by ID
       return {
         id: item.id,
         title: item.title,
@@ -616,12 +611,15 @@ export const fetchOutfits = async (limit?: number, celebrityId?: string): Promis
     });
 
     return formattedData;
-  }, 3, 1000);
+  } catch (error) {
+    console.error('Error fetching outfits:', error);
+    return [];
+  }
 };
 
 // Fetch outfit by slug
 export const fetchOutfitBySlug = async (slug: string): Promise<Outfit | null> => {
-  return retryOperation(async () => {
+  try {
     const { data, error } = await supabase
       .from('outfits')
       .select('*')
@@ -652,12 +650,15 @@ export const fetchOutfitBySlug = async (slug: string): Promise<Outfit | null> =>
     };
 
     return outfit;
-  }, 3, 1000);
+  } catch (error) {
+    console.error('Error fetching outfit by slug:', error);
+    return null;
+  }
 };
 
 // Fetch outfit by ID
 export const fetchOutfitById = async (id: string): Promise<Outfit | null> => {
-  return retryOperation(async () => {
+  try {
     const { data, error } = await supabase
       .from('outfits')
       .select('*')
@@ -688,12 +689,15 @@ export const fetchOutfitById = async (id: string): Promise<Outfit | null> => {
     };
 
     return outfit;
-  }, 3, 1000);
+  } catch (error) {
+    console.error('Error fetching outfit by id:', error);
+    return null;
+  }
 };
 
-// Fetch blog posts with improved error handling
+// Fetch blog posts
 export const fetchBlogPosts = async (limit?: number, categoryFilter?: string): Promise<BlogPost[]> => {
-  return retryOperation(async () => {
+  try {
     let query = supabase.from('blog_posts').select('*').order('date', { ascending: false });
     
     if (limit) {
@@ -709,10 +713,6 @@ export const fetchBlogPosts = async (limit?: number, categoryFilter?: string): P
     if (error) {
       console.error('Error fetching blog posts:', error);
       throw error;
-    }
-
-    if (!data) {
-      return [];
     }
 
     // Format the blog posts
@@ -732,12 +732,15 @@ export const fetchBlogPosts = async (limit?: number, categoryFilter?: string): P
       structured_data: post.structured_data || '',
       keywords: post.keywords || ''
     }));
-  }, 3, 1000);
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    return [];
+  }
 };
 
-// Fetch affiliate products with improved error handling
+// Fetch affiliate products
 export const fetchAffiliateProducts = async (limit?: number): Promise<AffiliateProduct[]> => {
-  return retryOperation(async () => {
+  try {
     let query = supabase.from('affiliate_products').select('*');
     
     if (limit) {
@@ -750,10 +753,6 @@ export const fetchAffiliateProducts = async (limit?: number): Promise<AffiliateP
       throw error;
     }
 
-    if (!data) {
-      return [];
-    }
-
     return data.map(product => ({
       id: product.id,
       outfitId: product.outfit_id,
@@ -764,12 +763,15 @@ export const fetchAffiliateProducts = async (limit?: number): Promise<AffiliateP
       affiliateLink: product.affiliate_link,
       description: product.description || ''
     }));
-  }, 3, 1000);
+  } catch (error) {
+    console.error('Error fetching affiliate products:', error);
+    return [];
+  }
 };
 
 // Fetch affiliate products by outfit ID
 export const fetchAffiliateProductsByOutfitId = async (outfitId: string): Promise<AffiliateProduct[]> => {
-  return retryOperation(async () => {
+  try {
     // Since there's no outfit_products relation table in the schema shown
     // We'll directly fetch affiliate products with the given outfit_id
     const { data, error } = await supabase
@@ -781,10 +783,6 @@ export const fetchAffiliateProductsByOutfitId = async (outfitId: string): Promis
       throw error;
     }
 
-    if (!data) {
-      return [];
-    }
-
     return data.map(product => ({
       id: product.id,
       outfitId: product.outfit_id,
@@ -795,12 +793,15 @@ export const fetchAffiliateProductsByOutfitId = async (outfitId: string): Promis
       affiliateLink: product.affiliate_link,
       description: product.description || ''
     }));
-  }, 3, 1000);
+  } catch (error) {
+    console.error('Error fetching affiliate products by outfit ID:', error);
+    return [];
+  }
 };
 
 // Fetch category items
 export const fetchCategoryItems = async (category: string): Promise<CategoryItem[]> => {
-  return retryOperation(async () => {
+  try {
     const { data, error } = await supabase
       .from('category_items')
       .select('*')
@@ -808,10 +809,6 @@ export const fetchCategoryItems = async (category: string): Promise<CategoryItem
 
     if (error) {
       throw error;
-    }
-
-    if (!data) {
-      return [];
     }
 
     return data.map(item => ({
@@ -824,7 +821,10 @@ export const fetchCategoryItems = async (category: string): Promise<CategoryItem
       retailer: item.retailer || '',
       affiliateLink: item.affiliate_link || ''
     }));
-  }, 3, 1000);
+  } catch (error) {
+    console.error(`Error fetching category items for ${category}:`, error);
+    return [];
+  }
 };
 
 export default { 
