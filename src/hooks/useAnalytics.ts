@@ -1,6 +1,5 @@
 
 import { useEffect, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
 export interface AnalyticsEvent {
   eventType: 'page_view' | 'product_click' | 'buy_now_click' | 'blog_read' | 'blog_view' | 'outfit_view' | 'affiliate_click';
@@ -25,12 +24,12 @@ class AnalyticsService {
 
   private async initializeSession() {
     try {
-      await supabase.from('user_sessions').insert({
-        session_id: this.sessionId,
-        ip_address: await this.getIPAddress(),
-        user_agent: navigator.userAgent,
-        referrer: document.referrer || null,
-        started_at: this.sessionStart.toISOString()
+      // TODO: Replace with your backend API call
+      console.log('Session initialized:', {
+        sessionId: this.sessionId,
+        startTime: this.sessionStart.toISOString(),
+        userAgent: navigator.userAgent,
+        referrer: document.referrer || null
       });
     } catch (error) {
       console.warn('Failed to initialize session:', error);
@@ -49,38 +48,25 @@ class AnalyticsService {
 
   async trackEvent(event: AnalyticsEvent) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      await supabase.from('analytics_events').insert({
+      // TODO: Replace with your backend API call
+      const analyticsData = {
         event_type: event.eventType,
         page_url: event.pageUrl,
-        user_id: user?.id || null,
         session_id: this.sessionId,
         user_agent: navigator.userAgent,
         ip_address: await this.getIPAddress(),
         referrer: document.referrer || null,
-        metadata: event.metadata || {}
-      });
-
-      // Update specific analytics based on event type
-      if (event.eventType === 'outfit_view' && event.metadata?.outfitId) {
-        await supabase.rpc('update_product_analytics', {
-          p_product_id: event.metadata.outfitId,
-          p_product_type: 'outfit',
-          p_event_type: 'view'
-        });
-      } else if (event.eventType === 'affiliate_click' && event.metadata?.productId) {
-        await supabase.rpc('update_product_analytics', {
-          p_product_id: event.metadata.productId,
-          p_product_type: 'affiliate_product',
-          p_event_type: 'click'
-        });
-      } else if (event.eventType === 'blog_view' && event.metadata?.blogPostId) {
-        await supabase.rpc('update_blog_analytics', {
-          p_blog_post_id: event.metadata.blogPostId,
-          p_event_type: 'view'
-        });
-      }
+        metadata: event.metadata || {},
+        timestamp: new Date().toISOString()
+      };
+      
+      console.log('Analytics event tracked:', analyticsData);
+      
+      // Store in localStorage for now - replace with API call
+      const existingEvents = JSON.parse(localStorage.getItem('analyticsEvents') || '[]');
+      existingEvents.push(analyticsData);
+      localStorage.setItem('analyticsEvents', JSON.stringify(existingEvents.slice(-100))); // Keep last 100 events
+      
     } catch (error) {
       console.warn('Failed to track event:', error);
     }
@@ -94,10 +80,11 @@ class AnalyticsService {
     if (this.pageViewStart && metadata?.blogPostId) {
       const readTime = Math.floor((Date.now() - this.pageViewStart.getTime()) / 1000);
       if (readTime > 10) { // Only track if user spent more than 10 seconds
-        await supabase.rpc('update_blog_analytics', {
-          p_blog_post_id: metadata.blogPostId,
-          p_event_type: 'read_time',
-          p_read_time: readTime
+        // TODO: Replace with your backend API call
+        console.log('Page view ended:', {
+          blogPostId: metadata.blogPostId,
+          readTime,
+          pageUrl
         });
       }
     }
@@ -106,13 +93,12 @@ class AnalyticsService {
   async updateSessionDuration() {
     const duration = Math.floor((Date.now() - this.sessionStart.getTime()) / 1000);
     try {
-      await supabase
-        .from('user_sessions')
-        .update({ 
-          session_duration: duration,
-          ended_at: new Date().toISOString()
-        })
-        .eq('session_id', this.sessionId);
+      // TODO: Replace with your backend API call
+      console.log('Session duration updated:', {
+        sessionId: this.sessionId,
+        duration,
+        endTime: new Date().toISOString()
+      });
     } catch (error) {
       console.warn('Failed to update session duration:', error);
     }

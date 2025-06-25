@@ -3,7 +3,6 @@ import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
 import { Loader2, X, Upload, Play, Image as ImageIcon } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
@@ -106,26 +105,24 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     if (!mediaFile.file) return mediaFile.url;
 
     try {
-      const fileExt = mediaFile.file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `${outfitId || 'temp'}/${fileName}`;
-
-      const { data, error } = await supabase.storage
-        .from('outfit-media')
-        .upload(filePath, mediaFile.file);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('outfit-media')
-        .getPublicUrl(filePath);
-
-      return publicUrl;
+      // TODO: Replace with your own file upload logic
+      console.log('Uploading file:', mediaFile.file.name);
+      
+      // For now, just return the blob URL
+      // In a real implementation, you would upload to your own storage service
+      const uploadedUrl = mediaFile.url;
+      
+      toast({
+        title: "Upload simulated",
+        description: `File ${mediaFile.file.name} would be uploaded to your storage service`,
+      });
+      
+      return uploadedUrl;
     } catch (error) {
       console.error('Error uploading media:', error);
       toast({
         title: "Upload failed",
-        description: `Failed to upload ${mediaFile.file.name}`,
+        description: `Failed to upload ${mediaFile.file?.name}`,
         variant: "destructive",
       });
       return null;
@@ -159,6 +156,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         </Label>
         <p className="text-sm text-muted-foreground mb-2">
           Select multiple images and videos. The first image will be set as primary.
+          Note: File upload is currently simulated - implement your own storage service.
         </p>
         <Input
           id="media-upload"
@@ -260,7 +258,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       {isUploading && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="w-4 h-4 animate-spin" />
-          Uploading media files...
+          Processing media files...
         </div>
       )}
     </div>

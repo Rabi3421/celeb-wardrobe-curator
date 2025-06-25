@@ -5,7 +5,7 @@ import { toast } from "@/components/ui/use-toast";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const LocalAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -13,15 +13,15 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Check for existing session on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('adminUser');
+    const savedUser = localStorage.getItem('authUser');
     if (savedUser) {
       try {
         const userData = JSON.parse(savedUser);
         setUser(userData);
         setIsAuthenticated(true);
       } catch (error) {
-        console.error('Error parsing saved admin user data:', error);
-        localStorage.removeItem('adminUser');
+        console.error('Error parsing saved user data:', error);
+        localStorage.removeItem('authUser');
       }
     }
   }, []);
@@ -31,7 +31,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setIsLoading(true);
       
       // Mock authentication - replace with your backend API call
-      console.log("Attempting admin sign in with:", email);
+      console.log("Attempting to sign in with:", email);
       
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -39,7 +39,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       // Mock successful login for admin@example.com
       if (email === 'admin@example.com' && password === 'admin123') {
         const userData: User = {
-          id: 'admin-1',
+          id: '1',
           email: email,
           name: 'Admin User',
           role: 'admin',
@@ -51,7 +51,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setIsAuthenticated(true);
         
         // Save to localStorage
-        localStorage.setItem('adminUser', JSON.stringify(userData));
+        localStorage.setItem('authUser', JSON.stringify(userData));
         
         toast({
           title: "Login successful",
@@ -62,13 +62,13 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       } else {
         toast({
           title: "Login failed",
-          description: "Invalid admin credentials",
+          description: "Invalid email or password",
           variant: "destructive",
         });
         return false;
       }
     } catch (error) {
-      console.error('Admin login error:', error);
+      console.error('Login error:', error);
       toast({
         title: "Login failed",
         description: "An unexpected error occurred",
@@ -81,10 +81,10 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const logout = async () => {
-    console.log("Logging out admin user");
+    console.log("Logging out user");
     
     // Clear localStorage
-    localStorage.removeItem('adminUser');
+    localStorage.removeItem('authUser');
     
     // Clear state
     setUser(null);
@@ -110,10 +110,10 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   );
 };
 
-export const useAdminAuth = (): AuthContextType => {
+export const useLocalAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAdminAuth must be used within an AdminAuthProvider");
+    throw new Error("useLocalAuth must be used within a LocalAuthProvider");
   }
   return context;
 };
