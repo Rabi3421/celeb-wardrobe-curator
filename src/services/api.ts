@@ -1,4 +1,3 @@
-
 import { AffiliateProduct, BlogPost, Celebrity, CategoryItem, Outfit } from "@/types/data";
 
 // Mock data for development - replace with your own backend API calls
@@ -133,6 +132,72 @@ export const generateSlug = (text: string): string => {
     .replace(/^-|-$/g, '');
 };
 
+// Generate unique celebrity slug
+export const generateUniqueCelebritySlug = async (name: string, excludeId?: string): Promise<string> => {
+  try {
+    console.log('Generating unique celebrity slug for:', name);
+    const baseSlug = generateSlug(name);
+    
+    // Check if slug already exists (mock implementation)
+    const existingCelebrity = mockCelebrities.find(c => 
+      c.slug === baseSlug && (!excludeId || c.id !== excludeId)
+    );
+    
+    if (!existingCelebrity) {
+      return baseSlug;
+    }
+    
+    // If slug exists, append a number
+    let counter = 1;
+    let uniqueSlug = `${baseSlug}-${counter}`;
+    
+    while (mockCelebrities.find(c => 
+      c.slug === uniqueSlug && (!excludeId || c.id !== excludeId)
+    )) {
+      counter++;
+      uniqueSlug = `${baseSlug}-${counter}`;
+    }
+    
+    return uniqueSlug;
+  } catch (error) {
+    console.error('Error generating unique celebrity slug:', error);
+    return generateSlug(name);
+  }
+};
+
+// Generate unique outfit slug
+export const generateUniqueOutfitSlug = async (title: string, excludeId?: string): Promise<string> => {
+  try {
+    console.log('Generating unique outfit slug for:', title);
+    const baseSlug = generateSlug(title);
+    
+    // Check if slug already exists (mock implementation)
+    const existingOutfit = mockOutfits.find(o => 
+      o.slug === baseSlug && (!excludeId || o.id !== excludeId)
+    );
+    
+    if (!existingOutfit) {
+      return baseSlug;
+    }
+    
+    // If slug exists, append a number
+    let counter = 1;
+    let uniqueSlug = `${baseSlug}-${counter}`;
+    
+    while (mockOutfits.find(o => 
+      o.slug === uniqueSlug && (!excludeId || o.id !== excludeId)
+    )) {
+      counter++;
+      uniqueSlug = `${baseSlug}-${counter}`;
+    }
+    
+    return uniqueSlug;
+  } catch (error) {
+    console.error('Error generating unique outfit slug:', error);
+    return generateSlug(title);
+  }
+};
+
 // Mock implementation - replace with your backend API calls
 export const fetchCelebrities = async (): Promise<Celebrity[]> => {
   try {
@@ -179,7 +244,7 @@ export const addCelebrity = async (celebrity: Partial<Celebrity>): Promise<{succ
     const newCelebrity = {
       id: Date.now().toString(),
       ...celebrity,
-      slug: celebrity.slug || generateSlug(celebrity.name || ''),
+      slug: celebrity.slug || generateUniqueCelebritySlug(celebrity.name || ''),
       outfitCount: 0
     } as Celebrity;
     
@@ -200,7 +265,7 @@ export const addOutfit = async (outfit: Partial<Outfit>): Promise<{success: bool
     const newOutfit = {
       id: Date.now().toString(),
       ...outfit,
-      slug: outfit.slug || generateSlug(outfit.title || ''),
+      slug: outfit.slug || generateUniqueOutfitSlug(outfit.title || ''),
       celebrity: mockCelebrities.find(c => c.id === outfit.celebrityId)?.name || ''
     } as Outfit;
     
@@ -361,6 +426,8 @@ export default {
   addCelebrity,
   addOutfit,
   generateSlug,
+  generateUniqueCelebritySlug,
+  generateUniqueOutfitSlug,
   fetchOutfits,
   fetchOutfitBySlug,
   fetchOutfitById,
