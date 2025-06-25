@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
-import SEO from "@/components/SEO/SEO";
+import EnhancedSEO from "@/components/SEO/EnhancedSEO";
 import OutfitCard from "@/components/ui/OutfitCard";
 import CelebrityCard from "@/components/ui/CelebrityCard";
 import BlogPostCard from "@/components/ui/BlogPostCard";
@@ -16,6 +16,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { getIndianKeywordString } from "@/data/indianSeoKeywords";
 
 const Index: React.FC = () => {
   const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
@@ -50,128 +51,146 @@ const Index: React.FC = () => {
   // Get featured data to display
   const featuredOutfits = outfits.slice(0, 6);
   const featuredCelebrities = celebrities.slice(0, 4);
-  const topCelebrities = celebrities.slice(0, 4); // Top 4 celebrities for the profiles section
+  const topCelebrities = celebrities.slice(0, 4);
   const recentBlogPosts = blogPosts.slice(0, 3);
 
-  console.log("Top celebrities for display:", featuredOutfits);
-
-  // Keep the hardcoded testimonials for now, as they're not part of the core data model
+  // Indian-focused testimonials
   const testimonials = [
     {
       id: 1,
-      name: "Emma Thompson",
-      role: "Fashion Enthusiast",
+      name: "Priya Sharma",
+      role: "Fashion Blogger, Delhi",
       avatar: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80",
-      quote: "CelebrityPersona completely transformed how I approach my personal style. Now I can easily find affordable alternatives to my favorite celebrity outfits!"
+      quote: "CelebrityPersona has completely changed how I shop for fashion! I can easily find affordable alternatives to Alia Bhatt and Deepika's looks on Myntra and Ajio."
     },
     {
       id: 2,
-      name: "Michael Rodriguez",
-      role: "Style Blogger",
+      name: "Arjun Patel",
+      role: "Fashion Enthusiast, Mumbai",
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80",
-      quote: "As a style blogger, this platform has become my go-to resource for researching celebrity fashion trends and finding budget-friendly options for my readers."
+      quote: "Finally, a platform that understands Indian fashion! The budget-friendly alternatives and shopping links to Indian websites make it so convenient."
     },
     {
       id: 3,
-      name: "Sophia Chen",
-      role: "Personal Shopper",
+      name: "Kavya Reddy",
+      role: "Personal Stylist, Bangalore",
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80",
-      quote: "The detailed breakdown of each outfit and similar alternatives at different price points makes this an invaluable tool for my clients who want celebrity-inspired looks."
+      quote: "My clients love when I recreate Bollywood looks for them. This site helps me find the perfect pieces from Nykaa Fashion and Amazon Fashion."
     }
   ];
 
+  // Indian fashion categories
   const categories = [
-    { title: "Dresses", icon: "dress", link: "/category/dresses" },
-    { title: "Shoes", icon: "shoe", link: "/category/shoes" },
-    { title: "Makeup", icon: "makeup", link: "/category/makeup" },
-    { title: "Handbags", icon: "handbag", link: "/category/handbags" },
-    { title: "Cars", icon: "car", link: "/category/cars" },
-    { title: "Bikes", icon: "bike", link: "/category/bikes" }
+    { title: "Sarees", icon: "dress", link: "/category/sarees" },
+    { title: "Lehengas", icon: "dress", link: "/category/lehengas" },
+    { title: "Ethnic Wear", icon: "dress", link: "/category/ethnic" },
+    { title: "Western", icon: "dress", link: "/category/western" },
+    { title: "Jewelry", icon: "jewelry", link: "/category/jewelry" },
+    { title: "Handbags", icon: "handbag", link: "/category/handbags" }
   ];
 
-  // Spotlight celebrity with sample products
+  // Spotlight celebrity with Indian products
   const spotlightCelebrity = celebrities.length > 0 ? {
     id: celebrities[0].id,
     name: celebrities[0].name,
     image: celebrities[0].image,
-    outfit: "Latest Fashion Statement",
-    event: "Recent Appearance",
-    description: celebrities[0].bio || "Stunning look from one of our favorite celebrities.",
-    products: affiliateProducts.slice(0, 4).map(product => ({
-      image: product.image,
-      title: product.title,
-      price: product.price,
-      retailer: product.retailer, 
-      affiliateLink: product.affiliateLink
-    }))
+    outfit: "Latest Bollywood Fashion Statement",
+    event: "Recent Red Carpet Appearance",
+    description: celebrities[0].bio || "Stunning look from one of Bollywood's most fashionable stars.",
+    products: [
+      {
+        image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+        title: "Designer Saree - Similar Style",
+        price: "₹2,499",
+        retailer: "Myntra",
+        affiliateLink: "https://myntra.com/sarees"
+      },
+      {
+        image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+        title: "Gold Jewelry Set",
+        price: "₹1,299",
+        retailer: "Nykaa Fashion",
+        affiliateLink: "https://nykaa.com/jewelry"
+      },
+      {
+        image: "https://images.unsplash.com/photo-1590736969955-71cc94901144?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+        title: "Ethnic Clutch",
+        price: "₹899",
+        retailer: "Ajio",
+        affiliateLink: "https://ajio.com/bags"
+      },
+      {
+        image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+        title: "Statement Earrings",
+        price: "₹599",
+        retailer: "Amazon Fashion",
+        affiliateLink: "https://amazon.in/jewelry"
+      }
+    ]
   } : null;
 
+  // Indian social media posts
   const socialPosts = [
     {
       platform: "instagram" as const,
-      username: "@celebritypersona",
-      content: "Check out Emma Stone's stunning Oscar gown and affordable alternatives on our website! #OscarFashion",
-      image: "https://images.unsplash.com/photo-1546536133-d1b07a9c768e?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+      username: "@celebritypersona_india",
+      content: "Alia Bhatt's stunning saree look from last night's event! 😍 Swipe to see affordable alternatives on Myntra starting at ₹2,499. #AliaBhatt #SareeStyle #BollywoodFashion",
+      image: "https://images.unsplash.com/photo-1594736797933-d0c6e5b6dd12?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
       date: "2 hours ago",
       link: "https://instagram.com"
     },
     {
       platform: "twitter" as const,
       username: "@celebritypersona",
-      content: "Just added: Ryan Gosling's premiere look breakdown with all the details about his custom suit. RT if you want to see more men's fashion!",
+      content: "Deepika Padukone's airport look is giving us major style goals! ✈️ Recreate this comfortable yet chic outfit for under ₹3,000. Thread with shopping links below 👇 #DeepikaPadukone #AirportFashion",
       date: "5 hours ago",
       link: "https://twitter.com"
     },
     {
       platform: "instagram" as const,
-      username: "@celebritypersona",
-      content: "Breaking down Margot Robbie's street style - swipe to see all the affordable alternatives! #StreetStyle #GetTheLook",
-      image: "https://images.unsplash.com/photo-1599039628218-eac5d51a4c85?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+      username: "@celebritypersona_india",
+      content: "Kiara Advani's festive look breakdown! 🎆 This gorgeous lehenga can be recreated with pieces from Nykaa Fashion and Amazon. Total cost: ₹4,500! #KiaraAdvani #FestivalFashion #Lehenga",
+      image: "https://images.unsplash.com/photo-1590736969955-71cc94901144?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
       date: "1 day ago",
       link: "https://instagram.com"
     }
   ];
 
-  // Enhanced FAQ data for structured data
+  // Indian-focused FAQ data
   const faqData = [
     {
-      question: "How do I find celebrity outfit inspiration?",
-      answer: "Browse our curated collection of celebrity outfits by visiting the Celebrities or Outfits section. You can filter by style, event type, or search for your favorite celebrity directly."
+      question: "How do I find affordable alternatives to Bollywood celebrity outfits?",
+      answer: "Browse our curated collection of celebrity outfits and use our shopping guides to find similar pieces on Indian websites like Myntra, Ajio, Nykaa Fashion, and Amazon Fashion. We provide direct links to affordable alternatives for every look."
     },
     {
-      question: "Are the similar fashion items exact matches?",
-      answer: "Our fashion experts curate similar items at various price points that capture the style essence of celebrity outfits. While not exact matches, they offer the same aesthetic at more affordable prices."
+      question: "Which Indian websites offer the best celebrity fashion dupes?",
+      answer: "Myntra, Ajio, Nykaa Fashion, Amazon Fashion, and Flipkart Fashion are the best Indian websites for celebrity-inspired fashion. We partner with these retailers to bring you authentic alternatives at budget-friendly prices."
     },
     {
-      question: "How often is new celebrity fashion content added?",
-      answer: "We update our collection daily with the latest celebrity fashion moments from red carpets, street style, and social media appearances."
+      question: "Can I recreate expensive Bollywood looks on a budget?",
+      answer: "Absolutely! Most celebrity looks can be recreated for ₹2,000 to ₹5,000 using alternatives from Indian fashion brands. We focus on capturing the essence of the look rather than exact designer pieces."
     },
     {
-      question: "Can I purchase celebrity fashion items directly from CelebrityPersona?",
-      answer: "CelebrityPersona partners with trusted retailers to offer similar items. When you click on a product, you'll be directed to the retailer's website where you can make your purchase securely."
+      question: "How often do you add new Bollywood celebrity fashion content?",
+      answer: "We update our collection daily with the latest Bollywood fashion moments from red carpets, events, airport looks, and social media appearances of your favorite Indian celebrities."
     },
     {
-      question: "How can I get personalized celebrity style recommendations?",
-      answer: "Subscribe to our newsletter for personalized style recommendations based on your favorite celebrities and fashion preferences."
+      question: "Do you cover regional Indian celebrities too?",
+      answer: "Yes! We cover fashion from Bollywood, Tollywood, Kollywood, and other regional film industries across India, ensuring diverse representation of Indian celebrity fashion."
     }
   ];
 
-  // Enhanced breadcrumb data
-  const breadcrumbData = [
-    {
-      name: "Home",
-      url: "/"
-    }
-  ];
+  // Generate Indian-focused keywords
+  const keywords = getIndianKeywordString();
 
-  // Enhanced structured data for the homepage with more specific elements
+  // Enhanced structured data for Indian market
   const jsonLd = [
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "CelebrityPersona",
+      "name": "CelebrityPersona India",
       "url": window.location.origin,
-      "description": "Your ultimate destination for celebrity fashion inspiration with affordable alternatives you can shop right now.",
+      "description": "Your ultimate destination for Bollywood and Indian celebrity fashion inspiration with affordable alternatives from Myntra, Ajio, Nykaa Fashion. Get your favorite star's look for less in India.",
       "potentialAction": {
         "@type": "SearchAction",
         "target": {
@@ -184,39 +203,21 @@ const Index: React.FC = () => {
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "CelebrityPersona",
+      "name": "CelebrityPersona India",
       "url": window.location.origin,
       "logo": `${window.location.origin}/logo.svg`,
+      "description": "India's leading platform for celebrity fashion inspiration and affordable alternatives",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "India"
+      },
       "sameAs": [
         "https://twitter.com/celebritypersona",
-        "https://instagram.com/celebritypersona",
-        "https://facebook.com/celebritypersona",
-        "https://pinterest.com/celebritypersona"
+        "https://instagram.com/celebritypersona_india",
+        "https://facebook.com/celebritypersona.india"
       ]
     }
   ];
-  
-  // If we have featured outfits, add those to structured data - fixed structure for ItemList
-  if (featuredOutfits && featuredOutfits.length > 0) {
-    jsonLd.push({
-      "@context": "https://schema.org",
-      "@type": "ItemList",
-      "name": "Celebrity Fashion Inspiration",
-      "description": "Trending celebrity outfits with affordable alternatives",
-      "numberOfItems": featuredOutfits.slice(0, 3).length,
-      "itemListElement": featuredOutfits.slice(0, 3).map((outfit, index) => ({
-        "@type": "ListItem",
-        "position": index + 1,
-        "item": {
-          "@type": "Product",
-          "name": outfit.title,
-          "description": outfit.description,
-          "image": outfit.image,
-          "url": `${window.location.origin}/outfit/${outfit.id}`
-        }
-      }))
-    } as any); // Use type assertion to avoid TypeScript error
-  }
 
   // Handle search submission
   const handleSearch = (e: React.FormEvent) => {
@@ -228,37 +229,41 @@ const Index: React.FC = () => {
 
   return (
     <PageLayout>
-      <SEO
-        title="CelebrityPersona | Celebrity Style Inspiration & Affordable Fashion Alternatives"
-        description="Discover celebrity fashion trends and affordable alternatives for your favorite star outfits. Shop celebrity-inspired dresses, accessories, shoes and party wear at budget-friendly prices."
-        ogImage="/images/hero_img.jpg"
-        ogTitle="Celebrity Style Inspiration & Affordable Fashion Alternatives | CelebrityPersona"
-        ogDescription="Get the celebrity look for less! Browse our collection of celebrity-inspired fashion with affordable alternatives for every budget."
+      <EnhancedSEO
+        title="CelebrityPersona India | Bollywood Celebrity Fashion & Affordable Style Alternatives"
+        description="Discover the latest Bollywood celebrity fashion trends and shop affordable alternatives on Myntra, Ajio, Nykaa Fashion. Get your favorite star's look for less in India."
+        ogImage="/images/hero_img.webp"
+        ogTitle="Bollywood Celebrity Fashion & Affordable Alternatives | CelebrityPersona India"
+        ogDescription="Shop celebrity-inspired fashion from your favorite Bollywood stars. Find affordable alternatives on Indian fashion websites like Myntra, Ajio, and Nykaa Fashion."
         twitterCard="summary_large_image"
-        twitterTitle="Celebrity Style Inspiration & Affordable Alternatives"
-        twitterDescription="Discover and shop celebrity-inspired fashion at budget-friendly prices. Red carpet looks, street style, and more!"
-        twitterImage="/images/hero_img.jpg"
-        keywords="celebrity outfits, celebrity dresses, celebrity fashion, affordable celebrity style, celebrity party wear, red carpet looks, celebrity street style, celebrity accessories, celebrity inspired clothing"
+        twitterTitle="Bollywood Celebrity Fashion & Affordable Style Alternatives"
+        twitterDescription="Get the latest Bollywood looks for less! Shop celebrity-inspired fashion from Indian brands and retailers."
+        twitterImage="/images/hero_img.webp"
+        keywords={keywords}
         jsonLd={jsonLd}
-        breadcrumbs={breadcrumbData}
         faqSchema={faqData}
+        contentLanguage="en-IN"
+        geoTargeting={{
+          country: "IN",
+          region: "Asia"
+        }}
       />
       
-      {/* Hero Banner */}
-      <section className="bg-gradient-to-r from-pastel-lavender to-pastel-blue py-12 md:py-20 animate-fade-slide-up">
+      {/* Hero Banner - Optimized for Indian Market */}
+      <section className="bg-gradient-to-r from-pink-100 via-purple-50 to-blue-100 py-12 md:py-20 animate-fade-slide-up">
         <div className="container-custom flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-8 md:mb-0">
             <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium mb-4">
-              Discover Celebrity Style & Shop Similar Looks
+              Bollywood Celebrity Fashion & Style Inspiration
             </h1>
-            <p className="text-muted-foreground mb-8 md:text-lg max-w-lg">
-              Your ultimate destination for celebrity fashion inspiration with affordable alternatives you can shop right now.
+            <p className="text-muted-foreground mb-6 md:text-lg max-w-lg">
+              Discover the latest celebrity looks from your favorite Bollywood stars and shop affordable alternatives on Myntra, Ajio, Nykaa Fashion & more.
             </p>
             <form onSubmit={handleSearch} className="relative max-w-md mb-6">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <Input 
                 type="text"
-                placeholder="Search celebrities, styles..."
+                placeholder="Search Alia Bhatt, Deepika, Kiara..."
                 className="pl-10 pr-20 py-6 rounded-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -275,17 +280,20 @@ const Index: React.FC = () => {
                 className="btn-primary flex items-center"
                 onClick={() => navigate('/celebrities')}
               >
-                Explore Celebrity Looks
+                Explore Bollywood Looks
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
             </div>
+            <p className="text-sm text-muted-foreground mt-4">
+              ✨ Shop from <strong>Myntra</strong>, <strong>Ajio</strong>, <strong>Nykaa Fashion</strong> & more
+            </p>
           </div>
           <div className="md:w-1/2 flex justify-center w-full">
             <img
               src="/images/hero_img.webp"
-              alt="Celebrity red carpet fashion"
+              alt="Bollywood celebrity red carpet fashion inspiration for Indian fashion lovers"
               className="rounded-2xl shadow-hero-glow w-full max-w-[280px] sm:max-w-[350px] md:max-w-md object-cover h-auto md:h-[500px] transform transition duration-500 hover:scale-105"
             />
           </div>
@@ -351,7 +359,7 @@ const Index: React.FC = () => {
       <section className="py-16 bg-secondary">
         <div className="container-custom">
           <h2 className="section-title text-center mb-10">
-            Explore by Category
+            Shop by Category
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {categories.map((category, index) => (
@@ -485,6 +493,35 @@ const Index: React.FC = () => {
           </form>
           <p className="text-xs text-muted-foreground mt-4">
             By subscribing, you agree to our Privacy Policy and consent to receive updates from CelebrityPersona.
+          </p>
+        </div>
+      </section>
+
+      {/* Email Signup - Indian Focused */}
+      <section className="container-custom py-16">
+        <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-2xl p-8 md:p-12 text-center">
+          <h2 className="font-serif text-2xl md:text-3xl font-medium mb-4">
+            Get Weekly Celebrity Looks in Your Inbox
+          </h2>
+          <p className="mb-2 max-w-lg mx-auto">
+            <strong>Curated for Indian Fashion Lovers</strong>
+          </p>
+          <p className="text-white/90 mb-8 max-w-lg mx-auto">
+            Be the first to get the latest Bollywood fashion trends, styling tips, and exclusive shopping deals from Myntra, Ajio, Nykaa Fashion, and more.
+          </p>
+          <form className="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
+            <input
+              type="email"
+              placeholder="Enter your email address"
+              className="flex-grow rounded-full px-4 py-3 text-gray-900 border-0 focus:outline-none focus:ring-2 focus:ring-white"
+              required
+            />
+            <button type="submit" className="bg-white text-purple-600 font-semibold py-3 px-6 rounded-full hover:bg-gray-100 transition-colors whitespace-nowrap">
+              Join 50,000+ Subscribers
+            </button>
+          </form>
+          <p className="text-xs text-white/75 mt-4">
+            No spam, unsubscribe anytime. Join fashion enthusiasts across India 🇮🇳
           </p>
         </div>
       </section>
