@@ -1,208 +1,817 @@
-import React, { useState, useEffect } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import { Button } from '@/components/ui/button';
-import { Outfit } from '@/types/data';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { toast } from 'sonner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAppDispatch } from '@/hooks/useAppDispatch';
-import { useAppSelector } from '@/hooks/useAppSelector';
-import { fetchOutfitsAsync } from '@/store/slices/outfitSlice';
+import React, { useState, useEffect } from "react";
+import AdminLayout from "@/components/admin/AdminLayout";
+import MediaUploader from "@/components/admin/MediaUploader";
+import { Outfit, Celebrity } from "@/types/data";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Search, Edit, Trash, Eye, Image, Loader2, ExternalLink } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { useForm } from "react-hook-form";
+import { toast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { generateUniqueOutfitSlug } from "@/services/api";
 
-const AdminOutfits = () => {
-  const dispatch = useAppDispatch();
-  const { outfits, isLoading, error } = useAppSelector((state) => state.outfits);
-  
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [selectedOutfit, setSelectedOutfit] = useState<Outfit | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+interface MediaFile {
+  id?: string;
+  file?: File;
+  url: string;
+  type: 'image' | 'video';
+  displayOrder: number;
+  isPrimary: boolean;
+}
 
-  // Load outfits on mount
-  useEffect(() => {
-    dispatch(fetchOutfitsAsync({}));
-  }, [dispatch]);
+interface SupabaseOutfit extends Omit<Outfit, 'id' | 'celebrityId' | 'celebrity'> {
+  id: string;
+  celebrity_id: string;
+}
 
-  // Handle add success
-  const handleAddSuccess = () => {
-    setIsAddDialogOpen(false);
-    dispatch(fetchOutfitsAsync({}));
-    toast.success('Outfit added successfully');
+const AdminOutfits: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editOutfit, setEditOutfit] = useState<Outfit | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [outfitToDelete, setOutfitToDelete] = useState<Outfit | null>(null);
+  const [showAddEditForm, setShowAddEditForm] = useState(false);
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const queryClient = useQueryClient();
+
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
+
+  // Fetch celebrities
+  const { data: celebrities = [], isLoading: isCelebritiesLoading } = useQuery({
+    queryKey: ['celebrities'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('celebrities')
+        .select('*');
+      
+      if (error) {
+        console.error('Error fetching celebrities:', error);
+        throw error;
+      }
+
+      return data.map((celebrity: any) => ({
+        id: celebrity.id,
+        name: celebrity.name,
+        image: celebrity.image,
+        bio: celebrity.bio,
+        category: celebrity.category,
+        styleType: celebrity.style_type,
+        outfitCount: 0 // This will be updated later if needed
+      }));
+    }
+  });
+
+  // Fetch outfits
+  const { data: outfits = [], isLoading: isOutfitsLoading } = useQuery({
+    queryKey: ['outfits'],
+    queryFn: async () => {
+      const { data: outfitsData, error: outfitsError } = await supabase
+        .from('outfits')
+        .select(`
+          *,
+          celebrities(name)
+        `);
+
+      if (outfitsError) {
+        console.error('Error fetching outfits:', outfitsError);
+        throw outfitsError;
+      }
+
+      // Map Supabase outfits to our application's Outfit type
+      return outfitsData.map((outfit: any) => ({
+        id: outfit.id,
+        image: outfit.image,
+        celebrityId: outfit.celebrity_id,
+        celebrity: outfit.celebrities?.name || 'Unknown',
+        title: outfit.title,
+        description: outfit.description,
+        fullDescription: outfit.full_description,
+        occasion: outfit.occasion,
+        date: outfit.date,
+        affiliateLink: outfit.affiliate_link,
+        slug: outfit.slug, // Include the slug
+      }));
+    }
+  });
+
+  // Fetch tags for each outfit
+  const { data: outfitTags = [] } = useQuery({
+    queryKey: ['outfit-tags'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('outfit_tags')
+        .select('*');
+      
+      if (error) {
+        console.error('Error fetching outfit tags:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    enabled: outfits.length > 0
+  });
+
+  // Create a map of outfit IDs to their tags
+  const outfitTagsMap = React.useMemo(() => {
+    const tagsMap: Record<string, string[]> = {};
+    
+    outfitTags.forEach((tagRecord: any) => {
+      const outfitId = tagRecord.outfit_id;
+      if (!tagsMap[outfitId]) {
+        tagsMap[outfitId] = [];
+      }
+      tagsMap[outfitId].push(tagRecord.tag_name);
+    });
+    
+    return tagsMap;
+  }, [outfitTags]);
+
+  // Add tags to outfits
+  const outfitsWithTags = React.useMemo(() => {
+    return outfits.map(outfit => ({
+      ...outfit,
+      tags: outfitTagsMap[outfit.id] || []
+    }));
+  }, [outfits, outfitTagsMap]);
+
+  // Filter outfits based on search term
+  const filteredOutfits = outfitsWithTags.filter((outfit) =>
+    outfit.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    outfit.celebrity.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Add outfit mutation with media support
+  const addOutfitMutation = useMutation({
+    mutationFn: async (data: any) => {
+      // Generate unique slug from title
+      const slug = await generateUniqueOutfitSlug(data.title);
+      
+      // First insert the outfit
+      const { data: newOutfit, error: outfitError } = await supabase
+        .from('outfits')
+        .insert([{
+          title: data.title,
+          image: data.image || '', // Keep for backward compatibility
+          celebrity_id: data.celebrityId,
+          description: data.description,
+          full_description: data.fullDescription || null,
+          occasion: data.occasion || null,
+          date: data.date || null,
+          affiliate_link: data.affiliateLink || null,
+          slug: slug,
+        }])
+        .select('*')
+        .single();
+
+      if (outfitError) {
+        throw outfitError;
+      }
+
+      // Upload and save media files
+      if (mediaFiles.length > 0) {
+        const mediaUploader = document.querySelector('[data-media-uploader]') as any;
+        const uploadedMedia = await mediaUploader?.uploadAllMedia?.() || [];
+        
+        if (uploadedMedia.length > 0) {
+          const mediaInserts = uploadedMedia.map((media: MediaFile, index: number) => ({
+            outfit_id: newOutfit.id,
+            media_url: media.url,
+            media_type: media.type,
+            display_order: index,
+            is_primary: media.isPrimary
+          }));
+
+          const { error: mediaError } = await supabase
+            .from('outfit_media')
+            .insert(mediaInserts);
+
+          if (mediaError) {
+            console.error('Error inserting media:', mediaError);
+          }
+
+          // Update outfit with primary image for backward compatibility
+          const primaryImage = uploadedMedia.find(m => m.isPrimary)?.url || uploadedMedia[0]?.url;
+          if (primaryImage) {
+            await supabase
+              .from('outfits')
+              .update({ image: primaryImage })
+              .eq('id', newOutfit.id);
+          }
+        }
+      }
+
+      // If there are tags, insert them
+      if (data.tags && data.tags.length > 0) {
+        const tagInserts = data.tags.map((tag: string) => ({
+          outfit_id: newOutfit.id,
+          tag_name: tag
+        }));
+
+        const { error: tagsError } = await supabase
+          .from('outfit_tags')
+          .insert(tagInserts);
+
+        if (tagsError) {
+          throw tagsError;
+        }
+      }
+
+      return newOutfit;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['outfits'] });
+      queryClient.invalidateQueries({ queryKey: ['outfit-tags'] });
+      toast({
+        title: "Outfit added",
+        description: "Your outfit has been added successfully with media files",
+      });
+      reset();
+      setMediaFiles([]);
+    },
+    onError: (error) => {
+      console.error('Error adding outfit:', error);
+      toast({
+        title: "Error",
+        description: "There was an error adding the outfit. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Update outfit mutation with media support
+  const updateOutfitMutation = useMutation({
+    mutationFn: async (data: any) => {
+      // Generate unique slug if title changed
+      let slug = data.slug;
+      if (!slug || (editOutfit && data.title !== editOutfit.title)) {
+        slug = await generateUniqueOutfitSlug(data.title, data.id);
+      }
+      
+      // First update the outfit
+      const { error: outfitError } = await supabase
+        .from('outfits')
+        .update({
+          title: data.title,
+          image: data.image || '', // Keep for backward compatibility
+          celebrity_id: data.celebrityId,
+          description: data.description,
+          full_description: data.fullDescription || null,
+          occasion: data.occasion || null,
+          date: data.date || null,
+          affiliate_link: data.affiliateLink || null,
+          slug: slug,
+        })
+        .eq('id', data.id);
+
+      if (outfitError) {
+        throw outfitError;
+      }
+
+      // Handle media files if they've been updated
+      if (mediaFiles.length > 0) {
+        // Delete existing media
+        await supabase
+          .from('outfit_media')
+          .delete()
+          .eq('outfit_id', data.id);
+
+        const mediaUploader = document.querySelector('[data-media-uploader]') as any;
+        const uploadedMedia = await mediaUploader?.uploadAllMedia?.() || [];
+        
+        if (uploadedMedia.length > 0) {
+          const mediaInserts = uploadedMedia.map((media: MediaFile, index: number) => ({
+            outfit_id: data.id,
+            media_url: media.url,
+            media_type: media.type,
+            display_order: index,
+            is_primary: media.isPrimary
+          }));
+
+          const { error: mediaError } = await supabase
+            .from('outfit_media')
+            .insert(mediaInserts);
+
+          if (mediaError) {
+            console.error('Error inserting media:', mediaError);
+          }
+
+          // Update outfit with primary image for backward compatibility
+          const primaryImage = uploadedMedia.find(m => m.isPrimary)?.url || uploadedMedia[0]?.url;
+          if (primaryImage) {
+            await supabase
+              .from('outfits')
+              .update({ image: primaryImage })
+              .eq('id', data.id);
+          }
+        }
+      }
+
+      // Delete existing tags for this outfit
+      const { error: deleteTagsError } = await supabase
+        .from('outfit_tags')
+        .delete()
+        .eq('outfit_id', data.id);
+
+      if (deleteTagsError) {
+        throw deleteTagsError;
+      }
+
+      // If there are tags, insert them
+      if (data.tags && data.tags.length > 0) {
+        const tagInserts = data.tags.map((tag: string) => ({
+          outfit_id: data.id,
+          tag_name: tag
+        }));
+
+        const { error: tagsError } = await supabase
+          .from('outfit_tags')
+          .insert(tagInserts);
+
+        if (tagsError) {
+          throw tagsError;
+        }
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['outfits'] });
+      queryClient.invalidateQueries({ queryKey: ['outfit-tags'] });
+      toast({
+        title: "Outfit updated",
+        description: "Your outfit has been updated successfully",
+      });
+      setEditOutfit(null);
+      setMediaFiles([]);
+      reset();
+    },
+    onError: (error) => {
+      console.error('Error updating outfit:', error);
+      toast({
+        title: "Error",
+        description: "There was an error updating the outfit. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Delete outfit mutation
+  const deleteOutfitMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('outfits')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['outfits'] });
+      queryClient.invalidateQueries({ queryKey: ['outfit-tags'] });
+      toast({
+        title: "Outfit deleted",
+        description: "The outfit has been removed successfully",
+      });
+      setOutfitToDelete(null);
+      setDeleteDialogOpen(false);
+    },
+    onError: (error) => {
+      console.error('Error deleting outfit:', error);
+      toast({
+        title: "Error",
+        description: "There was an error deleting the outfit. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const onSubmit = (data: any) => {
+    // Process the tags (convert from comma-separated string to array)
+    if (data.tagsString) {
+      data.tags = data.tagsString.split(',').map((tag: string) => tag.trim()).filter(Boolean);
+    }
+
+    if (editOutfit) {
+      updateOutfitMutation.mutate({ ...data, id: editOutfit.id, slug: editOutfit.slug });
+    } else {
+      addOutfitMutation.mutate(data);
+    }
+    
+    setShowAddEditForm(false);
   };
 
-  // Handle delete
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this outfit?')) {
-      try {
-        // TODO: Implement delete API call with Redux
-        console.log('Deleting outfit with ID:', id);
-        toast.success('Outfit deleted successfully');
-        dispatch(fetchOutfitsAsync({}));
-      } catch (error) {
-        console.error('Error deleting outfit:', error);
-        toast.error('Failed to delete outfit');
-      }
+  const handleDelete = (outfit: Outfit) => {
+    setOutfitToDelete(outfit);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (outfitToDelete) {
+      deleteOutfitMutation.mutate(outfitToDelete.id);
     }
   };
 
-  if (error) {
-    return (
-      <AdminLayout>
-        <div className="text-center py-12">
-          <p className="text-red-600 mb-4">{error}</p>
-          <Button onClick={() => dispatch(fetchOutfitsAsync({}))}>
-            Retry
-          </Button>
-        </div>
-      </AdminLayout>
-    );
-  }
+  const handleEdit = async (outfit: Outfit) => {
+    setEditOutfit(outfit);
+    
+    // Set form values
+    Object.keys(outfit).forEach((key) => {
+      if (key !== 'tags') {
+        setValue(key, outfit[key as keyof Outfit]);
+      }
+    });
+    
+    // Set tags as comma-separated string
+    if (outfit.tags) {
+      setValue('tagsString', outfit.tags.join(', '));
+    }
+
+    // Load existing media for the outfit
+    const { data: existingMedia } = await supabase
+      .from('outfit_media')
+      .select('*')
+      .eq('outfit_id', outfit.id)
+      .order('display_order');
+
+    if (existingMedia) {
+      const formattedMedia: MediaFile[] = existingMedia.map(media => ({
+        id: media.id,
+        url: media.media_url,
+        type: media.media_type as 'image' | 'video',
+        displayOrder: media.display_order,
+        isPrimary: media.is_primary
+      }));
+      setMediaFiles(formattedMedia);
+    }
+    
+    setShowAddEditForm(true);
+  };
+  
+  const handleAddNew = () => {
+    setEditOutfit(null);
+    setMediaFiles([]);
+    reset();
+    setShowAddEditForm(true);
+  };
+
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return "";
+    return new Date(dateString).toISOString().split('T')[0]; // Format as YYYY-MM-DD
+  };
 
   return (
     <AdminLayout>
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Manage Outfits</h1>
-          <div className="flex gap-4">
-            <div className="bg-white dark:bg-gray-800 rounded-md p-1">
-              <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'grid' | 'list')}>
-                <TabsList>
-                  <TabsTrigger value="grid">Grid</TabsTrigger>
-                  <TabsTrigger value="list">List</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-            <Button onClick={() => setIsAddDialogOpen(true)}>Add New Outfit</Button>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="font-serif text-2xl font-medium">Outfits</h1>
+        <Button onClick={handleAddNew}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Outfit
+        </Button>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="flex items-center mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search outfits..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4"
+            />
           </div>
         </div>
-        
-        {isLoading ? (
-          <div className="flex justify-center p-8">
-            <p>Loading outfits...</p>
-          </div>
-        ) : (
-          <>
-            {viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {outfits.map(outfit => (
-                  <div 
-                    key={outfit.id} 
-                    className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
-                  >
-                    <div className="relative h-48">
-                      <img 
-                        src={outfit.image || 'https://via.placeholder.com/400x200?text=No+Image'} 
-                        alt={outfit.title} 
-                        className="w-full h-full object-cover"
-                      />
+
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Image</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Celebrity</TableHead>
+                <TableHead>Occasion</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isOutfitsLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center h-32">
+                    <div className="flex justify-center items-center">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
-                    <div className="p-4">
-                      <h3 className="text-xl font-semibold mb-2">{outfit.title}</h3>
-                      <p className="text-gray-500 mb-2">{outfit.celebrity}</p>
-                      <p className="text-sm mb-2">{outfit.occasion}</p>
-                      <p className="text-sm mb-4 line-clamp-2">{outfit.description}</p>
-                      <div className="flex justify-between">
-                        <Button variant="outline" onClick={() => setSelectedOutfit(outfit)}>
-                          View Details
+                  </TableCell>
+                </TableRow>
+              ) : filteredOutfits.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center h-32">
+                    No outfits found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredOutfits.map((outfit) => (
+                  <TableRow key={outfit.id}>
+                    <TableCell>
+                      <div className="w-16 h-20 bg-secondary rounded overflow-hidden">
+                        {outfit.image ? (
+                          <img
+                            src={outfit.image}
+                            alt={outfit.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Image className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">{outfit.title}</TableCell>
+                    <TableCell>{outfit.celebrity}</TableCell>
+                    <TableCell>{outfit.occasion || "-"}</TableCell>
+                    <TableCell>
+                      {outfit.date ? new Date(outfit.date).toLocaleDateString() : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline" asChild>
+                          <a href={`/outfit/${outfit.slug || outfit.id}`} target="_blank" rel="noopener noreferrer">
+                            <Eye className="h-4 w-4" />
+                          </a>
                         </Button>
-                        <Button variant="destructive" onClick={() => handleDelete(outfit.id)}>
-                          Delete
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(outfit)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => handleDelete(outfit)}
+                          disabled={deleteOutfitMutation.isPending}
+                        >
+                          {deleteOutfitMutation.isPending && outfitToDelete?.id === outfit.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                  <thead>
-                    <tr>
-                      <th className="px-6 py-3 border-b text-left">Image</th>
-                      <th className="px-6 py-3 border-b text-left">Title</th>
-                      <th className="px-6 py-3 border-b text-left">Celebrity</th>
-                      <th className="px-6 py-3 border-b text-left">Occasion</th>
-                      <th className="px-6 py-3 border-b text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {outfits.map(outfit => (
-                      <tr key={outfit.id}>
-                        <td className="px-6 py-3 border-b">
-                          <div className="w-16 h-16 overflow-hidden rounded">
-                            <img 
-                              src={outfit.image || 'https://via.placeholder.com/150?text=No+Image'} 
-                              alt={outfit.title} 
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        </td>
-                        <td className="px-6 py-3 border-b">{outfit.title}</td>
-                        <td className="px-6 py-3 border-b">{outfit.celebrity}</td>
-                        <td className="px-6 py-3 border-b">{outfit.occasion}</td>
-                        <td className="px-6 py-3 border-b">
-                          <div className="flex justify-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setSelectedOutfit(outfit)}>
-                              View
-                            </Button>
-                            <Button variant="destructive" size="sm" onClick={() => handleDelete(outfit.id)}>
-                              Delete
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
-        )}
-        
-        {/* Add Outfit Dialog */}
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Add New Outfit</DialogTitle>
-            </DialogHeader>
-            <div className="p-4">
-              <p>Outfit form component would go here</p>
-              <Button onClick={handleAddSuccess}>Save Outfit</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-        
-        {/* Outfit Detail Dialog */}
-        <Dialog open={!!selectedOutfit} onOpenChange={() => setSelectedOutfit(null)}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Outfit Details</DialogTitle>
-            </DialogHeader>
-            {selectedOutfit && (
-              <div className="p-4">
-                <img 
-                  src={selectedOutfit.image} 
-                  alt={selectedOutfit.title}
-                  className="w-full h-64 object-cover rounded mb-4"
-                />
-                <h3 className="text-xl font-semibold mb-2">{selectedOutfit.title}</h3>
-                <p className="mb-2"><strong>Celebrity:</strong> {selectedOutfit.celebrity}</p>
-                <p className="mb-2"><strong>Occasion:</strong> {selectedOutfit.occasion}</p>
-                <p className="mb-2"><strong>Date:</strong> {selectedOutfit.date}</p>
-                <p className="mb-4">{selectedOutfit.fullDescription || selectedOutfit.description}</p>
-                {selectedOutfit.tags && (
-                  <div className="flex flex-wrap gap-2">
-                    {selectedOutfit.tags.map((tag, index) => (
-                      <span key={index} className="bg-gray-200 px-2 py-1 rounded text-sm">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
+
+      {/* Add/Edit Form Dialog */}
+      <Dialog open={showAddEditForm} onOpenChange={setShowAddEditForm}>
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>
+              {editOutfit ? "Edit Outfit" : "Add New Outfit"}
+            </DialogTitle>
+            <DialogDescription>
+              Fill in the details for the outfit and upload images/videos.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ScrollArea className="flex-1 max-h-[70vh] pr-4">
+            <form id="outfit-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
+              {/* Media Upload Section */}
+              <div data-media-uploader>
+                <MediaUploader
+                  outfitId={editOutfit?.id}
+                  existingMedia={mediaFiles}
+                  onMediaChange={setMediaFiles}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="title" className="font-medium">Title *</Label>
+                  <Input
+                    id="title"
+                    {...register("title", { required: "Title is required" })}
+                    defaultValue={editOutfit?.title || ""}
+                    placeholder="Enter outfit title"
+                  />
+                  {errors.title && (
+                    <p className="text-sm text-red-500">
+                      {errors.title.message as string}
+                    </p>
+                  )}
+                </div>
+
+                {/* Keep image field for backward compatibility but make it optional */}
+                <div className="grid gap-2">
+                  <Label htmlFor="image" className="font-medium">Fallback Image URL</Label>
+                  <Input
+                    id="image"
+                    {...register("image")}
+                    defaultValue={editOutfit?.image || ""}
+                    placeholder="Optional: backup image URL"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This will be auto-populated from uploaded media
+                  </p>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="celebrityId" className="font-medium">Celebrity *</Label>
+                  {isCelebritiesLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Loading celebrities...</span>
+                    </div>
+                  ) : (
+                    <select
+                      id="celebrityId"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      {...register("celebrityId", { required: "Celebrity is required" })}
+                      defaultValue={editOutfit?.celebrityId || ""}
+                    >
+                      <option value="">Select a celebrity</option>
+                      {celebrities.map((celebrity: Celebrity) => (
+                        <option key={celebrity.id} value={celebrity.id}>{celebrity.name}</option>
+                      ))}
+                    </select>
+                  )}
+                  {errors.celebrityId && (
+                    <p className="text-sm text-red-500">
+                      {errors.celebrityId.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="occasion" className="font-medium">Occasion</Label>
+                  <Input
+                    id="occasion"
+                    {...register("occasion")}
+                    defaultValue={editOutfit?.occasion || ""}
+                    placeholder="e.g., Red Carpet, Award Show, etc."
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="description" className="font-medium">Description *</Label>
+                  <Input
+                    id="description"
+                    {...register("description", { required: "Description is required" })}
+                    defaultValue={editOutfit?.description || ""}
+                    placeholder="Brief description of the outfit"
+                  />
+                  {errors.description && (
+                    <p className="text-sm text-red-500">
+                      {errors.description.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="date" className="font-medium">Date Worn</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    {...register("date")}
+                    defaultValue={formatDate(editOutfit?.date)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="affiliateLink" className="font-medium">Affiliate Link</Label>
+                <div className="relative">
+                  <Input
+                    id="affiliateLink"
+                    {...register("affiliateLink")}
+                    defaultValue={editOutfit?.affiliateLink || ""}
+                    placeholder="https://example.com/product-link"
+                  />
+                  <ExternalLink className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Add a direct purchase link for this outfit (optional)
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="tagsString" className="font-medium">Tags (comma separated)</Label>
+                <Input
+                  id="tagsString"
+                  {...register("tagsString")}
+                  defaultValue={editOutfit?.tags ? editOutfit.tags.join(', ') : ""}
+                  placeholder="red carpet, formal, gala, etc."
+                />
+                <p className="text-xs text-muted-foreground">
+                  Separate tags with commas
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="fullDescription" className="font-medium">Full Description</Label>
+                <Textarea
+                  id="fullDescription"
+                  className="min-h-32"
+                  {...register("fullDescription")}
+                  defaultValue={editOutfit?.fullDescription || ""}
+                  placeholder="Detailed description of the outfit, including style notes, materials, designer information, etc."
+                />
+              </div>
+            </form>
+          </ScrollArea>
+          
+          <DialogFooter className="pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowAddEditForm(false)}>
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              form="outfit-form"
+              disabled={addOutfitMutation.isPending || updateOutfitMutation.isPending}
+            >
+              {(addOutfitMutation.isPending || updateOutfitMutation.isPending) && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {editOutfit ? "Update Outfit" : "Add Outfit"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Outfit</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{outfitToDelete?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deleteOutfitMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDelete}
+              disabled={deleteOutfitMutation.isPending}
+            >
+              {deleteOutfitMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };
