@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -20,13 +19,13 @@ const AdminOutfits = () => {
 
   // Load outfits on mount
   useEffect(() => {
-    dispatch(fetchOutfitsAsync());
+    dispatch(fetchOutfitsAsync({}));
   }, [dispatch]);
 
   // Handle add success
   const handleAddSuccess = () => {
     setIsAddDialogOpen(false);
-    dispatch(fetchOutfitsAsync());
+    dispatch(fetchOutfitsAsync({}));
     toast.success('Outfit added successfully');
   };
 
@@ -37,7 +36,7 @@ const AdminOutfits = () => {
         // TODO: Implement delete API call with Redux
         console.log('Deleting outfit with ID:', id);
         toast.success('Outfit deleted successfully');
-        dispatch(fetchOutfitsAsync());
+        dispatch(fetchOutfitsAsync({}));
       } catch (error) {
         console.error('Error deleting outfit:', error);
         toast.error('Failed to delete outfit');
@@ -50,7 +49,7 @@ const AdminOutfits = () => {
       <AdminLayout>
         <div className="text-center py-12">
           <p className="text-red-600 mb-4">{error}</p>
-          <Button onClick={() => dispatch(fetchOutfitsAsync())}>
+          <Button onClick={() => dispatch(fetchOutfitsAsync({}))}>
             Retry
           </Button>
         </div>

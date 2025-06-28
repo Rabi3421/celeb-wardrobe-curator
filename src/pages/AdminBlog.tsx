@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -20,13 +19,13 @@ const AdminBlog = () => {
 
   // Load blog posts on mount
   useEffect(() => {
-    dispatch(fetchBlogPostsAsync());
+    dispatch(fetchBlogPostsAsync({}));
   }, [dispatch]);
 
   // Handle add success
   const handleAddSuccess = () => {
     setIsAddDialogOpen(false);
-    dispatch(fetchBlogPostsAsync());
+    dispatch(fetchBlogPostsAsync({}));
     toast.success('Blog post added successfully');
   };
 
@@ -37,7 +36,7 @@ const AdminBlog = () => {
         // TODO: Implement delete API call with Redux
         console.log('Deleting blog post with ID:', id);
         toast.success('Blog post deleted successfully');
-        dispatch(fetchBlogPostsAsync());
+        dispatch(fetchBlogPostsAsync({}));
       } catch (error) {
         console.error('Error deleting blog post:', error);
         toast.error('Failed to delete blog post');
@@ -50,7 +49,7 @@ const AdminBlog = () => {
       <AdminLayout>
         <div className="text-center py-12">
           <p className="text-red-600 mb-4">{error}</p>
-          <Button onClick={() => dispatch(fetchBlogPostsAsync())}>
+          <Button onClick={() => dispatch(fetchBlogPostsAsync({}))}>
             Retry
           </Button>
         </div>
