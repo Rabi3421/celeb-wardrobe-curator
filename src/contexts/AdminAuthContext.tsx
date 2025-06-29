@@ -1,15 +1,17 @@
 
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { User, AuthContextType } from "@/types/data";
 import { toast } from "@/components/ui/use-toast";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { useAppSelector } from "@/hooks/useAppSelector";
+import { loginAsync, logoutAsync, setUser } from "@/store/slices/authSlice";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [authChecked, setAuthChecked] = useState(true);
+  const dispatch = useAppDispatch();
+  const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+  const authChecked = true; // Since we're using Redux, we can consider auth always checked
 
   // Check for existing session on mount
   useEffect(() => {
@@ -17,78 +19,39 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (savedUser) {
       try {
         const userData = JSON.parse(savedUser);
-        setUser(userData);
-        setIsAuthenticated(true);
+        dispatch(setUser(userData));
       } catch (error) {
         console.error('Error parsing saved admin user data:', error);
         localStorage.removeItem('adminUser');
       }
     }
-  }, []);
+  }, [dispatch]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      setIsLoading(true);
+      await dispatch(loginAsync({ email, password })).unwrap();
       
-      // Mock authentication - replace with your backend API call
-      console.log("Attempting admin sign in with:", email);
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${user?.name || 'Admin'}!`,
+      });
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock successful login for admin@example.com
-      if (email === 'admin@example.com' && password === 'admin123') {
-        const userData: User = {
-          id: 'admin-1',
-          email: email,
-          name: 'Admin User',
-          role: 'admin',
-          password: '', // Don't store password
-          lastLogin: new Date().toISOString()
-        };
-        
-        setUser(userData);
-        setIsAuthenticated(true);
-        
-        // Save to localStorage
-        localStorage.setItem('adminUser', JSON.stringify(userData));
-        
-        toast({
-          title: "Login successful",
-          description: `Welcome back, ${userData.name}!`,
-        });
-        
-        return true;
-      } else {
-        toast({
-          title: "Login failed",
-          description: "Invalid admin credentials",
-          variant: "destructive",
-        });
-        return false;
-      }
+      return true;
     } catch (error) {
       console.error('Admin login error:', error);
       toast({
         title: "Login failed",
-        description: "An unexpected error occurred",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
         variant: "destructive",
       });
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const logout = async () => {
     console.log("Logging out admin user");
     
-    // Clear localStorage
-    localStorage.removeItem('adminUser');
-    
-    // Clear state
-    setUser(null);
-    setIsAuthenticated(false);
+    await dispatch(logoutAsync());
     
     toast({
       title: "Logged out",

@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Celebrity } from '@/types/data';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,95 +8,26 @@ import { toast } from 'sonner';
 import CelebrityForm from '@/components/admin/CelebrityForm';
 import CelebrityDetail from '@/components/admin/CelebrityDetail';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAppDispatch } from '@/hooks/useAppDispatch';
+import { useAppSelector } from '@/hooks/useAppSelector';
+import { fetchCelebritiesAsync, deleteCelebrityAsync, setSelectedCelebrity } from '@/store/slices/celebritySlice';
 
 const AdminCelebrities = () => {
-  const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { celebrities, isLoading, selectedCelebrity } = useAppSelector((state) => state.celebrities);
+  
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [selectedCelebrity, setSelectedCelebrity] = useState<Celebrity | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
-  // Fetch celebrities data
-  const fetchCelebrities = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('celebrities')
-        .select('*');
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Convert database fields to match our Celebrity type
-      const formattedData: Celebrity[] = data.map(item => {
-        // Process social media data
-        let socialMediaValue = item.social_media;
-        if (typeof socialMediaValue === 'string') {
-          socialMediaValue = JSON.parse(socialMediaValue);
-        }
-        
-        // Process signature data
-        let signatureValue = item.signature;
-        if (typeof signatureValue === 'string') {
-          signatureValue = JSON.parse(signatureValue);
-        }
-        
-        return {
-          id: item.id,
-          name: item.name,
-          image: item.image,
-          outfitCount: item.outfitcount || 0,
-          bio: item.bio,
-          category: item.category,
-          styleType: item.style_type,
-          slug: item.slug || item.id,
-          birthdate: item.birthdate,
-          birthplace: item.birthplace,
-          height: item.height,
-          education: item.education,
-          careerHighlights: item.career_highlights,
-          personalLife: item.personal_life,
-          awards: item.awards,
-          socialMedia: socialMediaValue as Celebrity['socialMedia'],
-          interestingFacts: item.interesting_facts,
-          nationality: item.nationality,
-          languages: item.languages,
-          netWorth: item.net_worth,
-          zodiacSign: item.zodiac_sign,
-          philanthropyWork: item.philanthropy_work,
-          businessVentures: item.business_ventures,
-          controversies: item.controversies,
-          fanbaseNickname: item.fanbase_nickname,
-          signature: signatureValue as Celebrity['signature'],
-          measurements: item.measurements,
-          dietFitness: item.diet_fitness,
-          styleEvolution: item.style_evolution,
-          influences: item.influences,
-          quotes: item.quotes,
-          publicPerception: item.public_perception,
-          brandEndorsements: item.brand_endorsements
-        };
-      });
-      
-      setCelebrities(formattedData);
-    } catch (error) {
-      console.error('Error fetching celebrities:', error);
-      toast.error('Failed to load celebrities');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Load celebrities on mount
   useEffect(() => {
-    fetchCelebrities();
-  }, []);
+    dispatch(fetchCelebritiesAsync());
+  }, [dispatch]);
 
   // Handle add success
   const handleAddSuccess = () => {
     setIsAddDialogOpen(false);
-    fetchCelebrities();
+    dispatch(fetchCelebritiesAsync());
     toast.success('Celebrity added successfully');
   };
 
@@ -104,17 +35,7 @@ const AdminCelebrities = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this celebrity?')) {
       try {
-        const { error } = await supabase
-          .from('celebrities')
-          .delete()
-          .eq('id', id);
-        
-        if (error) {
-          throw error;
-        }
-        
-        // Remove from state
-        setCelebrities(prev => prev.filter(celeb => celeb.id !== id));
+        await dispatch(deleteCelebrityAsync(id)).unwrap();
         toast.success('Celebrity deleted successfully');
       } catch (error) {
         console.error('Error deleting celebrity:', error);
@@ -125,7 +46,12 @@ const AdminCelebrities = () => {
 
   // Open celebrity detail modal
   const openCelebrityDetail = (celebrity: Celebrity) => {
-    setSelectedCelebrity(celebrity);
+    dispatch(setSelectedCelebrity(celebrity));
+  };
+
+  // Close celebrity detail modal
+  const closeCelebrityDetail = () => {
+    dispatch(setSelectedCelebrity(null));
   };
 
   return (
@@ -146,7 +72,7 @@ const AdminCelebrities = () => {
           </div>
         </div>
         
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center p-8">
             <p>Loading celebrities...</p>
           </div>
@@ -239,7 +165,7 @@ const AdminCelebrities = () => {
         </Dialog>
         
         {/* Celebrity Detail Dialog */}
-        <Dialog open={!!selectedCelebrity} onOpenChange={() => setSelectedCelebrity(null)}>
+        <Dialog open={!!selectedCelebrity} onOpenChange={closeCelebrityDetail}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Celebrity Details</DialogTitle>
