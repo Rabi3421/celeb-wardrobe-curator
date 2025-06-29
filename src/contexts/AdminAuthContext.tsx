@@ -10,19 +10,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useAppDispatch();
-  const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+  const { user, isAuthenticated, isLoading, error } = useAppSelector((state) => state.auth);
   const authChecked = true; // Since we're using Redux, we can consider auth always checked
 
   // Check for existing session on mount
   useEffect(() => {
     const savedUser = localStorage.getItem('adminUser');
-    if (savedUser) {
+    const authToken = localStorage.getItem('authToken');
+    
+    if (savedUser && authToken) {
       try {
         const userData = JSON.parse(savedUser);
         dispatch(setUser(userData));
       } catch (error) {
         console.error('Error parsing saved admin user data:', error);
         localStorage.removeItem('adminUser');
+        localStorage.removeItem('authToken');
       }
     }
   }, [dispatch]);
@@ -33,7 +36,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       
       toast({
         title: "Login successful",
-        description: `Welcome back, ${user?.name || 'Admin'}!`,
+        description: `Welcome back!`,
       });
       
       return true;
@@ -41,7 +44,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       console.error('Admin login error:', error);
       toast({
         title: "Login failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        description: error instanceof Error ? error.message : "Invalid credentials",
         variant: "destructive",
       });
       return false;

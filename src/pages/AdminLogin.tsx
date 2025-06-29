@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
@@ -9,12 +10,11 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  password: z.string().min(1, { message: "Password is required" }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -32,7 +32,7 @@ const AdminLogin: React.FC = () => {
     },
   });
 
-  // Add useEffect to redirect when authentication state changes
+  // Redirect when authentication state changes
   useEffect(() => {
     console.log("AdminLogin - authChecked:", authChecked);
     console.log("AdminLogin - authLoading:", authLoading);
@@ -45,112 +45,22 @@ const AdminLogin: React.FC = () => {
     }
   }, [isAuthenticated, navigate, authChecked, authLoading]);
 
-  const createTestUser = async (email: string, password: string) => {
-    try {
-      // Check if user exists first
-      const { data: userExists } = await supabase
-        .from('admin_users')
-        .select('id')
-        .eq('email', email)
-        .maybeSingle();
-      
-      if (!userExists) {
-        // Create user through Supabase auth
-        const { data: authUser, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              name: 'Admin User',
-              role: 'admin'
-            }
-          }
-        });
-
-        if (signUpError) {
-          console.error('Error creating auth user:', signUpError);
-          return false;
-        }
-
-        if (authUser?.user) {
-          // Create entry in admin_users table
-          const { error: insertError } = await supabase
-            .from('admin_users')
-            .insert({
-              id: authUser.user.id,
-              name: 'Admin User',
-              email: email,
-              role: 'admin',
-              last_login: new Date().toISOString()
-            });
-
-          if (insertError) {
-            console.error('Error creating admin user record:', insertError);
-            return false;
-          }
-
-          // Set admin user as confirmed using the admin API directly
-          // Note: In a real app, this would be done through the server-side admin API
-          const { error: adminUpdateError } = await supabase.auth.admin.updateUserById(
-            authUser.user.id,
-            { email_confirm: true }
-          ).catch(() => {
-            // Fallback for when admin API is not available (in development without admin keys)
-            console.log('Unable to confirm email via admin API, proceeding anyway');
-            return { error: null };
-          });
-
-          if (adminUpdateError) {
-            console.error('Error confirming user:', adminUpdateError);
-          }
-
-          toast({
-            title: "Admin user created",
-            description: "Test admin user has been created. You can now log in.",
-          });
-          
-          return true;
-        }
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Error creating test user:', error);
-      return false;
-    }
-  };
-
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      // Try to log in with provided credentials
       const success = await login(data.email, data.password);
       
-      if (!success) {
-        // If login failed and we're using the default admin credentials, try to create the test user
-        if (data.email === "admin@celebritypersona.com" && data.password === "admin123") {
-          const userCreated = await createTestUser(data.email, data.password);
-          
-          if (userCreated) {
-            // Attempt login again after creating user
-            const retrySuccess = await login(data.email, data.password);
-            if (retrySuccess) {
-              console.log("Login successful after creating test user");
-              navigate("/admin/dashboard", { replace: true });
-              return;
-            }
-          }
-        }
-        
-        toast({
-          title: "Login failed",
-          description: "Invalid email or password. If using default credentials, try again as the user may have been created.",
-          variant: "destructive",
-        });
-      } else {
+      if (success) {
         console.log("Login successful, navigating to dashboard");
         navigate("/admin/dashboard", { replace: true });
       }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -191,7 +101,7 @@ const AdminLogin: React.FC = () => {
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder="admin@celebritypersona.com"
+                          placeholder="Enter your email"
                           type="email"
                           disabled={isLoading}
                         />
@@ -208,17 +118,11 @@ const AdminLogin: React.FC = () => {
                     <FormItem>
                       <div className="flex justify-between items-center">
                         <FormLabel>Password</FormLabel>
-                        <a
-                          href="#"
-                          className="text-xs text-primary-foreground hover:underline"
-                        >
-                          Forgot password?
-                        </a>
                       </div>
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder="••••••••"
+                          placeholder="Enter your password"
                           type="password"
                           disabled={isLoading}
                         />
@@ -247,7 +151,7 @@ const AdminLogin: React.FC = () => {
           </CardContent>
           
           <CardFooter className="text-center text-sm text-muted-foreground border-t py-4">
-            <p className="w-full">Use admin@celebritypersona.com / admin123</p>
+            <p className="w-full">Enter your admin credentials to continue</p>
           </CardFooter>
         </Card>
       </div>
