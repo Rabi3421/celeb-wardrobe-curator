@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { User } from '@/types/data';
 import { API_ENDPOINTS } from '@/config/api';
+import axios from 'axios';
 
 interface AuthState {
   user: User | null;
@@ -21,39 +22,44 @@ const initialState: AuthState = {
 export const loginAsync = createAsyncThunk(
   'auth/login',
   async ({ email, password }: { email: string; password: string }) => {
-    const response = await fetch(API_ENDPOINTS.admin.login, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // Include cookies if your API uses them
-      body: JSON.stringify({ email, password }),
-    });
+    console.log("email:", email);
+    console.log("password:", password);
+    const payload = { "username": email, "password": password }
+    try {
+      const response = await axios.post(
+        API_ENDPOINTS.admin.login,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log("response:", response)
+      const data = response.data;
+      
+      const userData: User = {
+        id: data.user?.id || data.id,
+        email: data.user?.email || data.email,
+        name: data.user?.name || data.name || 'Admin User',
+        role: data.user?.role || data.role || 'admin',
+        password: '',
+        lastLogin: new Date().toISOString(),
+      };
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Login failed: ${response.status}`);
-    }
+      localStorage.setItem('adminUser', JSON.stringify(userData));
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+      }
 
-    const data = await response.json();
-    
-    // Assuming your API returns user data and possibly a token
-    const userData: User = {
-      id: data.user?.id || data.id,
-      email: data.user?.email || data.email,
-      name: data.user?.name || data.name || 'Admin User',
-      role: data.user?.role || data.role || 'admin',
-      password: '',
-      lastLogin: new Date().toISOString()
-    };
-    
-    // Store user data and token (if provided) in localStorage
-    localStorage.setItem('adminUser', JSON.stringify(userData));
-    if (data.token) {
-      localStorage.setItem('authToken', data.token);
+      return userData;
+    } catch (error: any) {
+      console.log("error:", error)
+      const message =
+        error.response?.data?.message ||
+        `Login failed: ${error.response?.status || error.message}`;
+      throw new Error(message);
     }
-    
-    return userData;
   }
 );
 
@@ -64,7 +70,7 @@ export const logoutAsync = createAsyncThunk(
     // Clear local storage
     localStorage.removeItem('adminUser');
     localStorage.removeItem('authToken');
-    
+
     // If your backend has a logout endpoint, you can call it here
     // try {
     //   await fetch(`${API_CONFIG.baseUrl}/admin/logout`, {

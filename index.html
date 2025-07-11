@@ -1,15 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-IN">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CelebrityPersona - Fashion & Style Inspiration</title>
+  <title>CelebrityPersona - Fashion & Style Inspiration in India</title>
   <meta name="description"
-    content="Discover celebrity fashion, trending outfits, and shop similar styles with CelebrityPersona - your ultimate destination for celebrity style inspiration." />
+    content="Discover celebrity fashion, trending outfits, and shop similar styles with CelebrityPersona - your ultimate destination for celebrity style inspiration in India. Bollywood fashion, Indian designer wear, and affordable celebrity looks." />
+  
   <meta name="author" content="CelebrityPersona" />
+  <!-- Updated keywords for Indian audience -->
   <meta name="keywords"
-    content="celebrity fashion, celebrity outfits, celebrity dresses, celebrity style, affordable celebrity looks, red carpet fashion, celebrity accessories, party wear" />
+    content="celebrity fashion india, bollywood fashion, indian celebrity outfits, bollywood style, indian designer wear, celebrity sarees, lehenga designs, indian fashion trends, bollywood red carpet, affordable celebrity looks india, party wear india, celebrity accessories india" />
+
+  <!-- Geographic targeting for India -->
+  <meta name="geo.region" content="IN" />
+  <meta name="geo.placename" content="India" />
+  <meta name="geo.position" content="20.5937;78.9629" />
+  <meta name="ICBM" content="20.5937, 78.9629" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/favicon.png" />
@@ -17,19 +25,25 @@
   <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#9b87f5" />
 
-  <!-- Open Graph Tags -->
-  <meta property="og:title" content="CelebrityPersona - Fashion & Style Inspiration" />
-  <meta property="og:description" content="Discover celebrity fashion, trending outfits, and shop similar styles." />
+  <!-- Open Graph Tags - Updated for Indian audience -->
+  <meta property="og:title" content="CelebrityPersona - Fashion & Style Inspiration in India" />
+  <meta property="og:description" content="Discover celebrity fashion, trending outfits, and shop similar styles. Bollywood fashion and Indian designer wear inspiration." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
   <meta property="og:site_name" content="CelebrityPersona" />
-  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale" content="en_IN" />
+  <meta property="og:country-name" content="India" />
 
   <!-- Twitter Card Tags -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@celebritypersona" />
   <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
   <meta name="twitter:creator" content="@celebritypersona" />
+
+  <!-- Hreflang for different regions/languages -->
+  <link rel="alternate" hreflang="en-IN" href="https://www.celebritypersona.com/" />
+  <link rel="alternate" hreflang="hi-IN" href="https://www.celebritypersona.com/hi/" />
+  <link rel="alternate" hreflang="x-default" href="https://www.celebritypersona.com/" />
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.celebritypersona.com/" />
@@ -48,15 +62,40 @@
   <!-- Speed optimization hints -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <!-- Google tag (gtag.js) -->
+
+  <!-- Structured Data for Indian business -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "CelebrityPersona",
+    "description": "Fashion & Style Inspiration in India",
+    "url": "https://www.celebritypersona.com",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.celebritypersona.com/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    },
+    "areaServed": "IN",
+    "inLanguage": "en-IN"
+  }
+  </script>
+
+  <!-- Google tag (gtag.js) with Indian timezone -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-4N8CNPPC9X"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
-    gtag('config', 'G-4N8CNPPC9X');
+    gtag('config', 'G-4N8CNPPC9X', {
+      'country': 'IN',
+      'currency': 'INR',
+      'custom_map': {'custom_parameter': 'india_audience'}
+    });
   </script>
+
+  <!-- Skimlinks for affiliate marketing -->
   <script type="text/javascript" src="https://s.skimresources.com/js/287621X1774215.skimlinks.js"></script>
 
 </head>

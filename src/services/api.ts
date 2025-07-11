@@ -235,25 +235,89 @@ export const fetchCelebrityBySlug = async (slug: string): Promise<Celebrity | nu
   }
 };
 
+// export const addCelebrity = async (celebrity: Partial<Celebrity>): Promise<{success: boolean, error: any, data?: any}> => {
+//   try {
+//     // TODO: Replace with your backend API call
+//     console.log('Adding celebrity:', celebrity);
+//     await new Promise(resolve => setTimeout(resolve, 500));
+    
+//     const newCelebrity = {
+//       id: Date.now().toString(),
+//       ...celebrity,
+//       slug: celebrity.slug || generateUniqueCelebritySlug(celebrity.name || ''),
+//       outfitCount: 0
+//     } as Celebrity;
+    
+//     mockCelebrities.push(newCelebrity);
+//     return { success: true, error: null, data: newCelebrity };
+//   } catch (error) {
+//     console.error('Error adding celebrity:', error);
+//     return { success: false, error };
+//   }
+// };
+
 export const addCelebrity = async (celebrity: Partial<Celebrity>): Promise<{success: boolean, error: any, data?: any}> => {
   try {
-    // TODO: Replace with your backend API call
     console.log('Adding celebrity:', celebrity);
-    await new Promise(resolve => setTimeout(resolve, 500));
     
+    // Generate slug if not provided
+    const slug = celebrity.slug || await generateUniqueCelebritySlug(celebrity.name || '');
+    
+    // Prepare data for backend API
+    const celebrityData = {
+      name: celebrity.name,
+      slug: slug,
+      bio: celebrity.bio,
+      category: celebrity.category,
+      styleType: celebrity.styleType,
+      profession: celebrity.profession || celebrity.category, // Use category as fallback
+      birthdate: celebrity.birthdate,
+      birthplace: celebrity.birthplace,
+      nationality: celebrity.nationality,
+      height: celebrity.height,
+      image: celebrity.image,
+      socialMedia: celebrity.socialMedia || {},
+      signature: celebrity.signature || {},
+      tags: celebrity.tags || []
+    };
+
+    // Make actual API call to backend
+    const response = await fetch('http://localhost:5000/api/celebrities', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}` // You'll need to implement this
+      },
+      body: JSON.stringify(celebrityData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    // Update local mock data for consistency (optional, remove when fully using backend)
     const newCelebrity = {
-      id: Date.now().toString(),
+      id: result.data.id || Date.now().toString(),
       ...celebrity,
-      slug: celebrity.slug || generateUniqueCelebritySlug(celebrity.name || ''),
+      slug: slug,
       outfitCount: 0
     } as Celebrity;
-    
     mockCelebrities.push(newCelebrity);
-    return { success: true, error: null, data: newCelebrity };
+    
+    return { success: true, error: null, data: result.data };
   } catch (error) {
     console.error('Error adding celebrity:', error);
-    return { success: false, error };
+    return { success: false, error: error instanceof Error ? error.message : error };
   }
+};
+
+// Helper function to get auth token (implement based on your auth system)
+const getAuthToken = (): string => {
+  // Replace with your actual token retrieval logic
+  return localStorage.getItem('authToken') || 'YOUR_JWT_TOKEN';
 };
 
 export const addOutfit = async (outfit: Partial<Outfit>): Promise<{success: boolean, error: any, data?: any}> => {

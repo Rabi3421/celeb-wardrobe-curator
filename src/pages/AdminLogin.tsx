@@ -48,6 +48,7 @@ const AdminLogin: React.FC = () => {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
+      console.log("data:",data)
       const success = await login(data.email, data.password);
       
       if (success) {
