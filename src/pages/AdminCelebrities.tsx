@@ -10,12 +10,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { fetchCelebritiesAsync, setSelectedCelebrity } from '@/store/slices/celebritySlice';
+import { useNavigate } from 'react-router-dom';
 
 // Helper to get unique tags and categories
 const getUnique = (arr: Celebrity[], key: keyof Celebrity) =>
   Array.from(new Set(arr.flatMap(item => Array.isArray(item[key]) ? item[key] as string[] : [item[key] as string]))).filter(Boolean);
 
 const AdminCelebrities = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { celebrities, isLoading, selectedCelebrity } = useAppSelector((state) => state.celebrities);
 
@@ -166,8 +168,7 @@ const AdminCelebrities = () => {
                 </TabsList>
               </Tabs>
             </div>
-            <Button onClick={() => setIsAddDialogOpen(true)}>Add New Celebrity</Button>
-          </div>
+            <Button onClick={() => navigate('/admin/celebrities/add')}>Add New Celebrity</Button>          </div>
         </div>
 
         {isLoading ? (
@@ -178,62 +179,62 @@ const AdminCelebrities = () => {
           <>
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-{filteredCelebrities.map(celebrity => (
-  <div
-    key={celebrity.id}
-    className="relative bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden group transition-transform hover:-translate-y-1 hover:shadow-2xl"
-  >
-    {/* Main Image with gradient overlay */}
-    <div className="relative h-56 w-full">
-      <img
-        src={celebrity.image || 'https://via.placeholder.com/400x250?text=No+Image'}
-        alt={celebrity.name}
-        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-      {/* Avatar */}
-      <div className="absolute left-4 -bottom-8 z-10">
-        <img
-          src={celebrity.image || 'https://via.placeholder.com/80?text=No+Image'}
-          alt={celebrity.name}
-          className="w-16 h-16 rounded-full border-4 border-white shadow-lg object-cover bg-white"
-        />
-      </div>
-    </div>
-    {/* Card Content */}
-    <div className="pt-10 pb-4 px-4">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate">{celebrity.name}</h3>
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">{celebrity.category}</span>
-        {celebrity.styleType && (
-          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">{celebrity.styleType}</span>
-        )}
-      </div>
-      <p className="text-xs text-gray-500 dark:text-gray-300 mb-2 line-clamp-2">{celebrity.bio}</p>
-      <div className="flex flex-wrap gap-1 mb-3">
-        {Array.isArray(celebrity.tags) && celebrity.tags.map(tag => (
-          <span key={tag} className="bg-pink-100 text-pink-700 px-2 py-0.5 rounded text-xs">{tag}</span>
-        ))}
-      </div>
-      <div className="flex justify-between items-center gap-2 mt-2">
-        <Button
-          variant="outline"
-          className="w-1/2"
-          onClick={() => openCelebrityDetail(celebrity)}
-        >
-          View
-        </Button>
-        <Button
-          variant="destructive"
-          className="w-1/2"
-          onClick={() => handleDelete(celebrity.id)}
-        >
-          Delete
-        </Button>
-      </div>
-    </div>
-  </div>
-))}
+                {filteredCelebrities.map(celebrity => (
+                  <div
+                    key={celebrity.id}
+                    className="relative bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden group transition-transform hover:-translate-y-1 hover:shadow-2xl"
+                  >
+                    {/* Main Image with gradient overlay */}
+                    <div className="relative h-56 w-full">
+                      <img
+                        src={celebrity.image || 'https://via.placeholder.com/400x250?text=No+Image'}
+                        alt={celebrity.name}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                      {/* Avatar */}
+                      <div className="absolute left-4 -bottom-8 z-10">
+                        <img
+                          src={celebrity.image || 'https://via.placeholder.com/80?text=No+Image'}
+                          alt={celebrity.name}
+                          className="w-16 h-16 rounded-full border-4 border-white shadow-lg object-cover bg-white"
+                        />
+                      </div>
+                    </div>
+                    {/* Card Content */}
+                    <div className="pt-10 pb-4 px-4">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate">{celebrity.name}</h3>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">{celebrity.category}</span>
+                        {celebrity.styleType && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">{celebrity.styleType}</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-300 mb-2 line-clamp-2">{celebrity.bio}</p>
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {Array.isArray(celebrity.tags) && celebrity.tags.map(tag => (
+                          <span key={tag} className="bg-pink-100 text-pink-700 px-2 py-0.5 rounded text-xs">{tag}</span>
+                        ))}
+                      </div>
+                      <div className="flex justify-between items-center gap-2 mt-2">
+                        <Button
+                          variant="outline"
+                          className="w-1/2"
+                          onClick={() => openCelebrityDetail(celebrity)}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          className="w-1/2"
+                          onClick={() => handleDelete(celebrity.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -253,9 +254,9 @@ const AdminCelebrities = () => {
                       <tr key={celebrity.id}>
                         <td className="px-6 py-3 border-b">
                           <div className="w-16 h-16 overflow-hidden rounded-full">
-                            <img 
-                              src={celebrity.image || 'https://via.placeholder.com/150?text=No+Image'} 
-                              alt={celebrity.name} 
+                            <img
+                              src={celebrity.image || 'https://via.placeholder.com/150?text=No+Image'}
+                              alt={celebrity.name}
                               className="w-full h-full object-cover"
                             />
                           </div>
@@ -288,16 +289,6 @@ const AdminCelebrities = () => {
             )}
           </>
         )}
-
-        {/* Add Celebrity Dialog */}
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Add New Celebrity</DialogTitle>
-            </DialogHeader>
-            <CelebrityForm onSuccess={handleAddSuccess} />
-          </DialogContent>
-        </Dialog>
 
         {/* Celebrity Detail Dialog */}
         <Dialog open={!!selectedCelebrity} onOpenChange={closeCelebrityDetail}>

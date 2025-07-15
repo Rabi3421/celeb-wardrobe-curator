@@ -32,6 +32,7 @@ import AdminNewsletterSubscribers from "./pages/AdminNewsletterSubscribers";
 import AdminCelebrities from "./pages/AdminCelebrities";
 import AdminBlog from "./pages/AdminBlog";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import AddCelebrity from "./pages/AddCelebrity";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -71,6 +72,7 @@ function App() {
                 <Route path="/privacy-policy" element={<Privacy />} />
                 <Route path="/terms-of-service" element={<Terms />} />
                 <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
+                <Route path="/admin/celebrities/add" element={<AddCelebrity />} />
                 
                 {/* Admin routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
