@@ -1,13 +1,14 @@
-
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Celebrity } from '@/types/data';
-import { supabase } from '@/integrations/supabase/client';
 
 interface CelebrityState {
   celebrities: Celebrity[];
   selectedCelebrity: Celebrity | null;
   isLoading: boolean;
   error: string | null;
+  total: number;
+  page: number;
+  limit: number;
 }
 
 const initialState: CelebrityState = {
@@ -15,77 +16,31 @@ const initialState: CelebrityState = {
   selectedCelebrity: null,
   isLoading: false,
   error: null,
+  total: 0,
+  page: 1,
+  limit: 10,
 };
 
-// Async thunk for fetching celebrities
+// Fetch all celebrities (no pagination)
 export const fetchCelebritiesAsync = createAsyncThunk(
   'celebrities/fetchCelebrities',
   async () => {
-    const { data, error } = await supabase
-      .from('celebrities')
-      .select('*');
-    
-    if (error) {
-      throw error;
-    }
-    
-    // Convert database fields to match Celebrity type
-    const formattedData: Celebrity[] = data.map(item => ({
-      id: item.id,
-      name: item.name,
-      image: item.image,
-      outfitCount: item.outfitcount || 0,
-      bio: item.bio,
-      category: item.category,
-      styleType: item.style_type,
-      slug: item.slug || item.id,
-      birthdate: item.birthdate,
-      birthplace: item.birthplace,
-      height: item.height,
-      education: item.education,
-      careerHighlights: item.career_highlights,
-      personalLife: item.personal_life,
-      awards: item.awards,
-      socialMedia: typeof item.social_media === 'string' ? 
-        JSON.parse(item.social_media) : item.social_media,
-      interestingFacts: item.interesting_facts,
-      nationality: item.nationality,
-      languages: item.languages,
-      netWorth: item.net_worth,
-      zodiacSign: item.zodiac_sign,
-      philanthropyWork: item.philanthropy_work,
-      businessVentures: item.business_ventures,
-      controversies: item.controversies,
-      fanbaseNickname: item.fanbase_nickname,
-      signature: typeof item.signature === 'string' ? 
-        JSON.parse(item.signature) : item.signature,
-      measurements: item.measurements,
-      dietFitness: item.diet_fitness,
-      styleEvolution: item.style_evolution,
-      influences: item.influences,
-      quotes: item.quotes,
-      publicPerception: item.public_perception,
-      brandEndorsements: item.brand_endorsements
-    }));
-    
-    return formattedData;
+    const response = await fetch('http://localhost:5000/api/celebrities');
+    if (!response.ok) throw new Error('Failed to fetch celebrities');
+    const data = await response.json();
+    return data?.data;
   }
 );
 
-// Async thunk for deleting celebrity
-export const deleteCelebrityAsync = createAsyncThunk(
-  'celebrities/deleteCelebrity',
-  async (id: string) => {
-    const { error } = await supabase
-      .from('celebrities')
-      .delete()
-      .eq('id', id);
-    
-    if (error) {
-      throw error;
-    }
-    
-    return id;
+// Fetch celebrities with pagination
+export const fetchCelebritiesPaginatedAsync = createAsyncThunk(
+  'celebrities/fetchCelebritiesPaginated',
+  async ({ page = 1, limit = 10 }: { page?: number; limit?: number }) => {
+    const response = await fetch(`http://localhost:5000/api/celebrities?page=${page}&limit=${limit}`);
+    if (!response.ok) throw new Error('Failed to fetch celebrities');
+    const data = await response.json();
+    // Assume API returns { data: Celebrity[], total: number }
+    return data?.data;
   }
 );
 
@@ -98,6 +53,12 @@ const celebritySlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    setPage: (state, action: PayloadAction<number>) => {
+      state.page = action.payload;
+    },
+    setLimit: (state, action: PayloadAction<number>) => {
+      state.limit = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -115,13 +76,22 @@ const celebritySlice = createSlice({
         state.isLoading = false;
         state.error = action.error.message || 'Failed to fetch celebrities';
       })
-      .addCase(deleteCelebrityAsync.fulfilled, (state, action) => {
-        state.celebrities = state.celebrities.filter(
-          celebrity => celebrity.id !== action.payload
-        );
+      .addCase(fetchCelebritiesPaginatedAsync.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchCelebritiesPaginatedAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.celebrities = action.payload.data;
+        state.total = action.payload.total;
+        state.error = null;
+      })
+      .addCase(fetchCelebritiesPaginatedAsync.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Failed to fetch celebrities';
       });
   },
 });
 
-export const { setSelectedCelebrity, clearError } = celebritySlice.actions;
+export const { setSelectedCelebrity, clearError, setPage, setLimit } = celebritySlice.actions;
 export default celebritySlice.reducer;

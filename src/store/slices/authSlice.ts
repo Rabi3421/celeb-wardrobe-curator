@@ -24,7 +24,7 @@ export const loginAsync = createAsyncThunk(
   async ({ email, password }: { email: string; password: string }) => {
     console.log("email:", email);
     console.log("password:", password);
-    const payload = { "username": email, "password": password }
+    const payload = { "email": email, "password": password }
     try {
       const response = await axios.post(
         API_ENDPOINTS.admin.login,

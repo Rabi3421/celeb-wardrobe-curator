@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Celebrity } from '@/types/data';
@@ -10,14 +9,22 @@ import CelebrityDetail from '@/components/admin/CelebrityDetail';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
-import { fetchCelebritiesAsync, deleteCelebrityAsync, setSelectedCelebrity } from '@/store/slices/celebritySlice';
+import { fetchCelebritiesAsync, setSelectedCelebrity } from '@/store/slices/celebritySlice';
+
+// Helper to get unique tags and categories
+const getUnique = (arr: Celebrity[], key: keyof Celebrity) =>
+  Array.from(new Set(arr.flatMap(item => Array.isArray(item[key]) ? item[key] as string[] : [item[key] as string]))).filter(Boolean);
 
 const AdminCelebrities = () => {
   const dispatch = useAppDispatch();
   const { celebrities, isLoading, selectedCelebrity } = useAppSelector((state) => state.celebrities);
-  
+
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [search, setSearch] = useState('');
+  const [tagFilter, setTagFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [sortBy, setSortBy] = useState<'date-desc' | 'date-asc' | 'name-asc' | 'name-desc'>('date-desc');
 
   // Load celebrities on mount
   useEffect(() => {
@@ -54,12 +61,103 @@ const AdminCelebrities = () => {
     dispatch(setSelectedCelebrity(null));
   };
 
+  // Unique tags and categories for filter dropdowns
+  const allTags = useMemo(() => getUnique(celebrities, 'tags').flat(), [celebrities]);
+  const allCategories = useMemo(() => getUnique(celebrities, 'category'), [celebrities]);
+
+  // Filtered and sorted celebrities
+  const filteredCelebrities = useMemo(() => {
+    let filtered = celebrities;
+
+    // Search by name
+    if (search.trim()) {
+      filtered = filtered.filter(c =>
+        c.name?.toLowerCase().includes(search.trim().toLowerCase())
+      );
+    }
+
+    // Filter by tag
+    if (tagFilter) {
+      filtered = filtered.filter(c =>
+        Array.isArray(c.tags) && c.tags.includes(tagFilter)
+      );
+    }
+
+    // Filter by category
+    if (categoryFilter) {
+      filtered = filtered.filter(c =>
+        c.category === categoryFilter
+      );
+    }
+
+    // Sorting
+    filtered = [...filtered].sort((a, b) => {
+      if (sortBy === 'date-desc') {
+        return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime();
+      }
+      if (sortBy === 'date-asc') {
+        return new Date(a.createdAt || '').getTime() - new Date(b.createdAt || '').getTime();
+      }
+      if (sortBy === 'name-asc') {
+        return (a.name || '').localeCompare(b.name || '');
+      }
+      if (sortBy === 'name-desc') {
+        return (b.name || '').localeCompare(a.name || '');
+      }
+      return 0;
+    });
+
+    return filtered;
+  }, [celebrities, search, tagFilter, categoryFilter, sortBy]);
+
   return (
     <AdminLayout>
       <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <h1 className="text-3xl font-bold">Manage Celebrities</h1>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-2 items-center">
+            {/* Search */}
+            <input
+              type="text"
+              placeholder="Search by name"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="border rounded px-3 py-1 text-sm"
+            />
+            {/* Tag Filter */}
+            <select
+              value={tagFilter}
+              onChange={e => setTagFilter(e.target.value)}
+              className="border rounded px-3 py-1 text-sm"
+            >
+              <option value="">All Tags</option>
+              {allTags.map(tag => (
+                <option key={tag} value={tag}>{tag}</option>
+              ))}
+            </select>
+            {/* Category Filter */}
+            <select
+              value={categoryFilter}
+              onChange={e => setCategoryFilter(e.target.value)}
+              className="border rounded px-3 py-1 text-sm"
+            >
+              <option value="">All Categories</option>
+              {allCategories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            {/* Sort */}
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as any)}
+              className="border rounded px-3 py-1 text-sm"
+            >
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="name-asc">Name A-Z</option>
+              <option value="name-desc">Name Z-A</option>
+            </select>
+            {/* View Mode */}
             <div className="bg-white dark:bg-gray-800 rounded-md p-1">
               <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'grid' | 'list')}>
                 <TabsList>
@@ -71,7 +169,7 @@ const AdminCelebrities = () => {
             <Button onClick={() => setIsAddDialogOpen(true)}>Add New Celebrity</Button>
           </div>
         </div>
-        
+
         {isLoading ? (
           <div className="flex justify-center p-8">
             <p>Loading celebrities...</p>
@@ -80,33 +178,62 @@ const AdminCelebrities = () => {
           <>
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {celebrities.map(celebrity => (
-                  <div 
-                    key={celebrity.id} 
-                    className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
-                  >
-                    <div className="relative h-48">
-                      <img 
-                        src={celebrity.image || 'https://via.placeholder.com/400x200?text=No+Image'} 
-                        alt={celebrity.name} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-xl font-semibold mb-2">{celebrity.name}</h3>
-                      <p className="text-gray-500 mb-2">{celebrity.category}</p>
-                      <p className="text-sm mb-4 line-clamp-2">{celebrity.bio}</p>
-                      <div className="flex justify-between">
-                        <Button variant="outline" onClick={() => openCelebrityDetail(celebrity)}>
-                          View Details
-                        </Button>
-                        <Button variant="destructive" onClick={() => handleDelete(celebrity.id)}>
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+{filteredCelebrities.map(celebrity => (
+  <div
+    key={celebrity.id}
+    className="relative bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden group transition-transform hover:-translate-y-1 hover:shadow-2xl"
+  >
+    {/* Main Image with gradient overlay */}
+    <div className="relative h-56 w-full">
+      <img
+        src={celebrity.image || 'https://via.placeholder.com/400x250?text=No+Image'}
+        alt={celebrity.name}
+        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+      {/* Avatar */}
+      <div className="absolute left-4 -bottom-8 z-10">
+        <img
+          src={celebrity.image || 'https://via.placeholder.com/80?text=No+Image'}
+          alt={celebrity.name}
+          className="w-16 h-16 rounded-full border-4 border-white shadow-lg object-cover bg-white"
+        />
+      </div>
+    </div>
+    {/* Card Content */}
+    <div className="pt-10 pb-4 px-4">
+      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate">{celebrity.name}</h3>
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">{celebrity.category}</span>
+        {celebrity.styleType && (
+          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">{celebrity.styleType}</span>
+        )}
+      </div>
+      <p className="text-xs text-gray-500 dark:text-gray-300 mb-2 line-clamp-2">{celebrity.bio}</p>
+      <div className="flex flex-wrap gap-1 mb-3">
+        {Array.isArray(celebrity.tags) && celebrity.tags.map(tag => (
+          <span key={tag} className="bg-pink-100 text-pink-700 px-2 py-0.5 rounded text-xs">{tag}</span>
+        ))}
+      </div>
+      <div className="flex justify-between items-center gap-2 mt-2">
+        <Button
+          variant="outline"
+          className="w-1/2"
+          onClick={() => openCelebrityDetail(celebrity)}
+        >
+          View
+        </Button>
+        <Button
+          variant="destructive"
+          className="w-1/2"
+          onClick={() => handleDelete(celebrity.id)}
+        >
+          Delete
+        </Button>
+      </div>
+    </div>
+  </div>
+))}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -117,11 +244,12 @@ const AdminCelebrities = () => {
                       <th className="px-6 py-3 border-b text-left">Name</th>
                       <th className="px-6 py-3 border-b text-left">Category</th>
                       <th className="px-6 py-3 border-b text-left">Style</th>
+                      <th className="px-6 py-3 border-b text-left">Tags</th>
                       <th className="px-6 py-3 border-b text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {celebrities.map(celebrity => (
+                    {filteredCelebrities.map(celebrity => (
                       <tr key={celebrity.id}>
                         <td className="px-6 py-3 border-b">
                           <div className="w-16 h-16 overflow-hidden rounded-full">
@@ -135,6 +263,13 @@ const AdminCelebrities = () => {
                         <td className="px-6 py-3 border-b">{celebrity.name}</td>
                         <td className="px-6 py-3 border-b">{celebrity.category}</td>
                         <td className="px-6 py-3 border-b">{celebrity.styleType}</td>
+                        <td className="px-6 py-3 border-b">
+                          <div className="flex flex-wrap gap-1">
+                            {Array.isArray(celebrity.tags) && celebrity.tags.map(tag => (
+                              <span key={tag} className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-xs">{tag}</span>
+                            ))}
+                          </div>
+                        </td>
                         <td className="px-6 py-3 border-b">
                           <div className="flex justify-center gap-2">
                             <Button variant="outline" size="sm" onClick={() => openCelebrityDetail(celebrity)}>
@@ -153,7 +288,7 @@ const AdminCelebrities = () => {
             )}
           </>
         )}
-        
+
         {/* Add Celebrity Dialog */}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -163,7 +298,7 @@ const AdminCelebrities = () => {
             <CelebrityForm onSuccess={handleAddSuccess} />
           </DialogContent>
         </Dialog>
-        
+
         {/* Celebrity Detail Dialog */}
         <Dialog open={!!selectedCelebrity} onOpenChange={closeCelebrityDetail}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
