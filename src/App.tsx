@@ -33,6 +33,7 @@ import AdminCelebrities from "./pages/AdminCelebrities";
 import AdminBlog from "./pages/AdminBlog";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AddCelebrity from "./pages/AddCelebrity";
+import ApiDocs from "./pages/ApiDocs";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -87,6 +88,7 @@ function App() {
                 <Route path="/admin/celebrities" element={<AdminCelebrities />} />
                 <Route path="/admin/blog" element={<AdminBlog />} />
                 
+                <Route path="/api-docs" element={<ApiDocs />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AdminAuthProvider>

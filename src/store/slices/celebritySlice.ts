@@ -1,5 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Celebrity } from '@/types/data';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { Celebrity } from "@/types/data";
+import axios from "axios";
+import { API_CONFIG } from "../../config/api";
 
 interface CelebrityState {
   celebrities: Celebrity[];
@@ -23,29 +25,64 @@ const initialState: CelebrityState = {
 
 // Fetch all celebrities (no pagination)
 export const fetchCelebritiesAsync = createAsyncThunk(
-  'celebrities/fetchCelebrities',
-  async () => {
-    const response = await fetch('http://localhost:5000/api/celebrities');
-    if (!response.ok) throw new Error('Failed to fetch celebrities');
-    const data = await response.json();
-    return data?.data;
+  "celebrities/fetchCelebrities",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_CONFIG.baseUrl}/celebrities`, {
+        headers: {
+          "Content-Type": "application/json",
+          api_key: API_CONFIG.websiteApiKey,
+        },
+      });
+      return response.data?.data;
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch celebrities";
+      return rejectWithValue(message);
+    }
   }
 );
 
 // Fetch celebrities with pagination
 export const fetchCelebritiesPaginatedAsync = createAsyncThunk(
-  'celebrities/fetchCelebritiesPaginated',
-  async ({ page = 1, limit = 10 }: { page?: number; limit?: number }) => {
-    const response = await fetch(`http://localhost:5000/api/celebrities?page=${page}&limit=${limit}`);
-    if (!response.ok) throw new Error('Failed to fetch celebrities');
-    const data = await response.json();
-    // Assume API returns { data: Celebrity[], total: number }
-    return data?.data;
+  "celebrities/fetchCelebritiesPaginated",
+  async (
+    {
+      page = 1,
+      limit = 10,
+      apiKey,
+    }: { page?: number; limit?: number; apiKey: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axios.get(
+        `${API_CONFIG.baseUrl}/celebrities?page=${page}&limit=${limit}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            api_key: API_CONFIG.websiteApiKey,
+          },
+        }
+      );
+      console.log("Fetched celebrities:", response.data);
+      // Assume API returns { data: Celebrity[], total: number }
+      return response.data;
+    } catch (error: any) {
+      console.log("Error fetching celebrities:", error);
+      // Axios error handling
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch celebrities";
+      return rejectWithValue(message);
+    }
   }
 );
 
 const celebritySlice = createSlice({
-  name: 'celebrities',
+  name: "celebrities",
   initialState,
   reducers: {
     setSelectedCelebrity: (state, action: PayloadAction<Celebrity | null>) => {
@@ -74,7 +111,7 @@ const celebritySlice = createSlice({
       })
       .addCase(fetchCelebritiesAsync.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch celebrities';
+        state.error = action.error.message || "Failed to fetch celebrities";
       })
       .addCase(fetchCelebritiesPaginatedAsync.pending, (state) => {
         state.isLoading = true;
@@ -88,10 +125,11 @@ const celebritySlice = createSlice({
       })
       .addCase(fetchCelebritiesPaginatedAsync.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch celebrities';
+        state.error = action.error.message || "Failed to fetch celebrities";
       });
   },
 });
 
-export const { setSelectedCelebrity, clearError, setPage, setLimit } = celebritySlice.actions;
+export const { setSelectedCelebrity, clearError, setPage, setLimit } =
+  celebritySlice.actions;
 export default celebritySlice.reducer;

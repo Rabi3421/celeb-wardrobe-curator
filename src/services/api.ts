@@ -1,4 +1,5 @@
 import { AffiliateProduct, BlogPost, Celebrity, CategoryItem, Outfit } from "@/types/data";
+import { API_CONFIG } from "../config/api";
 
 // Mock data for development - replace with your own backend API calls
 const mockCelebrities: Celebrity[] = [
@@ -199,12 +200,24 @@ export const generateUniqueOutfitSlug = async (title: string, excludeId?: string
 };
 
 // Mock implementation - replace with your backend API calls
-export const fetchCelebrities = async (): Promise<Celebrity[]> => {
+export const fetchCelebrities = async (page = 1, limit = 10, apiKey: string): Promise<Celebrity[]> => {
   try {
-    console.log('Fetching celebrities from mock data...');
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return mockCelebrities;
+    const response = await fetch(
+      `${API_CONFIG.baseUrl}/celebrities?page=${page}&limit=${limit}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "api_key": apiKey,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    // Adjust this if your API response structure is different
+    return data.celebrities || [];
   } catch (error) {
     console.error('Error fetching celebrities:', error);
     return [];

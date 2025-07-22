@@ -10,7 +10,7 @@ import CategoryCard from "@/components/ui/CategoryCard";
 import CelebritySpotlight from "@/components/ui/CelebritySpotlight";
 import SocialFeedCard from "@/components/ui/SocialFeedCard";
 import AffiliateProductCard from "@/components/ui/AffiliateProductCard";
-import { fetchCelebrities, fetchOutfits, fetchBlogPosts, fetchAffiliateProducts } from "@/services/api";
+import {  fetchOutfits, fetchBlogPosts, fetchAffiliateProducts } from "@/services/api";
 import { Celebrity, Outfit, BlogPost, AffiliateProduct } from "@/types/data";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -27,26 +27,26 @@ const Index: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      const [celebritiesData, outfitsData, blogPostsData, productsData] = await Promise.all([
-        fetchCelebrities(),
-        fetchOutfits(3),
-        fetchBlogPosts(),
-        fetchAffiliateProducts()
-      ]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setIsLoading(true);
+  //     const [celebritiesData, outfitsData, blogPostsData, productsData] = await Promise.all([
+  //       fetchCelebrities(),
+  //       fetchOutfits(3),
+  //       fetchBlogPosts(),
+  //       fetchAffiliateProducts()
+  //     ]);
 
-      console.log("Loaded celebrities:", celebritiesData.length);
-      setCelebrities(celebritiesData);
-      setOutfits(outfitsData);
-      setBlogPosts(blogPostsData);
-      setAffiliateProducts(productsData);
-      setIsLoading(false);
-    };
+  //     console.log("Loaded celebrities:", celebritiesData.length);
+  //     setCelebrities(celebritiesData);
+  //     setOutfits(outfitsData);
+  //     setBlogPosts(blogPostsData);
+  //     setAffiliateProducts(productsData);
+  //     setIsLoading(false);
+  //   };
 
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
 
   // Get featured data to display
   const featuredOutfits = outfits.slice(0, 6);

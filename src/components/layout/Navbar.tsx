@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/navigation-menu"
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { fetchCelebrities } from "@/services/api";
+// import { fetchCelebrities } from "@/services/api";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -27,7 +27,8 @@ const Navbar: React.FC = () => {
 
     try {
       // Fetch celebrities to search among them
-      const celebrities = await fetchCelebrities();
+      // const celebrities = await fetchCelebrities();
+      const celebrities = [];
       
       // Check if the search term matches a celebrity name
       const matchedCelebrity = celebrities.find(celeb => 
@@ -91,6 +92,13 @@ const Navbar: React.FC = () => {
                   <Link to="/blog">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                       Blog
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/api-docs">
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      API Docs
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
