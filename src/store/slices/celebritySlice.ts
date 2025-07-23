@@ -81,6 +81,30 @@ export const fetchCelebritiesPaginatedAsync = createAsyncThunk(
   }
 );
 
+export const deleteCelebrityAsync = createAsyncThunk(
+  "celebrities/deleteCelebrity",
+  async (celebrityId: string, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.baseUrl}/celebrities/${celebrityId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        const error = await response.json();
+        return rejectWithValue(error);
+      }
+      return celebrityId; // Return the deleted ID for reducer
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  }
+);
+
 const celebritySlice = createSlice({
   name: "celebrities",
   initialState,

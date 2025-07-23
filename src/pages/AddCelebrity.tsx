@@ -104,7 +104,7 @@ const AddCelebrity = () => {
     };
 
     // Publish handler
-    const handlePublish = () => {
+    const handlePublish = async () => {
         const profileData: any = {
             name,
             birthDate,
@@ -151,8 +151,28 @@ const AddCelebrity = () => {
             profileData.medals = medals.filter(m => m.type && m.year);
         }
 
-        console.log(JSON.stringify(profileData, null, 2));
-        // TODO: Send profileData to your backend
+        try {
+            const response = await fetch("http://localhost:5000/api/celebrities", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(profileData)
+            });
+            if (response.ok) {
+                const result = await response.json();
+                console.log("Celebrity added:", result);
+                alert("Celebrity added successfully!");
+                // Optionally reset form or navigate
+            } else {
+                const error = await response.json();
+                console.log("Error adding celebrity:", error);
+                alert("Error: " + (error.message || "Failed to add celebrity"));
+            }
+        } catch (err) {
+            console.error("Network error:", err);
+            alert("Network error: " + err);
+        }
     };
 
     const handleSaveDraft = () => {

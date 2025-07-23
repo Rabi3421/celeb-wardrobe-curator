@@ -9,7 +9,7 @@ import CelebrityDetail from '@/components/admin/CelebrityDetail';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
-import { fetchCelebritiesAsync, setSelectedCelebrity } from '@/store/slices/celebritySlice';
+import { deleteCelebrityAsync, fetchCelebritiesAsync, setSelectedCelebrity } from '@/store/slices/celebritySlice';
 import { useNavigate } from 'react-router-dom';
 
 // Helper to get unique tags and categories
@@ -46,6 +46,7 @@ const AdminCelebrities = () => {
       try {
         await dispatch(deleteCelebrityAsync(id)).unwrap();
         toast.success('Celebrity deleted successfully');
+        dispatch(fetchCelebritiesAsync()); // Refresh the list after delete
       } catch (error) {
         console.error('Error deleting celebrity:', error);
         toast.error('Failed to delete celebrity');
@@ -111,7 +112,7 @@ const AdminCelebrities = () => {
 
     return filtered;
   }, [celebrities, search, tagFilter, categoryFilter, sortBy]);
-
+  console.log("Filtered celebrities:", filteredCelebrities);
   return (
     <AdminLayout>
       <div className="container mx-auto px-4 py-6">
@@ -227,7 +228,7 @@ const AdminCelebrities = () => {
                         <Button
                           variant="destructive"
                           className="w-1/2"
-                          onClick={() => handleDelete(celebrity.id)}
+                          onClick={() => handleDelete(celebrity._id)}
                         >
                           Delete
                         </Button>
@@ -251,7 +252,7 @@ const AdminCelebrities = () => {
                   </thead>
                   <tbody>
                     {filteredCelebrities.map(celebrity => (
-                      <tr key={celebrity.id}>
+                      <tr key={celebrity._id}>
                         <td className="px-6 py-3 border-b">
                           <div className="w-16 h-16 overflow-hidden rounded-full">
                             <img
@@ -276,7 +277,7 @@ const AdminCelebrities = () => {
                             <Button variant="outline" size="sm" onClick={() => openCelebrityDetail(celebrity)}>
                               View
                             </Button>
-                            <Button variant="destructive" size="sm" onClick={() => handleDelete(celebrity.id)}>
+                            <Button variant="destructive" size="sm" onClick={() => handleDelete(celebrity._id)}>
                               Delete
                             </Button>
                           </div>

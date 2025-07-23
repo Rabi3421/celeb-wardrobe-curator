@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { useDispatch } from "react-redux";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -23,7 +24,7 @@ const AdminLogin: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated, authChecked, isLoading: authLoading } = useAdminAuth();
   const navigate = useNavigate();
-  
+  const dispatch = useDispatch();
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -34,25 +35,18 @@ const AdminLogin: React.FC = () => {
 
   // Redirect when authentication state changes
   useEffect(() => {
-    console.log("AdminLogin - authChecked:", authChecked);
-    console.log("AdminLogin - authLoading:", authLoading);
-    console.log("AdminLogin - isAuthenticated:", isAuthenticated);
-    
-    // Only redirect if auth has been checked and not still loading
-    if (authChecked && !authLoading && isAuthenticated) {
-      console.log("User is authenticated, redirecting to dashboard");
+    if (authChecked && isAuthenticated) {
       navigate("/admin/dashboard", { replace: true });
     }
-  }, [isAuthenticated, navigate, authChecked, authLoading]);
+  }, [isAuthenticated, navigate, authChecked]);
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      console.log("data:",data)
+      console.log("data:", data)
       const success = await login(data.email, data.password);
-      
+      console.log("Login success:", success);
       if (success) {
-        console.log("Login successful, navigating to dashboard");
         navigate("/admin/dashboard", { replace: true });
       }
     } catch (error) {
@@ -89,7 +83,7 @@ const AdminLogin: React.FC = () => {
               Admin Dashboard Login
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -111,7 +105,7 @@ const AdminLogin: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="password"
@@ -132,9 +126,9 @@ const AdminLogin: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                
-                <Button 
-                  type="submit" 
+
+                <Button
+                  type="submit"
                   className="w-full btn-primary py-3 font-medium"
                   disabled={isLoading}
                 >
@@ -150,7 +144,7 @@ const AdminLogin: React.FC = () => {
               </form>
             </Form>
           </CardContent>
-          
+
           <CardFooter className="text-center text-sm text-muted-foreground border-t py-4">
             <p className="w-full">Enter your admin credentials to continue</p>
           </CardFooter>

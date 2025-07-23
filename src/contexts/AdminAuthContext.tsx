@@ -17,7 +17,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useEffect(() => {
     const savedUser = localStorage.getItem('adminUser');
     const authToken = localStorage.getItem('authToken');
-    
+
     if (savedUser && authToken) {
       try {
         const userData = JSON.parse(savedUser);
@@ -33,12 +33,10 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       await dispatch(loginAsync({ email, password })).unwrap();
-      
       toast({
         title: "Login successful",
         description: `Welcome back!`,
       });
-      
       return true;
     } catch (error) {
       console.error('Admin login error:', error);
@@ -52,10 +50,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const logout = async () => {
-    console.log("Logging out admin user");
-    
     await dispatch(logoutAsync());
-    
     toast({
       title: "Logged out",
       description: "You have been logged out successfully",
@@ -63,10 +58,10 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      login, 
-      logout, 
+    <AuthContext.Provider value={{
+      user,
+      login,
+      logout,
       isAuthenticated,
       isLoading,
       authChecked
