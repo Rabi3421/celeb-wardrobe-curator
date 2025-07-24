@@ -5,10 +5,19 @@ import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import Image from '@tiptap/extension-image';
 import { useNavigate } from 'react-router-dom';
+import { storage } from "../components/ui/firebase";
+import { getAuth, signInAnonymously } from "firebase/auth";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const AddCelebrity = () => {
     const navigate = useNavigate();
 
+    const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+    const [infoboxImageFile, setInfoboxImageFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    // Add this near your other useState hooks
+    const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+    const [galleryImages, setGalleryImages] = useState<string[]>([]);
     // Infobox fields
     const [name, setName] = useState('');
     const [birthDate, setBirthDate] = useState('');
@@ -103,55 +112,111 @@ const AddCelebrity = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setCoverImageFile(e.target.files[0]);
+        }
+    };
+
+    const handleInfoboxImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setInfoboxImageFile(e.target.files[0]);
+        }
+    };
+
+    const uploadImageToFirebase = async (file: File, celebrityName: string) => {
+        const auth = getAuth();
+        if (!auth.currentUser) {
+            await signInAnonymously(auth);
+        }
+        // Generate SEO-friendly name: e.g. alia-bhatt.jpg
+        const ext = file.name.split('.').pop();
+        const seoName = celebrityName
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-')         // spaces to hyphens
+            .replace(/[^a-z0-9\-]/g, ''); // remove non-alphanumeric except hyphen
+        const fileName = `${seoName}.${ext}`;
+        const fileRef = ref(storage, `celebrities/${fileName}`);
+        await uploadBytes(fileRef, file);
+        return await getDownloadURL(fileRef);
+    };
+
     // Publish handler
     const handlePublish = async () => {
-        const profileData: any = {
-            name,
-            birthDate,
-            occupation,
-            nationality,
-            infoboxImage,
-            facts: facts.filter(f => f.label && f.value),
-            type,
-            sections: [
-                { title: "Biography", content: editor?.getHTML() || "" },
-                ...sections
-            ],
-            metaTitle,
-            metaDescription,
-            slug,
-            coverImage,
-        };
+        setIsUploading(true);
 
-        // Only add relevant fields for the selected type
-        if (type === "actor") {
-            profileData.films = films.filter(f => f.title && f.year);
-            profileData.awards = awards.filter(a => a.name && a.year);
-        }
-        if (type === "cricketer") {
-            profileData.matches = matches.filter(m => m.type && m.count);
-            profileData.trophies = trophies.filter(t => t.name && t.year);
-        }
-        if (type === "singer" || type === "musician") {
-            profileData.albums = albums.filter(a => a.title && a.year);
-            profileData.awards = awards.filter(a => a.name && a.year);
-        }
-        if (type === "writer") {
-            profileData.books = books.filter(b => b.title && b.year);
-        }
-        if (type === "politician") {
-            profileData.positions = positions.filter(p => p.title && p.year);
-            profileData.achievements = achievements.filter(a => a.name && a.year);
-        }
-        if (type === "businessperson" || type === "philanthropist") {
-            profileData.achievements = achievements.filter(a => a.name && a.year);
-        }
-        if (type === "athlete") {
-            profileData.events = events.filter(e => e.name && e.year);
-            profileData.medals = medals.filter(m => m.type && m.year);
-        }
+        let uploadedCoverImage = coverImage;
+        let uploadedInfoboxImage = infoboxImage;
+        let uploadedGalleryImages: string[] = [];
 
+        if (galleryFiles.length > 0) {
+            uploadedGalleryImages = [];
+            for (const file of galleryFiles) {
+                const url = await uploadImageToFirebase(file, name);
+                uploadedGalleryImages.push(url);
+            }
+            setGalleryImages(uploadedGalleryImages);
+        }
         try {
+            if (coverImageFile) {
+                uploadedCoverImage = await uploadImageToFirebase(coverImageFile, name);
+                console.log("Uploaded cover image URL:", uploadedCoverImage);
+                setCoverImage(uploadedCoverImage);
+            }
+            if (infoboxImageFile) {
+                uploadedInfoboxImage = await uploadImageToFirebase(infoboxImageFile, name);
+                console.log("Uploaded cover image URL:", uploadedInfoboxImage);
+                setInfoboxImage(uploadedInfoboxImage);
+            }
+
+            const profileData: any = {
+                name,
+                birthDate,
+                occupation,
+                nationality,
+                facts: facts.filter(f => f.label && f.value),
+                type,
+                sections: [
+                    { title: "Biography", content: editor?.getHTML() || "" },
+                    ...sections
+                ],
+                metaTitle,
+                metaDescription,
+                slug,
+                coverImage: uploadedCoverImage,
+                infoboxImage: uploadedInfoboxImage,
+                galleryImages: uploadedGalleryImages,
+            };
+
+            // Only add relevant fields for the selected type
+            if (type === "actor") {
+                profileData.films = films.filter(f => f.title && f.year);
+                profileData.awards = awards.filter(a => a.name && a.year);
+            }
+            if (type === "cricketer") {
+                profileData.matches = matches.filter(m => m.type && m.count);
+                profileData.trophies = trophies.filter(t => t.name && t.year);
+            }
+            if (type === "singer" || type === "musician") {
+                profileData.albums = albums.filter(a => a.title && a.year);
+                profileData.awards = awards.filter(a => a.name && a.year);
+            }
+            if (type === "writer") {
+                profileData.books = books.filter(b => b.title && b.year);
+            }
+            if (type === "politician") {
+                profileData.positions = positions.filter(p => p.title && p.year);
+                profileData.achievements = achievements.filter(a => a.name && a.year);
+            }
+            if (type === "businessperson" || type === "philanthropist") {
+                profileData.achievements = achievements.filter(a => a.name && a.year);
+            }
+            if (type === "athlete") {
+                profileData.events = events.filter(e => e.name && e.year);
+                profileData.medals = medals.filter(m => m.type && m.year);
+            }
+
             const response = await fetch("http://localhost:5000/api/celebrities", {
                 method: "POST",
                 headers: {
@@ -172,6 +237,8 @@ const AddCelebrity = () => {
         } catch (err) {
             console.error("Network error:", err);
             alert("Network error: " + err);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -228,6 +295,7 @@ const AddCelebrity = () => {
 
     // Preview: Show JSON in an alert (or modal if you want)
     const handlePreview = () => {
+        setIsUploading(true);
         const previewData: any = {
             name,
             birthDate,
@@ -276,6 +344,8 @@ const AddCelebrity = () => {
 
         alert(JSON.stringify(previewData, null, 2));
         // You can replace alert with a modal for better UX
+        setIsUploading(false);
+
     };
 
     // Reset: Clear all fields to their initial state
@@ -791,6 +861,7 @@ const AddCelebrity = () => {
                     <div className="flex gap-2 mb-4">
                         <button
                             type="button"
+                            disabled={isUploading}
                             className="bg-purple-800 hover:bg-purple-900 text-white font-semibold py-2 px-4 rounded shadow"
                             onClick={handlePublish}
                         >
@@ -896,13 +967,12 @@ const AddCelebrity = () => {
                         />
                     </div>
                     <div className="bg-gray-800 rounded-lg shadow border border-gray-700 p-4">
-                        <label className="font-semibold mb-1 block text-gray-200">Infobox Image URL</label>
+                        <label className="font-semibold mb-1 block text-gray-200">Infobox Image</label>
                         <input
-                            type="url"
-                            value={infoboxImage}
-                            onChange={e => setInfoboxImage(e.target.value)}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleInfoboxImageChange}
                             className="input w-full border rounded px-3 py-2 mb-2 bg-gray-900 text-gray-100 border-gray-700"
-                            placeholder="Paste image URL"
                         />
                         {infoboxImage && (
                             <img
@@ -911,6 +981,30 @@ const AddCelebrity = () => {
                                 className="mt-2 rounded shadow w-full h-32 object-cover border border-gray-700"
                             />
                         )}
+                    </div>
+                    <div className="bg-gray-800 rounded-lg shadow border border-gray-700 p-4">
+                        <label className="font-semibold mb-1 block text-gray-200">Gallery Images</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={e => {
+                                if (e.target.files) {
+                                    setGalleryFiles(prev => [...prev, ...Array.from(e.target.files)]);
+                                }
+                            }}
+                            className="input w-full border rounded px-3 py-2 mb-2 bg-gray-900 text-gray-100 border-gray-700"
+                        />
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            {galleryImages.map((img, idx) => (
+                                <img
+                                    key={idx}
+                                    src={img}
+                                    alt={`Gallery ${idx + 1}`}
+                                    className="rounded shadow w-24 h-24 object-cover border border-gray-700"
+                                />
+                            ))}
+                        </div>
                     </div>
                     {/* Facts (key-value pairs) */}
                     <div className="bg-gray-800 rounded-lg shadow border border-gray-700 p-4">
@@ -984,13 +1078,12 @@ const AddCelebrity = () => {
                     </div>
                     {/* Meta fields */}
                     <div className="bg-gray-800 rounded-lg shadow border border-gray-700 p-4">
-                        <label className="font-semibold mb-1 block text-gray-200">Cover Image URL</label>
+                        <label className="font-semibold mb-1 block text-gray-200">Cover Image</label>
                         <input
-                            type="url"
-                            value={coverImage}
-                            onChange={e => setCoverImage(e.target.value)}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleCoverImageChange}
                             className="input w-full border rounded px-3 py-2 mb-2 bg-gray-900 text-gray-100 border-gray-700"
-                            placeholder="Paste image URL"
                         />
                         {coverImage && (
                             <img
@@ -1045,6 +1138,17 @@ const AddCelebrity = () => {
                         <path d="M12 19V5M12 5L5 12M12 5L19 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
+            )}
+            {isUploading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                    <div className="flex flex-col items-center">
+                        <svg className="animate-spin h-12 w-12 text-purple-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                        <span className="text-white text-lg font-semibold">Processing...</span>
+                    </div>
+                </div>
             )}
         </div>
     );

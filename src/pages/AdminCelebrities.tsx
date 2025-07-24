@@ -20,7 +20,7 @@ const AdminCelebrities = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { celebrities, isLoading, selectedCelebrity } = useAppSelector((state) => state.celebrities);
-
+  const [isProcessing, setIsProcessing] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [search, setSearch] = useState('');
@@ -43,6 +43,7 @@ const AdminCelebrities = () => {
   // Handle delete
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this celebrity?')) {
+      setIsProcessing(true);
       try {
         await dispatch(deleteCelebrityAsync(id)).unwrap();
         toast.success('Celebrity deleted successfully');
@@ -50,6 +51,8 @@ const AdminCelebrities = () => {
       } catch (error) {
         console.error('Error deleting celebrity:', error);
         toast.error('Failed to delete celebrity');
+      } finally {
+        setIsProcessing(false);
       }
     }
   };
@@ -188,7 +191,7 @@ const AdminCelebrities = () => {
                     {/* Main Image with gradient overlay */}
                     <div className="relative h-56 w-full">
                       <img
-                        src={celebrity.image || 'https://via.placeholder.com/400x250?text=No+Image'}
+                        src={celebrity.coverImage || 'https://via.placeholder.com/400x250?text=No+Image'}
                         alt={celebrity.name}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
@@ -196,7 +199,7 @@ const AdminCelebrities = () => {
                       {/* Avatar */}
                       <div className="absolute left-4 -bottom-8 z-10">
                         <img
-                          src={celebrity.image || 'https://via.placeholder.com/80?text=No+Image'}
+                          src={celebrity.infoboxImage || 'https://via.placeholder.com/80?text=No+Image'}
                           alt={celebrity.name}
                           className="w-16 h-16 rounded-full border-4 border-white shadow-lg object-cover bg-white"
                         />
@@ -300,6 +303,17 @@ const AdminCelebrities = () => {
             {selectedCelebrity && <CelebrityDetail celebrity={selectedCelebrity} />}
           </DialogContent>
         </Dialog>
+        {isProcessing && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+            <div className="flex flex-col items-center">
+              <svg className="animate-spin h-12 w-12 text-purple-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+              </svg>
+              <span className="text-white text-lg font-semibold">Processing...</span>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );
