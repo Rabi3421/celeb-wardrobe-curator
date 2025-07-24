@@ -34,6 +34,7 @@ export const fetchCelebritiesAsync = createAsyncThunk(
           api_key: API_CONFIG.websiteApiKey,
         },
       });
+      // If your API returns { data: [...] }
       return response.data?.data;
     } catch (error: any) {
       const message =
@@ -49,11 +50,7 @@ export const fetchCelebritiesAsync = createAsyncThunk(
 export const fetchCelebritiesPaginatedAsync = createAsyncThunk(
   "celebrities/fetchCelebritiesPaginated",
   async (
-    {
-      page = 1,
-      limit = 10,
-      apiKey,
-    }: { page?: number; limit?: number; apiKey: string },
+    { page = 1, limit = 10 }: { page?: number; limit?: number },
     { rejectWithValue }
   ) => {
     try {
@@ -66,12 +63,9 @@ export const fetchCelebritiesPaginatedAsync = createAsyncThunk(
           },
         }
       );
-      console.log("Fetched celebrities:", response.data);
-      // Assume API returns { data: Celebrity[], total: number }
+      // If your API returns { data: [...], total: ... }
       return response.data;
     } catch (error: any) {
-      console.log("Error fetching celebrities:", error);
-      // Axios error handling
       const message =
         error.response?.data?.message ||
         error.message ||
@@ -91,6 +85,7 @@ export const deleteCelebrityAsync = createAsyncThunk(
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            api_key: API_CONFIG.websiteApiKey,
           },
         }
       );
@@ -130,7 +125,7 @@ const celebritySlice = createSlice({
       })
       .addCase(fetchCelebritiesAsync.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.celebrities = action.payload;
+        state.celebrities = action.payload || [];
         state.error = null;
       })
       .addCase(fetchCelebritiesAsync.rejected, (state, action) => {
@@ -143,17 +138,24 @@ const celebritySlice = createSlice({
       })
       .addCase(fetchCelebritiesPaginatedAsync.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.celebrities = action.payload.data;
-        state.total = action.payload.total;
+        // If your API returns { data: [...], total: ... }
+        state.celebrities = action.payload.data || [];
+        state.total = action.payload.total || 0;
         state.error = null;
       })
       .addCase(fetchCelebritiesPaginatedAsync.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to fetch celebrities";
+      })
+      .addCase(deleteCelebrityAsync.fulfilled, (state, action) => {
+        state.celebrities = state.celebrities.filter(
+          (celeb) => celeb.id !== action.payload && celeb._id !== action.payload
+        );
       });
   },
 });
 
 export const { setSelectedCelebrity, clearError, setPage, setLimit } =
   celebritySlice.actions;
+
 export default celebritySlice.reducer;

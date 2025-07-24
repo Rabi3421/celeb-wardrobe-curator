@@ -11,29 +11,39 @@ import { Celebrity } from "@/types/data";
 import CelebritySpotlight from "@/components/ui/CelebritySpotlight";
 import { Card } from "@/components/ui/card";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { fetchCelebritiesPaginatedAsync } from "@/store/slices/celebritySlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store"; // adjust path as needed
 
 const Celebrities: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearchTerm = searchParams.get("search") || "";
   const navigate = useNavigate();
-  
-  const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
+  const dispatch = useDispatch();
+  const {
+    celebrities,
+    isLoading,
+    total,
+    page,
+    limit,
+  } = useSelector((state: RootState) => state.celebrities);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  
+  console.log("celebrities:",celebrities)
   useEffect(() => {
     const loadCelebrities = async () => {
-      setIsLoading(true);
-      const data = await fetchCelebrities();
-      setCelebrities(data);
-      setIsLoading(false);
+      try {
+        const action = await dispatch(fetchCelebritiesPaginatedAsync({ page, limit }));
+        const data = action.payload;
+      } catch (error) {
+        console.error(error);
+      }
     };
-    
     loadCelebrities();
-  }, []);
-  
+  }, [dispatch, page, limit]);
+
   // Update search params when search term changes
   const updateSearchParams = (newSearchTerm: string) => {
     if (newSearchTerm) {
@@ -50,7 +60,7 @@ const Celebrities: React.FC = () => {
 
     try {
       // Check if the search term matches a celebrity name
-      const matchedCelebrity = celebrities.find(celeb => 
+      const matchedCelebrity = celebrities.find(celeb =>
         celeb.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
 
@@ -67,7 +77,7 @@ const Celebrities: React.FC = () => {
       updateSearchParams(searchTerm);
     }
   };
-  
+
   // Filter celebrities based on search term and category
   const filteredCelebrities = celebrities.filter((celebrity: Celebrity) => {
     const matchesSearch = celebrity.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -77,10 +87,10 @@ const Celebrities: React.FC = () => {
 
   // Get unique categories
   const categories = ["all", ...Array.from(new Set(celebrities.map((celeb: Celebrity) => celeb.category)))];
-  
+
   // Celebrity of the month
   const featuredCelebrity = celebrities[0]; // Just using the first one as an example
-  
+
   // Mock data for the spotlight section
   const spotlightProducts = featuredCelebrity ? [
     {
@@ -98,7 +108,7 @@ const Celebrities: React.FC = () => {
       affiliateLink: "#"
     }
   ] : [];
-  
+
   // Handle "Load More" button click
   const handleLoadMore = () => {
     setIsLoadingMore(true);
@@ -114,7 +124,7 @@ const Celebrities: React.FC = () => {
     const randomIndex = Math.floor(Math.random() * celebrities.length);
     return celebrities[randomIndex];
   };
-  
+
   if (isLoading) {
     return (
       <PageLayout>
@@ -124,7 +134,7 @@ const Celebrities: React.FC = () => {
       </PageLayout>
     );
   }
-  
+
   return (
     <PageLayout>
       {/* Hero Section */}
@@ -138,13 +148,13 @@ const Celebrities: React.FC = () => {
           </p>
           <form onSubmit={handleSearchSubmit} className="relative max-w-md mx-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-            <Input 
+            <Input
               placeholder="Search celebrities..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-6 rounded-full"
             />
-            <Button 
+            <Button
               type="submit"
               className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full px-4"
             >
@@ -162,7 +172,7 @@ const Celebrities: React.FC = () => {
             <CelebritySpotlight
               id={featuredCelebrity.id}
               name={featuredCelebrity.name}
-              image={featuredCelebrity.image}
+              image={featuredCelebrity.coverImage}
               outfit="Red Carpet Statement Look"
               event="Fashion Week Front Row"
               description={featuredCelebrity.bio || "A trendsetting style icon known for bold fashion choices and setting seasonal trends. This celebrity's distinctive looks are always the talk of the fashion industry."}
@@ -182,7 +192,7 @@ const Celebrities: React.FC = () => {
                   onClick={() => setSelectedCategory(category)}
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                  {/* {category.charAt(0).toUpperCase() + category.slice(1)} */}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -196,16 +206,34 @@ const Celebrities: React.FC = () => {
               key={celebrity.id}
               id={celebrity.id}
               name={celebrity.name}
-              image={celebrity.image}
+              image={celebrity.coverImage}
               outfitCount={celebrity.outfitCount || 0}
             />
           ))}
         </div>
-
+        <div className="flex justify-center items-center gap-2 mt-8">
+          <Button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className="btn-primary"
+          >
+            Previous
+          </Button>
+          <span className="text-gray-700 dark:text-gray-200 font-semibold">
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+            className="btn-primary"
+          >
+            Next
+          </Button>
+        </div>
         {/* Load More Button */}
         <div className="flex justify-center mt-12">
-          <Button 
-            onClick={handleLoadMore} 
+          <Button
+            onClick={handleLoadMore}
             disabled={isLoadingMore}
             className="btn-primary"
           >
@@ -235,7 +263,7 @@ const Celebrities: React.FC = () => {
                   Discover new celebrity style icons with our random recommendation feature.
                 </p>
               </div>
-              <Button 
+              <Button
                 className="bg-pastel-mint text-primary-foreground hover:bg-opacity-90"
                 onClick={() => {
                   const randomCeleb = getRandomCelebrity();
