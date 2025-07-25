@@ -31,7 +31,7 @@ const Celebrities: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  console.log("celebrities:",celebrities)
+  console.log("celebrities:", celebrities)
   useEffect(() => {
     const loadCelebrities = async () => {
       try {
@@ -208,6 +208,7 @@ const Celebrities: React.FC = () => {
               name={celebrity.name}
               image={celebrity.coverImage}
               outfitCount={celebrity.outfitCount || 0}
+              slug={celebrity.slug}
             />
           ))}
         </div>
