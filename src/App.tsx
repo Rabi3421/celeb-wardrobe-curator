@@ -34,6 +34,7 @@ import AdminBlog from "./pages/AdminBlog";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AddCelebrity from "./pages/AddCelebrity";
 import ApiDocs from "./pages/ApiDocs";
+import AddOutfit from "./pages/AddOutfit";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ function App() {
                 <Route path="/celebrity/:slug" element={<CelebrityProfile />} />
                 <Route path="/celebrity/id/:id" element={<CelebrityProfile />} />
                 
+                <Route path="/add-outfit" element={<AddOutfit />} />
                 <Route path="/outfits" element={<Outfits />} />
                 
                 {/* Outfit routes - slug-based as primary */}

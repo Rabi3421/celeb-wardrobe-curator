@@ -27,6 +27,7 @@ import { useQuery } from "@tanstack/react-query";
 import CelebrityInfoSection from "@/components/celebrity/CelebrityInfoSection";
 import CelebrityTimelineSection from "@/components/celebrity/CelebrityTimelineSection";
 import CelebrityStyleSection from "@/components/celebrity/CelebrityStyleSection";
+import CelebrityWikiProfile from "@/components/celebrity/CelebrityWikiProfile";
 
 const CelebrityProfile: React.FC = () => {
   const { id, slug } = useParams<{ id?: string; slug?: string }>();
@@ -120,7 +121,7 @@ const CelebrityProfile: React.FC = () => {
     "height": celebrity.height,
     "url": canonicalUrl
   };
-
+  console.log("finalcelebrity", celebrity);
   return (
     <PageLayout>
       {/* SEO Optimization */}
@@ -418,7 +419,8 @@ const CelebrityProfile: React.FC = () => {
 
           {/* Biography & Information Tab */}
           <TabsContent value="info">
-            <CelebrityInfoSection celebrity={celebrity} />
+            <CelebrityWikiProfile celebrity={celebrity} />
+            {/* <CelebrityInfoSection celebrity={celebrity} /> */}
           </TabsContent>
 
           {/* Style Analysis Tab */}

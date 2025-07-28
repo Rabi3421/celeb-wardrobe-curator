@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
+import { Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
@@ -8,13 +9,98 @@ import { useNavigate } from 'react-router-dom';
 import { storage } from "../components/ui/firebase";
 import { getAuth, signInAnonymously } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useLocation } from 'react-router-dom';
+import axios from 'axios';
+import BulletList from '@tiptap/extension-bullet-list';
+import OrderedList from '@tiptap/extension-ordered-list';
+import ListItem from '@tiptap/extension-list-item';
+
+const SectionEditor = ({
+    value,
+    onChange,
+    placeholder,
+}: {
+    value: string;
+    onChange: (val: string) => void;
+    placeholder: string;
+}) => {
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Underline,
+            Image,
+            Link,
+            BulletList,
+            OrderedList,
+            ListItem,
+        ],
+        content: value,
+        editorProps: {
+            attributes: {
+                class: 'prose prose-invert max-w-none min-h-[200px] border-0 rounded-none p-0 bg-gray-900 text-gray-100 list-disc list-decimal list-inside',
+                style: 'font-size:1.05rem;',
+            },
+            placeholder,
+        },
+        onUpdate: ({ editor }) => {
+            onChange(editor.getHTML());
+        },
+    });
+
+    // Toolbar actions for this editor
+    const setLink = () => {
+        const url = window.prompt('Enter URL');
+        if (url) {
+            editor?.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+        }
+    };
+    const unsetLink = () => editor?.chain().focus().unsetLink().run();
+    const addImage = () => {
+        const url = window.prompt('Enter image URL');
+        if (url) {
+            editor?.chain().focus().setImage({ src: url }).run();
+        }
+    };
+
+    useEffect(() => {
+        if (editor && value !== editor.getHTML()) {
+            editor.commands.setContent(value || "");
+        }
+    }, [value, editor]);
+
+    return (
+        <div>
+            <div className="flex flex-wrap gap-2 mb-2 bg-gray-800 border border-gray-700 rounded-lg p-2">
+                <button type="button" title="Bold" onClick={() => editor?.chain().focus().toggleBold().run()} className={`px-2 py-1 rounded hover:bg-purple-900 ${editor?.isActive('bold') ? 'bg-purple-800 font-bold text-purple-300' : 'text-gray-300'}`}>B</button>
+                <button type="button" title="Italic" onClick={() => editor?.chain().focus().toggleItalic().run()} className={`px-2 py-1 rounded hover:bg-purple-900 ${editor?.isActive('italic') ? 'bg-purple-800 italic text-purple-300' : 'text-gray-300'}`}>I</button>
+                <button type="button" title="Underline" onClick={() => editor?.chain().focus().toggleUnderline().run()} className={`px-2 py-1 rounded hover:bg-purple-900 ${editor?.isActive('underline') ? 'bg-purple-800 underline text-purple-300' : 'text-gray-300'}`}>U</button>
+                <button type="button" title="Paragraph" onClick={() => editor?.chain().focus().setParagraph().run()} className="px-2 py-1 rounded hover:bg-purple-900 text-gray-300">P</button>
+                <button type="button" title="Heading 1" onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} className={`px-2 py-1 rounded hover:bg-purple-900 ${editor?.isActive('heading', { level: 1 }) ? 'bg-purple-800 text-purple-300' : 'text-gray-300'}`}>H1</button>
+                <button type="button" title="Heading 2" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} className={`px-2 py-1 rounded hover:bg-purple-900 ${editor?.isActive('heading', { level: 2 }) ? 'bg-purple-800 text-purple-300' : 'text-gray-300'}`}>H2</button>
+                <button type="button" title="Heading 3" onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()} className={`px-2 py-1 rounded hover:bg-purple-900 ${editor?.isActive('heading', { level: 3 }) ? 'bg-purple-800 text-purple-300' : 'text-gray-300'}`}>H3</button>
+                <button type="button" title="Bullet List" onClick={() => editor?.chain().focus().toggleBulletList().run()} className="px-2 py-1 rounded hover:bg-purple-900 text-gray-300">• List</button>
+                <button type="button" title="Ordered List" onClick={() => editor?.chain().focus().toggleOrderedList().run()} className="px-2 py-1 rounded hover:bg-purple-900 text-gray-300">1. List</button>
+                <button type="button" title="Blockquote" onClick={() => editor?.chain().focus().toggleBlockquote().run()} className="px-2 py-1 rounded hover:bg-purple-900 text-gray-300">❝</button>
+                <button type="button" title="Add Link" onClick={setLink} className="px-2 py-1 rounded hover:bg-purple-900 text-gray-300">🔗</button>
+                <button type="button" title="Remove Link" onClick={unsetLink} className="px-2 py-1 rounded hover:bg-purple-900 text-gray-300">Unlink</button>
+                <button type="button" title="Add Image" onClick={addImage} className="px-2 py-1 rounded hover:bg-purple-900 text-gray-300">🖼️</button>
+            </div>
+            <EditorContent editor={editor} />
+        </div>
+    );
+};
 
 const AddCelebrity = () => {
     const navigate = useNavigate();
-
+    const location = useLocation();
+    const editingCelebrity = location.state?.celebrity;
+    console.log("editingCelebrity:", editingCelebrity)
     const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
     const [infoboxImageFile, setInfoboxImageFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [isDirty, setIsDirty] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [sectionEditors, setSectionEditors] = useState<Editor[]>([]);
     // Add this near your other useState hooks
     const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
     const [galleryImages, setGalleryImages] = useState<string[]>([]);
@@ -40,8 +126,7 @@ const AddCelebrity = () => {
 
     // Dynamic tables
     const [films, setFilms] = useState([{ title: '', year: '' }]);
-    const [awards, setAwards] = useState([{ name: '', year: '' }]);
-    const [matches, setMatches] = useState([{ type: '', count: '' }]);
+    const [awards, setAwards] = useState([{ name: '', year: '', movie: '', status: '', category: '' }]); const [matches, setMatches] = useState([{ type: '', count: '' }]);
     const [trophies, setTrophies] = useState([{ name: '', year: '' }]);
     const [albums, setAlbums] = useState([{ title: '', year: '' }]);
     const [books, setBooks] = useState([{ title: '', year: '' }]);
@@ -64,9 +149,31 @@ const AddCelebrity = () => {
         { title: 'Awards', content: '' }
     ]);
 
+    function decodeHtml(html: string) {
+        const txt = document.createElement("textarea");
+        txt.innerHTML = html;
+        return txt.value;
+    }
+
+
     // Main biography editor
     const editor = useEditor({
-        extensions: [StarterKit, Link, Underline, Image],
+        extensions: [
+            StarterKit,
+            Underline,
+            Image,
+            Link.configure({
+                openOnClick: false,
+                HTMLAttributes: {
+                    class: "text-purple-400 underline hover:text-purple-600",
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                },
+            }),
+            BulletList,
+            OrderedList,
+            ListItem,
+        ],
         content: '',
         autofocus: true,
         editorProps: {
@@ -76,10 +183,12 @@ const AddCelebrity = () => {
             },
             placeholder: 'Start writing the main biography here...',
         },
+        onUpdate: () => setIsDirty(true),
     });
 
     // Section editors
     const handleSectionChange = (idx: number, value: string) => {
+        setIsDirty(true)
         const updated = [...sections];
         updated[idx].content = value;
         setSections(updated);
@@ -108,18 +217,78 @@ const AddCelebrity = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    useEffect(() => {
+        if (editingCelebrity) {
+            setName(editingCelebrity.name || "");
+            setBirthDate(editingCelebrity.birthDate ? editingCelebrity.birthDate.slice(0, 10) : "");
+            setOccupation(editingCelebrity.occupation || "");
+            setNationality(editingCelebrity.nationality || "");
+            setInfoboxImage(editingCelebrity.infoboxImage || "");
+            setFacts(
+                editingCelebrity.facts && editingCelebrity.facts.length
+                    ? editingCelebrity.facts
+                    : [
+                        { label: 'Born', value: '' },
+                        { label: 'Citizenship', value: '' },
+                        { label: 'Occupation', value: '' },
+                        { label: 'Years active', value: '' },
+                        { label: 'Works', value: '' },
+                        { label: 'Spouse', value: '' },
+                        { label: 'Children', value: '' },
+                        { label: 'Parents', value: '' },
+                        { label: 'Relatives', value: '' },
+                        { label: 'Awards', value: '' }
+                    ]
+            );
+            setType(editingCelebrity.type || "");
+            setFilms(editingCelebrity.films && editingCelebrity.films.length ? editingCelebrity.films : [{ title: '', year: '' }]);
+            setAwards(editingCelebrity.awards && editingCelebrity.awards.length ? editingCelebrity.awards : [{ name: '', year: '', movie: '', status: '', category: '' }]);
+            setMatches(editingCelebrity.matches && editingCelebrity.matches.length ? editingCelebrity.matches : [{ type: '', count: '' }]);
+            setTrophies(editingCelebrity.trophies && editingCelebrity.trophies.length ? editingCelebrity.trophies : [{ name: '', year: '' }]);
+            setAlbums(editingCelebrity.albums && editingCelebrity.albums.length ? editingCelebrity.albums : [{ title: '', year: '' }]);
+            setBooks(editingCelebrity.books && editingCelebrity.books.length ? editingCelebrity.books : [{ title: '', year: '' }]);
+            setPositions(editingCelebrity.positions && editingCelebrity.positions.length ? editingCelebrity.positions : [{ title: '', year: '' }]);
+            setAchievements(editingCelebrity.achievements && editingCelebrity.achievements.length ? editingCelebrity.achievements : [{ name: '', year: '' }]);
+            setEvents(editingCelebrity.events && editingCelebrity.events.length ? editingCelebrity.events : [{ name: '', year: '' }]);
+            setMedals(editingCelebrity.medals && editingCelebrity.medals.length ? editingCelebrity.medals : [{ type: '', year: '' }]);
+            setMetaTitle(editingCelebrity.metaTitle || "");
+            setMetaDescription(editingCelebrity.metaDescription || "");
+            setSlug(editingCelebrity.slug || "");
+            setCoverImage(editingCelebrity.coverImage || "");
+            setGalleryImages(editingCelebrity.galleryImages || []);
+            setSections(
+                editingCelebrity.sections && editingCelebrity.sections.length > 1
+                    ? editingCelebrity.sections.slice(1) // skip Biography, handled by editor
+                    : [
+                        { title: 'Early Life', content: '' },
+                        { title: 'Career', content: '' },
+                        { title: 'Awards', content: '' }
+                    ]
+            );
+            // Set main biography editor content
+            editor?.commands.setContent(
+                editingCelebrity.sections && editingCelebrity.sections.length
+                    ? editingCelebrity.sections[0].content || ""
+                    : ""
+            );
+        }
+        // eslint-disable-next-line
+    }, [editingCelebrity, editor]);
+
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
+            setIsDirty(true)
             setCoverImageFile(e.target.files[0]);
         }
     };
 
     const handleInfoboxImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
+            setIsDirty(true)
             setInfoboxImageFile(e.target.files[0]);
         }
     };
@@ -192,7 +361,7 @@ const AddCelebrity = () => {
             // Only add relevant fields for the selected type
             if (type === "actor") {
                 profileData.films = films.filter(f => f.title && f.year);
-                profileData.awards = awards.filter(a => a.name && a.year);
+                profileData.awards = awards.filter(a => a.name && a.year && a.movie && a.status && a.category);
             }
             if (type === "cricketer") {
                 profileData.matches = matches.filter(m => m.type && m.count);
@@ -242,6 +411,61 @@ const AddCelebrity = () => {
         }
     };
 
+    // Update handler
+    const handleUpdate = async () => {
+        if (!editingCelebrity?._id) return;
+        setIsUploading(true);
+        try {
+            const updatedData: any = {
+                name,
+                birthDate,
+                occupation,
+                nationality,
+                facts: facts.filter(f => f.label && f.value),
+                type,
+                sections: [
+                    { title: "Biography", content: editor?.getHTML() || "" },
+                    ...sections
+                ],
+                metaTitle,
+                metaDescription,
+                slug,
+                coverImage,
+                infoboxImage,
+                galleryImages,
+                films,
+                awards,
+                matches,
+                trophies,
+                albums,
+                books,
+                positions,
+                achievements,
+                events,
+                medals,
+            };
+            console.log("Updated Data:", updatedData);
+            const response = await axios.put(
+                `http://localhost:5000/api/celebrities/${editingCelebrity._id}`,
+                updatedData,
+                { headers: { "Content-Type": "application/json" } }
+            );
+            console.log("Celebrity updated:", response.data);
+            setShowSuccessModal(true);
+            setIsDirty(false);
+        } catch (err: any) {
+            if (err.response) {
+                console.log("error updating celebrity:", err.response.data);
+                alert("Error: " + (err.response.data.message || "Failed to update celebrity"));
+            } else {
+                console.log("error updating celebrity:", err);
+                alert("Network error: " + err.message);
+            }
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const handleSaveDraft = () => {
         const draftData: any = {
             name,
@@ -267,7 +491,9 @@ const AddCelebrity = () => {
             draftData.awards = awards.filter(a => a.name && a.year);
         }
         if (type === "cricketer") {
-            draftData.matches = matches.filter(m => m.type && m.count);
+            draftData.matches = matches
+                .filter(m => m.type && m.count)
+                .map(m => `${m.type}: ${m.count}`);
             draftData.trophies = trophies.filter(t => t.name && t.year);
         }
         if (type === "singer" || type === "musician") {
@@ -390,35 +616,42 @@ const AddCelebrity = () => {
         editor?.commands.setContent('');
     };
 
-    // Duplicate: Copy current data to a new profile (here, just logs the data)
-    const handleDuplicate = () => {
-        const duplicateData: any = {
-            name,
-            birthDate,
-            occupation,
-            nationality,
-            infoboxImage,
-            facts: facts.map(f => ({ ...f })),
-            type,
-            films: films.map(f => ({ ...f })),
-            awards: awards.map(a => ({ ...a })),
-            matches: matches.map(m => ({ ...m })),
-            trophies: trophies.map(t => ({ ...t })),
-            albums: albums.map(a => ({ ...a })),
-            books: books.map(b => ({ ...b })),
-            positions: positions.map(p => ({ ...p })),
-            achievements: achievements.map(a => ({ ...a })),
-            events: events.map(e => ({ ...e })),
-            medals: medals.map(m => ({ ...m })),
-            sections: sections.map(s => ({ ...s })),
-            metaTitle,
-            metaDescription,
-            slug,
-            coverImage,
-        };
-        console.log("Duplicate Data:", JSON.stringify(duplicateData, null, 2));
-        // You can use this data to create a new profile or pre-fill another form
-    };
+
+    useEffect(() => {
+        if (editingCelebrity) {
+            // ...other state setters...
+            editor?.commands.setContent(
+                editingCelebrity.sections && editingCelebrity.sections.length
+                    ? decodeHtml(editingCelebrity.sections[0].content || "")
+                    : ""
+            );
+        }
+        // eslint-disable-next-line
+    }, [editingCelebrity, editor]);
+
+    useEffect(() => {
+        // Create a TipTap editor for each section
+        setSectionEditors(sections.map((section, idx) =>
+            new Editor({
+                extensions: [StarterKit, Underline, Image, Link],
+                content: section.content,
+                editorProps: {
+                    attributes: {
+                        class: 'prose prose-invert max-w-none min-h-[200px] border-0 rounded-none p-0 bg-gray-900 text-gray-100',
+                        style: 'font-size:1.05rem;',
+                    },
+                    placeholder: `Write about ${section.title}...`,
+                },
+                onUpdate: ({ editor }) => {
+                    setIsDirty(true);
+                    const updatedSections = [...sections];
+                    updatedSections[idx].content = editor.getHTML();
+                    setSections(updatedSections);
+                }
+            })
+        ));
+        // eslint-disable-next-line
+    }, [sections.length]);
 
     return (
         <div className="min-h-screen bg-gray-900 py-10">
@@ -462,15 +695,18 @@ const AddCelebrity = () => {
                                 <EditorContent editor={editor} />
                             </div>
                             {/* Wikipedia-style sections */}
-                            <h3 className="text-lg font-bold text-gray-200 mb-2">Additional Sections</h3>
+                            <h3 className="text-3xl font-extrabold text-gray-100 mb-4">Additional Sections</h3>
                             {sections.map((section, idx) => (
                                 <div key={idx} className="mb-4 bg-gray-800 border border-gray-700 rounded-lg p-3">
-                                    <label className="font-semibold mb-1 block text-gray-200">{section.title}</label>
-                                    <textarea
+                                    <label className="text-2xl font-extrabold mb-2 block text-gray-100">{section.title}</label>
+                                    <SectionEditor
                                         value={section.content}
-                                        onChange={e => handleSectionChange(idx, e.target.value)}
-                                        className="input w-full border rounded px-3 py-2 bg-gray-900 text-gray-100 border-gray-700"
-                                        rows={12}
+                                        onChange={val => {
+                                            setIsDirty(true);
+                                            const updated = [...sections];
+                                            updated[idx].content = val;
+                                            setSections(updated);
+                                        }}
                                         placeholder={`Write about ${section.title}...`}
                                     />
                                 </div>
@@ -487,6 +723,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={film.title}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newFilms = [...films];
                                                         newFilms[idx].title = e.target.value;
                                                         setFilms(newFilms);
@@ -498,6 +735,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={film.year}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newFilms = [...films];
                                                         newFilms[idx].year = e.target.value;
                                                         setFilms(newFilms);
@@ -514,33 +752,73 @@ const AddCelebrity = () => {
                                     <div className="bg-gray-800 rounded-lg shadow border border-gray-700 p-4 mb-4">
                                         <label className="font-semibold mb-1 block text-gray-200">Awards</label>
                                         {awards.map((award, idx) => (
-                                            <div key={idx} className="flex gap-2 mb-2">
-                                                <input
-                                                    type="text"
-                                                    value={award.name}
-                                                    onChange={e => {
-                                                        const newAwards = [...awards];
-                                                        newAwards[idx].name = e.target.value;
-                                                        setAwards(newAwards);
-                                                    }}
-                                                    placeholder="Award Name"
-                                                    className="input border rounded px-2 py-1 bg-gray-900 text-gray-100 border-gray-700"
-                                                />
+                                            <div key={idx} className="flex flex-wrap gap-2 mb-2 w-full">
                                                 <input
                                                     type="text"
                                                     value={award.year}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newAwards = [...awards];
                                                         newAwards[idx].year = e.target.value;
                                                         setAwards(newAwards);
                                                     }}
                                                     placeholder="Year"
-                                                    className="input border rounded px-2 py-1 bg-gray-900 text-gray-100 border-gray-700"
+                                                    className="input border rounded px-2 py-1 bg-gray-900 text-gray-100 border-gray-700 flex-1 min-w-[80px]"
                                                 />
+                                                <input
+                                                    type="text"
+                                                    value={award.name}
+                                                    onChange={e => {
+                                                        setIsDirty(true)
+                                                        const newAwards = [...awards];
+                                                        newAwards[idx].name = e.target.value;
+                                                        setAwards(newAwards);
+                                                    }}
+                                                    placeholder="Award Name"
+                                                    className="input border rounded px-2 py-1 bg-gray-900 text-gray-100 border-gray-700 flex-1 min-w-[120px]"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={award.category}
+                                                    onChange={e => {
+                                                        setIsDirty(true)
+                                                        const newAwards = [...awards];
+                                                        newAwards[idx].category = e.target.value;
+                                                        setAwards(newAwards);
+                                                    }}
+                                                    placeholder="Category (e.g. Best Actor In A Comic Role)"
+                                                    className="input border rounded px-2 py-1 bg-gray-900 text-gray-100 border-gray-700 flex-1 min-w-[160px]"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={award.movie}
+                                                    onChange={e => {
+                                                        setIsDirty(true)
+                                                        const newAwards = [...awards];
+                                                        newAwards[idx].movie = e.target.value;
+                                                        setAwards(newAwards);
+                                                    }}
+                                                    placeholder="Movie"
+                                                    className="input border rounded px-2 py-1 bg-gray-900 text-gray-100 border-gray-700 flex-1 min-w-[120px]"
+                                                />
+                                                <select
+                                                    value={award.status}
+                                                    onChange={e => {
+                                                        setIsDirty(true)
+                                                        const newAwards = [...awards];
+                                                        newAwards[idx].status = e.target.value;
+                                                        setAwards(newAwards);
+                                                    }}
+                                                    className="input border rounded px-2 py-1 bg-gray-900 text-gray-100 border-gray-700 flex-1 min-w-[100px]"
+                                                >
+                                                    <option value="">Status</option>
+                                                    <option value="Nominated">Nominated</option>
+                                                    <option value="Won">Won</option>
+                                                </select>
                                                 <button type="button" onClick={() => setAwards(awards.filter((_, i) => i !== idx))} className="text-red-400">Remove</button>
                                             </div>
                                         ))}
-                                        <button type="button" onClick={() => setAwards([...awards, { name: '', year: '' }])} className="text-purple-400 mt-2">Add Award</button>
+                                        <button type="button" onClick={() => setAwards([...awards, { name: '', year: '', movie: '', status: '', category: '' }])} className="text-purple-400 mt-2">Add Award</button>
                                     </div>
                                 </>
                             )}
@@ -555,6 +833,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={match.type}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newMatches = [...matches];
                                                         newMatches[idx].type = e.target.value;
                                                         setMatches(newMatches);
@@ -566,6 +845,7 @@ const AddCelebrity = () => {
                                                     type="number"
                                                     value={match.count}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newMatches = [...matches];
                                                         newMatches[idx].count = e.target.value;
                                                         setMatches(newMatches);
@@ -587,6 +867,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={trophy.name}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newTrophies = [...trophies];
                                                         newTrophies[idx].name = e.target.value;
                                                         setTrophies(newTrophies);
@@ -598,6 +879,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={trophy.year}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newTrophies = [...trophies];
                                                         newTrophies[idx].year = e.target.value;
                                                         setTrophies(newTrophies);
@@ -623,6 +905,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={album.title}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newAlbums = [...albums];
                                                         newAlbums[idx].title = e.target.value;
                                                         setAlbums(newAlbums);
@@ -634,6 +917,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={album.year}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newAlbums = [...albums];
                                                         newAlbums[idx].year = e.target.value;
                                                         setAlbums(newAlbums);
@@ -655,6 +939,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={award.name}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newAwards = [...awards];
                                                         newAwards[idx].name = e.target.value;
                                                         setAwards(newAwards);
@@ -666,6 +951,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={award.year}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newAwards = [...awards];
                                                         newAwards[idx].year = e.target.value;
                                                         setAwards(newAwards);
@@ -691,6 +977,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={book.title}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newBooks = [...books];
                                                         newBooks[idx].title = e.target.value;
                                                         setBooks(newBooks);
@@ -702,6 +989,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={book.year}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newBooks = [...books];
                                                         newBooks[idx].year = e.target.value;
                                                         setBooks(newBooks);
@@ -727,6 +1015,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={position.title}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newPositions = [...positions];
                                                         newPositions[idx].title = e.target.value;
                                                         setPositions(newPositions);
@@ -738,6 +1027,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={position.year}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newPositions = [...positions];
                                                         newPositions[idx].year = e.target.value;
                                                         setPositions(newPositions);
@@ -759,6 +1049,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={achievement.name}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newAchievements = [...achievements];
                                                         newAchievements[idx].name = e.target.value;
                                                         setAchievements(newAchievements);
@@ -770,6 +1061,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={achievement.year}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newAchievements = [...achievements];
                                                         newAchievements[idx].year = e.target.value;
                                                         setAchievements(newAchievements);
@@ -795,6 +1087,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={event.name}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newEvents = [...events];
                                                         newEvents[idx].name = e.target.value;
                                                         setEvents(newEvents);
@@ -806,6 +1099,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={event.year}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newEvents = [...events];
                                                         newEvents[idx].year = e.target.value;
                                                         setEvents(newEvents);
@@ -827,6 +1121,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={medal.type}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newMedals = [...medals];
                                                         newMedals[idx].type = e.target.value;
                                                         setMedals(newMedals);
@@ -838,6 +1133,7 @@ const AddCelebrity = () => {
                                                     type="text"
                                                     value={medal.year}
                                                     onChange={e => {
+                                                        setIsDirty(true)
                                                         const newMedals = [...medals];
                                                         newMedals[idx].year = e.target.value;
                                                         setMedals(newMedals);
@@ -867,6 +1163,16 @@ const AddCelebrity = () => {
                         >
                             Publish
                         </button>
+                        {editingCelebrity && (
+                            <button
+                                type="button"
+                                disabled={!isDirty || isUploading}
+                                className={`bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded shadow ${(!isDirty || isUploading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                onClick={handleUpdate}
+                            >
+                                Update
+                            </button>
+                        )}
                         <button
                             type="button"
                             className="bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded shadow"
@@ -888,20 +1194,16 @@ const AddCelebrity = () => {
                         >
                             Reset
                         </button>
-                        <button
-                            type="button"
-                            className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded shadow"
-                            onClick={handleDuplicate}
-                        >
-                            Duplicate
-                        </button>
                     </div>
                     {/* Type selector */}
                     <div className="bg-gray-800 rounded-lg shadow border border-gray-700 p-4">
                         <label className="font-semibold mb-1 block text-gray-200">Type</label>
                         <select
                             value={type}
-                            onChange={e => setType(e.target.value)}
+                            onChange={e => {
+                                setIsDirty(true)
+                                setType(e.target.value)
+                            }}
                             className="input w-full border rounded px-3 py-2 bg-gray-900 text-gray-100 border-gray-700"
                         >
                             <option value="">Select Type</option>
@@ -932,7 +1234,10 @@ const AddCelebrity = () => {
                         <input
                             type="text"
                             value={name}
-                            onChange={e => setName(e.target.value)}
+                            onChange={e => {
+                                setIsDirty(true)
+                                setName(e.target.value)
+                            }}
                             className="input w-full border rounded px-3 py-2 bg-gray-900 text-gray-100 border-gray-700"
                             placeholder="Celebrity Name"
                         />
@@ -942,7 +1247,10 @@ const AddCelebrity = () => {
                         <input
                             type="date"
                             value={birthDate}
-                            onChange={e => setBirthDate(e.target.value)}
+                            onChange={e => {
+                                setIsDirty(true)
+                                setBirthDate(e.target.value)
+                            }}
                             className="input w-full border rounded px-3 py-2 bg-gray-900 text-gray-100 border-gray-700"
                         />
                     </div>
@@ -951,7 +1259,10 @@ const AddCelebrity = () => {
                         <input
                             type="text"
                             value={occupation}
-                            onChange={e => setOccupation(e.target.value)}
+                            onChange={e => {
+                                setIsDirty(true)
+                                setOccupation(e.target.value)
+                            }}
                             className="input w-full border rounded px-3 py-2 bg-gray-900 text-gray-100 border-gray-700"
                             placeholder="Occupation"
                         />
@@ -961,7 +1272,10 @@ const AddCelebrity = () => {
                         <input
                             type="text"
                             value={nationality}
-                            onChange={e => setNationality(e.target.value)}
+                            onChange={e => {
+                                setIsDirty(true)
+                                setNationality(e.target.value)
+                            }}
                             className="input w-full border rounded px-3 py-2 bg-gray-900 text-gray-100 border-gray-700"
                             placeholder="Nationality"
                         />
@@ -990,6 +1304,7 @@ const AddCelebrity = () => {
                             multiple
                             onChange={e => {
                                 if (e.target.files) {
+                                    setIsDirty(true);
                                     setGalleryFiles(prev => [...prev, ...Array.from(e.target.files)]);
                                 }
                             }}
@@ -1052,6 +1367,7 @@ const AddCelebrity = () => {
                                         type="text"
                                         value={fact.label}
                                         onChange={e => {
+                                            setIsDirty(true);
                                             const newFacts = [...facts];
                                             newFacts[idx].label = e.target.value;
                                             setFacts(newFacts);
@@ -1063,6 +1379,7 @@ const AddCelebrity = () => {
                                         type="text"
                                         value={fact.value}
                                         onChange={e => {
+                                            setIsDirty(true);
                                             const newFacts = [...facts];
                                             newFacts[idx].value = e.target.value;
                                             setFacts(newFacts);
@@ -1098,7 +1415,10 @@ const AddCelebrity = () => {
                         <input
                             type="text"
                             value={slug}
-                            onChange={e => setSlug(e.target.value.replace(/\s+/g, '-').toLowerCase())}
+                            onChange={e => {
+                                setSlug(e.target.value.replace(/\s+/g, '-').toLowerCase())
+                                setIsDirty(true)
+                            }}
                             className="input w-full border rounded px-3 py-2 bg-gray-900 text-gray-100 border-gray-700"
                             placeholder="e.g. alia-bhatt"
                             maxLength={75}
@@ -1109,7 +1429,10 @@ const AddCelebrity = () => {
                         <input
                             type="text"
                             value={metaTitle}
-                            onChange={e => setMetaTitle(e.target.value)}
+                            onChange={e => {
+                                setMetaTitle(e.target.value)
+                                setIsDirty(true)
+                            }}
                             className="input w-full border rounded px-3 py-2 bg-gray-900 text-gray-100 border-gray-700"
                             placeholder="Meta Title"
                             maxLength={70}
@@ -1120,7 +1443,10 @@ const AddCelebrity = () => {
                         <input
                             type="text"
                             value={metaDescription}
-                            onChange={e => setMetaDescription(e.target.value)}
+                            onChange={e => {
+                                setMetaDescription(e.target.value)
+                                setIsDirty(true)
+                            }}
                             className="input w-full border rounded px-3 py-2 bg-gray-900 text-gray-100 border-gray-700"
                             placeholder="Meta Description"
                             maxLength={170}
@@ -1147,6 +1473,23 @@ const AddCelebrity = () => {
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                         </svg>
                         <span className="text-white text-lg font-semibold">Processing...</span>
+                    </div>
+                </div>
+            )}
+            {showSuccessModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                    <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col items-center max-w-sm w-full">
+                        <svg className="h-16 w-16 text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <h2 className="text-2xl font-bold mb-2 text-gray-800">Update Successful!</h2>
+                        <p className="text-gray-600 mb-6 text-center">The celebrity profile has been updated successfully.</p>
+                        <button
+                            onClick={() => setShowSuccessModal(false)}
+                            className="bg-purple-700 hover:bg-purple-800 text-white font-semibold py-2 px-6 rounded shadow"
+                        >
+                            Close
+                        </button>
                     </div>
                 </div>
             )}

@@ -224,7 +224,7 @@ const AdminCelebrities = () => {
                         <Button
                           variant="outline"
                           className="w-1/2"
-                          onClick={() => openCelebrityDetail(celebrity)}
+                          onClick={() => navigate('/admin/celebrities/add', { state: { celebrity } })}
                         >
                           View
                         </Button>

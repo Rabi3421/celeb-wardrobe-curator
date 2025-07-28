@@ -1,10 +1,12 @@
-
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, X, Upload, Play, Image as ImageIcon } from 'lucide-react';
+import { Loader2, X, Play, Image as ImageIcon } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { storage } from "@/components/ui/firebase";
+import { getAuth, signInAnonymously } from "firebase/auth";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface MediaFile {
   id?: string;
@@ -21,13 +23,18 @@ interface MediaUploaderProps {
   onMediaChange: (media: MediaFile[]) => void;
 }
 
-const MediaUploader: React.FC<MediaUploaderProps> = ({ 
-  outfitId, 
-  existingMedia = [], 
-  onMediaChange 
-}) => {
+const MediaUploader = forwardRef<{
+  uploadAllMedia: () => Promise<MediaFile[]>;
+}, MediaUploaderProps>(function MediaUploader(
+  { outfitId, existingMedia = [], onMediaChange },
+  ref
+) {
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>(existingMedia);
   const [isUploading, setIsUploading] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    uploadAllMedia
+  }));
 
   const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -71,7 +78,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       displayOrder: i,
       isPrimary: i === 0 && media.type === 'image'
     }));
-    
+
     setMediaFiles(reorderedMedia);
     onMediaChange(reorderedMedia);
   }, [mediaFiles, onMediaChange]);
@@ -81,7 +88,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       ...media,
       isPrimary: i === index && media.type === 'image'
     }));
-    
+
     setMediaFiles(updatedMedia);
     onMediaChange(updatedMedia);
   }, [mediaFiles, onMediaChange]);
@@ -90,13 +97,13 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     const updatedMedia = [...mediaFiles];
     const [movedItem] = updatedMedia.splice(fromIndex, 1);
     updatedMedia.splice(toIndex, 0, movedItem);
-    
+
     // Update display order
     const reorderedMedia = updatedMedia.map((media, i) => ({
       ...media,
       displayOrder: i
     }));
-    
+
     setMediaFiles(reorderedMedia);
     onMediaChange(reorderedMedia);
   }, [mediaFiles, onMediaChange]);
@@ -105,18 +112,26 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     if (!mediaFile.file) return mediaFile.url;
 
     try {
-      // TODO: Replace with your own file upload logic
-      console.log('Uploading file:', mediaFile.file.name);
-      
-      // For now, just return the blob URL
-      // In a real implementation, you would upload to your own storage service
-      const uploadedUrl = mediaFile.url;
-      
+      const auth = getAuth();
+      if (!auth.currentUser) {
+        await signInAnonymously(auth);
+      }
+      const ext = mediaFile.file.name.split('.').pop();
+      const seoName = mediaFile.file.name
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9\-]/g, '');
+      const fileName = `${seoName}-${Date.now()}.${ext}`;
+      const fileRef = ref(storage, `outfits/${fileName}`);
+      await uploadBytes(fileRef, mediaFile.file);
+      const uploadedUrl = await getDownloadURL(fileRef);
+
       toast({
-        title: "Upload simulated",
-        description: `File ${mediaFile.file.name} would be uploaded to your storage service`,
+        title: "Upload successful",
+        description: `File ${mediaFile.file.name} uploaded.`,
       });
-      
+
       return uploadedUrl;
     } catch (error) {
       console.error('Error uploading media:', error);
@@ -156,7 +171,6 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         </Label>
         <p className="text-sm text-muted-foreground mb-2">
           Select multiple images and videos. The first image will be set as primary.
-          Note: File upload is currently simulated - implement your own storage service.
         </p>
         <Input
           id="media-upload"
@@ -194,13 +208,13 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
                       </div>
                     </div>
                   )}
-                  
+
                   {media.isPrimary && (
                     <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
                       Primary
                     </div>
                   )}
-                  
+
                   <div className="absolute top-2 right-2 flex gap-1">
                     {media.type === 'image' && !media.isPrimary && (
                       <Button
@@ -223,7 +237,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="p-2 text-center">
                   <p className="text-xs text-muted-foreground">
                     {media.type === 'video' ? 'Video' : 'Image'} #{index + 1}
@@ -263,6 +277,6 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       )}
     </div>
   );
-};
+});
 
 export default MediaUploader;

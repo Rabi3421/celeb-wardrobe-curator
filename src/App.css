@@ -40,3 +40,24 @@
 .read-the-docs {
   color: #888;
 }
+
+a.text-purple-400 {
+  color: #a78bfa; /* Tailwind's purple-400 */
+}
+a.text-purple-400:hover {
+  color: #7c3aed; /* Tailwind's purple-600 */
+}
+.prose ul, .prose-invert ul {
+  list-style-type: disc !important;
+  margin-left: 1.5em !important;
+}
+.prose ol, .prose-invert ol {
+  list-style-type: decimal !important;
+  margin-left: 1.5em !important;
+}
+.prose li, .prose-invert li {
+  display: list-item !important;
+}
+ul, ol {
+  list-style: revert !important;
+}
