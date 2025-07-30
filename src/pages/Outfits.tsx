@@ -25,13 +25,12 @@ const Outfits: React.FC = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  
+
   useEffect(() => {
     const loadOutfits = async () => {
       setIsLoading(true);
       try {
         const data = await fetchOutfits();
-        console.log("Fetched outfits:", data);
         setOutfits(data);
       } catch (error) {
         console.error("Error loading outfits:", error);
@@ -44,22 +43,30 @@ const Outfits: React.FC = () => {
         setIsLoading(false);
       }
     };
-    
     loadOutfits();
   }, [toast]);
 
   // Filter outfits based on search and category
   const filteredOutfits = outfits.filter(outfit => {
-    const matchesSearch = outfit.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          outfit.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          outfit.celebrity.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || outfit.occasion === selectedCategory;
+    const celebrityName =
+      typeof outfit.celebrity === "string"
+        ? outfit.celebrity
+        : outfit.celebrity?.name || "";
+
+    const matchesSearch =
+      outfit.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      outfit.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      celebrityName.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === "all" || outfit.occasion === selectedCategory;
+
     return matchesSearch && matchesCategory;
   });
 
   // Get unique occasions/categories
   const occasions = ["all", ...Array.from(new Set(outfits.map(outfit => outfit.occasion || "casual")))];
-  
+
   // Handle "Load More" button click
   const handleLoadMore = () => {
     setIsLoadingMore(true);
@@ -76,8 +83,12 @@ const Outfits: React.FC = () => {
   const featuredOutfit = outfits.length > 0 ? outfits[0] : null;
 
   // Enhanced internal linking data
-  const internalLinks = generateInternalLinks(selectedCategory, featuredOutfit?.celebrity, selectedCategory);
-  
+  const internalLinks = generateInternalLinks(
+    selectedCategory,
+    featuredOutfit?.celebrity?.name || (typeof featuredOutfit?.celebrity === "string" ? featuredOutfit.celebrity : ""),
+    selectedCategory
+  );
+
   // Social proof metrics (would come from analytics in real app)
   const socialProofMetrics = {
     totalViews: 12500,
@@ -88,7 +99,14 @@ const Outfits: React.FC = () => {
   };
 
   // Mock review data for featured outfit
-  const featuredOutfitReviews = featuredOutfit ? generateMockReviews(featuredOutfit.title, featuredOutfit.celebrity) : undefined;
+  const featuredOutfitReviews = featuredOutfit
+    ? generateMockReviews(
+      featuredOutfit.title,
+      typeof featuredOutfit.celebrity === "string"
+        ? featuredOutfit.celebrity
+        : featuredOutfit.celebrity?.name
+    )
+    : undefined;
 
   // Enhanced meta description
   const optimizedDescription = `Discover ${filteredOutfits.length}+ celebrity outfit inspirations from Zendaya, Rihanna, Harry Styles & more. Shop affordable alternatives to recreate red carpet looks, street style, and casual celebrity fashion for less than $100.`;
@@ -106,9 +124,12 @@ const Outfits: React.FC = () => {
     items: filteredOutfits.slice(0, 20).map((outfit) => ({
       name: outfit.title,
       description: outfit.description,
-      image: outfit.image,
-      url: `/outfit/${outfit.id}`,
-      author: outfit.celebrity
+      image: Array.isArray(outfit.images) ? outfit.images[0] : outfit.image,
+      url: `/outfit/${outfit._id || outfit.id}`,
+      author:
+        typeof outfit.celebrity === "string"
+          ? outfit.celebrity
+          : outfit.celebrity?.name
     }))
   };
 
@@ -128,7 +149,7 @@ const Outfits: React.FC = () => {
       answer: "Most celebrity looks can be recreated for under $100 using our curated affordable alternatives. We provide direct shopping links to budget-friendly dupes from brands like H&M, Zara, ASOS, and Target."
     }
   ];
-  
+
   if (isLoading) {
     return (
       <PageLayout>
@@ -157,7 +178,7 @@ const Outfits: React.FC = () => {
       </PageLayout>
     );
   }
-  
+
   return (
     <PageLayout>
       <EnhancedSEO
@@ -203,14 +224,14 @@ const Outfits: React.FC = () => {
           <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
             {seoContentSnippets.outfitGrid.description}
           </p>
-          
+
           {/* Internal linking section */}
           <div className="text-sm mb-8">
             <span className="text-muted-foreground">Explore: </span>
             {internalLinks.slice(0, 3).map((link, index) => (
               <span key={link.url}>
-                <a 
-                  href={link.url} 
+                <a
+                  href={link.url}
                   className="text-primary hover:text-primary/80 underline"
                   title={link.title}
                 >
@@ -220,10 +241,10 @@ const Outfits: React.FC = () => {
               </span>
             ))}
           </div>
-          
+
           <div className="relative max-w-md mx-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-            <Input 
+            <Input
               placeholder="Search celebrity outfits by name, style, or occasion..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -243,9 +264,11 @@ const Outfits: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2">
                 <div className="relative aspect-[3/4] md:aspect-auto">
                   <img
-                    src={featuredOutfit.image}
+                    src={Array.isArray(featuredOutfit.images) ? featuredOutfit.images[0] : featuredOutfit.image}
                     alt={generateOptimizedAltText(
-                      featuredOutfit.celebrity,
+                      typeof featuredOutfit.celebrity === "string"
+                        ? featuredOutfit.celebrity
+                        : featuredOutfit.celebrity?.name,
                       featuredOutfit.title,
                       featuredOutfit.occasion
                     )}
@@ -263,7 +286,9 @@ const Outfits: React.FC = () => {
                       {featuredOutfit.title}
                     </CardTitle>
                     <CardDescription className="text-base">
-                      By {featuredOutfit.celebrity}
+                      By {typeof featuredOutfit.celebrity === "string"
+                        ? featuredOutfit.celebrity
+                        : featuredOutfit.celebrity?.name}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-0 pt-4">
@@ -271,21 +296,21 @@ const Outfits: React.FC = () => {
                     <p className="text-sm text-muted-foreground mb-6">
                       {seoContentSnippets.featuredOutfit.description}
                     </p>
-                    
+
                     {/* Social proof indicators */}
                     <div className="flex items-center space-x-4 mb-6">
                       <div className="flex items-center space-x-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{featuredOutfit.date ? new Date(featuredOutfit.date).toLocaleDateString() : "Recent"}</span>
+                        <span className="text-sm">{featuredOutfit.createdAt ? new Date(featuredOutfit.createdAt).toLocaleDateString() : "Recent"}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Heart className="h-4 w-4 text-red-500" />
                         <span className="text-sm">{socialProofMetrics.likes} Likes</span>
                       </div>
                     </div>
-                    <Button 
+                    <Button
                       className="bg-white text-primary-foreground hover:bg-white/90"
-                      onClick={() => window.location.href = `/outfit/${featuredOutfit.id}`}
+                      onClick={() => window.location.href = `/outfit/${featuredOutfit._id || featuredOutfit.id}`}
                     >
                       View Details & Shop The Look
                     </Button>
@@ -315,17 +340,26 @@ const Outfits: React.FC = () => {
         {filteredOutfits.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filteredOutfits.map((outfit) => (
-              <div key={outfit.id} className="group">
+              <div key={outfit._id || outfit.id} className="group">
                 <OutfitCard
-                  id={outfit.id}
-                  image={outfit.image}
-                  celebrity={outfit.celebrity}
-                  celebrityId={outfit.celebrityId}
+                  id={outfit._id || outfit.id}
+                  image={Array.isArray(outfit.images) ? outfit.images[0] : outfit.image}
+                  celebrity={
+                    typeof outfit.celebrity === "string"
+                      ? outfit.celebrity
+                      : outfit.celebrity?.name
+                  }
+                  celebrityId={
+                    typeof outfit.celebrity === "object"
+                      ? outfit.celebrity?._id
+                      : undefined
+                  }
                   title={outfit.title}
                   description={outfit.description}
                   slug={outfit.slug}
+                  price={outfit.price}
                 />
-                
+
                 {/* Hidden structured data for individual outfits */}
                 <script type="application/ld+json">
                   {JSON.stringify({
@@ -335,10 +369,13 @@ const Outfits: React.FC = () => {
                     "description": outfit.description,
                     "author": {
                       "@type": "Person",
-                      "name": outfit.celebrity
+                      "name":
+                        typeof outfit.celebrity === "string"
+                          ? outfit.celebrity
+                          : outfit.celebrity?.name
                     },
-                    "image": outfit.image,
-                    "url": `${window.location.origin}/outfit/${outfit.id}`,
+                    "image": Array.isArray(outfit.images) ? outfit.images[0] : outfit.image,
+                    "url": `${window.location.origin}/outfit/${outfit._id || outfit.id}`,
                     "publisher": {
                       "@type": "Organization",
                       "name": "CelebrityPersona"
@@ -353,8 +390,8 @@ const Outfits: React.FC = () => {
             <p className="text-muted-foreground mb-4">No outfits found matching your search criteria.</p>
             <p className="text-sm text-muted-foreground">
               Try searching for different terms or{" "}
-              <button 
-                onClick={() => {setSearchTerm(""); setSelectedCategory("all");}}
+              <button
+                onClick={() => { setSearchTerm(""); setSelectedCategory("all"); }}
                 className="text-primary hover:text-primary/80 underline"
               >
                 browse all outfits
@@ -366,8 +403,8 @@ const Outfits: React.FC = () => {
         {/* Load More Button */}
         {filteredOutfits.length > 0 && (
           <div className="flex justify-center mt-12">
-            <Button 
-              onClick={handleLoadMore} 
+            <Button
+              onClick={handleLoadMore}
               disabled={isLoadingMore}
               className="btn-primary"
             >
@@ -388,7 +425,7 @@ const Outfits: React.FC = () => {
             <ShoppingGuidesCard />
           </div>
         </div>
-        
+
         {/* Internal linking section */}
         <div className="mt-12 p-6 bg-gray-50 rounded-lg">
           <h3 className="text-lg font-semibold mb-4">Explore More Celebrity Fashion</h3>

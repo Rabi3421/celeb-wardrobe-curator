@@ -229,26 +229,18 @@ export const generateUniqueOutfitSlug = async (
 // Mock implementation - replace with your backend API calls
 export const fetchCelebrities = async (
   page = 1,
-  limit = 10,
-  apiKey: string
+  limit = 10
 ): Promise<Celebrity[]> => {
   try {
-    const response = await fetch(
-      `${API_CONFIG.baseUrl}/celebrities?page=${page}&limit=${limit}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          api_key: apiKey,
-        },
-      }
-    );
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
+    const response = await axios.get(`${API_CONFIG.baseUrl}/celebrities`, {
+      params: { page, limit },
+      headers: {
+        "Content-Type": "application/json",
+        api_key: API_CONFIG.websiteApiKey,
+      },
+    });
     // Adjust this if your API response structure is different
-    return data.celebrities || [];
+    return response.data.celebrities || [];
   } catch (error) {
     console.error("Error fetching celebrities:", error);
     return [];
@@ -269,7 +261,6 @@ export const getCelebrityById = async (
 };
 
 export const fetchCelebrityById = getCelebrityById;
-
 
 export const fetchCelebrityBySlug = async (
   slug: string
@@ -412,24 +403,25 @@ export const addOutfit = async (
 };
 
 export const fetchOutfits = async (
-  limit?: number,
+  limit = 10,
   celebrityId?: string
 ): Promise<Outfit[]> => {
   try {
-    console.log("Fetching outfits...");
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    const params: Record<string, string> = {
+      page: "1",
+      limit: limit.toString(),
+    };
+    if (celebrityId) params.celebrityId = celebrityId;
 
-    let outfits = [...mockOutfits];
-
-    if (celebrityId) {
-      outfits = outfits.filter((outfit) => outfit.celebrityId === celebrityId);
-    }
-
-    if (limit) {
-      outfits = outfits.slice(0, limit);
-    }
-
-    return outfits;
+    const response = await axios.get(`${API_CONFIG.baseUrl}/outfits`, {
+      params,
+      headers: {
+        "Content-Type": "application/json",
+        api_key: API_CONFIG.websiteApiKey,
+      },
+    });
+    // Adjust this if your API response structure is different
+    return response.data.data || [];
   } catch (error) {
     console.error("Error fetching outfits:", error);
     return [];
@@ -452,8 +444,19 @@ export const fetchOutfitBySlug = async (
 export const fetchOutfitById = async (id: string): Promise<Outfit | null> => {
   try {
     console.log("Fetching outfit by ID:", id);
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    return mockOutfits.find((outfit) => outfit.id === id) || null;
+    const response = await fetch(`${API_CONFIG.baseUrl}/outfits/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        api_key: API_CONFIG.websiteApiKey, // Remove if your API doesn't need it
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    // Adjust this if your API response structure is different
+    return data.data || null;
   } catch (error) {
     console.error("Error fetching outfit by ID:", error);
     return null;

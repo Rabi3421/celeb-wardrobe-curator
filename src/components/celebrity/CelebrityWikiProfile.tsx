@@ -170,7 +170,6 @@ const CelebrityWikiProfile: React.FC<{ celebrity: any }> = ({ celebrity }) => {
                         {renderSections()}
                         {renderFilms()}
                         {renderAwards()}
-                        {renderGallery()}
                     </div>
                     {/* Right: Image and quick info */}
                     <div className="md:w-1/4 flex flex-col items-center">

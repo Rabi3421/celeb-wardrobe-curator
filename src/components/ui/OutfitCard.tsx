@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -14,6 +13,7 @@ interface OutfitCardProps {
   date?: string;
   occasion?: string;
   slug?: string;
+  price?: number;
 }
 
 const OutfitCard: React.FC<OutfitCardProps> = ({
@@ -25,7 +25,8 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
   description,
   date,
   occasion,
-  slug
+  slug,
+  price,
 }) => {
   const { trackEvent } = useAnalytics();
 
@@ -42,7 +43,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
   };
 
   // Use slug if available, fallback to id
-  const outfitUrl = slug ? `/outfit/${slug}` : `/outfit/${id}`;
+  const outfitUrl = slug ? `/outfits/${slug}` : `/outfits/${id}`;
 
   return (
     <div className="group bg-white rounded-xl border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden max-w-sm mx-auto">
@@ -64,13 +65,13 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
         </button>
 
         {/* Occasion Badge */}
-        {occasion && (
+        {/* {occasion && (
           <div className="absolute top-3 left-3">
             <span className="bg-black/80 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-md">
               {occasion.toUpperCase()}
             </span>
           </div>
-        )}
+        )} */}
 
         {/* Quick Shop Overlay */}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -116,16 +117,16 @@ const OutfitCard: React.FC<OutfitCardProps> = ({
           <span className="text-xs text-gray-500 ml-1">(4.0)</span>
         </div>
 
-        {/* Price Section - Simplified */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-gray-900">$25</span>
-            <span className="text-sm text-gray-500 line-through">$89</span>
+        {/* Price Section - Improved */}
+        {typeof price === "number" ? (
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold text-gray-900">
+                ₹{price.toLocaleString("en-IN")}
+              </span>
+            </div>
           </div>
-          <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">
-            72% OFF
-          </span>
-        </div>
+        ) : null}
 
         {/* Shop Button */}
         <Link 

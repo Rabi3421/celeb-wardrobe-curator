@@ -1,11 +1,9 @@
-
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "@/components/layout/PageLayout";
 import AffiliateProductCard from "@/components/ui/AffiliateProductCard";
 import MediaGallery from "@/components/ui/MediaGallery";
-import { fetchOutfitBySlug, fetchOutfitById, fetchAffiliateProductsByOutfitId } from "@/services/api";
-import { Outfit, AffiliateProduct } from "@/types/data";
+import { fetchOutfitById, fetchAffiliateProductsByOutfitId } from "@/services/api";
 import { Loader2, ShoppingCart, ExternalLink } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -21,69 +19,43 @@ interface MediaItem {
 }
 
 const OutfitDetail: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
-  
-  // Query to fetch outfit data - try by slug first, then by ID if slug doesn't work
+  const { id } = useParams<{ id: string }>();
+
+  // Query to fetch outfit data by ID
   const { data: outfit, isLoading: isLoadingOutfit, error: outfitError } = useQuery({
-    queryKey: ['outfit', slug],
+    queryKey: ['outfit', id],
     queryFn: async () => {
-      if (!slug) throw new Error("Outfit slug not found");
-      
-      // Try fetching by slug first
-      let outfitData = await fetchOutfitBySlug(slug);
-      
-      // If not found by slug, try by ID (for backward compatibility)
-      if (!outfitData) {
-        outfitData = await fetchOutfitById(slug);
-      }
-      
+      if (!id) throw new Error("Outfit ID not found");
+      const outfitData = await fetchOutfitById(id);
       if (!outfitData) throw new Error("Outfit not found");
       return outfitData;
     }
   });
 
-  // Query to fetch media for this outfit
-  const { data: mediaItems = [], isLoading: isLoadingMedia } = useQuery({
-    queryKey: ['outfit', slug, 'media'],
-    queryFn: async () => {
-      if (!outfit) return [];
-      
-      const { data, error } = await supabase
-        .from('outfit_media')
-        .select('*')
-        .eq('outfit_id', outfit.id)
-        .order('display_order');
-
-      if (error) {
-        console.error('Error fetching outfit media:', error);
-        return [];
-      }
-
-      return data.map(item => ({
-        id: item.id,
-        url: item.media_url,
-        type: item.media_type as 'image' | 'video',
-        isPrimary: item.is_primary,
-        displayOrder: item.display_order
-      }));
-    },
-    enabled: !!outfit
-  });
+  // Use images array from outfit for gallery
+  const displayMedia: MediaItem[] = outfit?.images?.length
+    ? outfit.images.map((url: string, idx: number) => ({
+      id: `img-${idx}`,
+      url,
+      type: 'image',
+      isPrimary: idx === 0,
+      displayOrder: idx,
+    }))
+    : [];
 
   // Query to fetch affiliate products for this outfit
   const { data: products = [], isLoading: isLoadingProducts } = useQuery({
-    queryKey: ['outfit', slug, 'products'],
+    queryKey: ['outfit', id, 'products'],
     queryFn: async () => {
       if (!outfit) return [];
-      return fetchAffiliateProductsByOutfitId(outfit.id);
+      return fetchAffiliateProductsByOutfitId(outfit._id);
     },
     enabled: !!outfit
   });
 
-  const isLoading = isLoadingOutfit || isLoadingProducts || isLoadingMedia;
+  const isLoading = isLoadingOutfit || isLoadingProducts;
 
   const handleBuyNowClick = () => {
-    // If there's an affiliate link, open it in a new tab
     if (outfit?.affiliateLink) {
       window.open(outfit.affiliateLink, '_blank');
       toast({
@@ -124,25 +96,12 @@ const OutfitDetail: React.FC = () => {
     );
   }
 
-  // Create fallback media if no media items exist
-  const displayMedia: MediaItem[] = mediaItems.length > 0 
-    ? mediaItems 
-    : outfit.image 
-      ? [{
-          id: 'fallback',
-          url: outfit.image,
-          type: 'image' as const,
-          isPrimary: true,
-          displayOrder: 0
-        }]
-      : [];
-
   return (
     <PageLayout>
       <div className="container-custom py-8 md:py-16">
         <div className="mb-6">
           <Link
-            to={`/celebrity/${outfit.celebrityId}`}
+            to={`/celebrity/${outfit.celebrity?._id}`}
             className="text-sm font-medium text-primary-foreground hover:underline inline-flex items-center"
           >
             <svg
@@ -159,7 +118,7 @@ const OutfitDetail: React.FC = () => {
             >
               <path d="m15 18-6-6 6-6" />
             </svg>
-            Back to {outfit.celebrity}'s Profile
+            Back to {outfit.celebrity?.name}'s Profile
           </Link>
         </div>
 
@@ -170,7 +129,7 @@ const OutfitDetail: React.FC = () => {
               <MediaGallery
                 media={displayMedia}
                 title={outfit.title}
-                celebrity={outfit.celebrity}
+                celebrity={outfit.celebrity?.name}
               />
             ) : (
               <div className="aspect-[4/5] bg-gray-100 rounded-2xl flex items-center justify-center">
@@ -184,7 +143,7 @@ const OutfitDetail: React.FC = () => {
                   {outfit.occasion}
                 </span>
               )}
-              {outfit.tags && outfit.tags.map((tag, index) => (
+              {outfit.tags && outfit.tags.map((tag: string, index: number) => (
                 <span
                   key={index}
                   className="bg-secondary px-3 py-1 rounded-full text-xs font-medium"
@@ -198,9 +157,9 @@ const OutfitDetail: React.FC = () => {
           {/* Right column - Details */}
           <div>
             <div className="mb-6">
-              <Link to={`/celebrity/${outfit.celebrityId}`}>
+              <Link to={`/celebrity/${outfit.celebrity?._id}`}>
                 <h3 className="font-medium text-sm text-primary-foreground hover:underline">
-                  {outfit.celebrity}
+                  {outfit.celebrity?.name}
                 </h3>
               </Link>
               <h1 className="font-serif text-3xl font-medium mt-1 mb-4">
@@ -209,16 +168,29 @@ const OutfitDetail: React.FC = () => {
               <p className="text-muted-foreground">
                 {outfit.fullDescription || outfit.description}
               </p>
-              
+              {outfit.price && (
+                <div className="text-lg font-bold text-primary mt-4 mb-2">
+                  ₹{outfit.price.toLocaleString("en-IN")}
+                </div>
+              )}
+              {outfit.brand && (
+                <div className="text-sm text-muted-foreground mb-2">
+                  Brand: <span className="font-medium">{outfit.brand}</span>
+                </div>
+              )}
               {outfit.affiliateLink && (
-                <Button 
-                  onClick={handleBuyNowClick} 
-                  className="mt-6 w-full md:w-auto"
+                <Button
+                  onClick={handleBuyNowClick}
+                  className="mt-6 w-full md:w-auto px-7 py-3 text-base font-semibold rounded-xl bg-[#e63946]/90 text-white border border-[#e63946] hover:bg-[#e63946] hover:shadow-lg transition-all duration-300 ease-in-out flex items-center justify-center gap-2"
                   size="lg"
+                  style={{
+                    letterSpacing: "0.025em",
+                    boxShadow: "0 6px 14px rgba(230, 57, 70, 0.15)",
+                  }}
                 >
-                  <ShoppingCart className="mr-2" />
+                  <ShoppingCart className="h-5 w-5 text-white opacity-90" />
                   Buy Now
-                  <ExternalLink className="ml-2 h-4 w-4" />
+                  <ExternalLink className="h-5 w-5 text-white opacity-90" />
                 </Button>
               )}
             </div>
@@ -248,13 +220,13 @@ const OutfitDetail: React.FC = () => {
                 Outfit Details
               </h2>
               <div className="space-y-3">
-                {outfit.date && (
+                {outfit.createdAt && (
                   <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-muted-foreground">Date</span>
-                    <span className="font-medium">{new Date(outfit.date).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'short', 
-                      day: 'numeric' 
+                    <span className="font-medium">{new Date(outfit.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
                     })}</span>
                   </div>
                 )}
@@ -267,52 +239,7 @@ const OutfitDetail: React.FC = () => {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Share</span>
                   <div className="flex space-x-4">
-                    <button aria-label="Share on Facebook">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                      </svg>
-                    </button>
-                    <button aria-label="Share on Twitter">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-                      </svg>
-                    </button>
-                    <button aria-label="Share on Pinterest">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <line x1="12" x2="12" y1="5" y2="19" />
-                        <line x1="5" x2="19" y1="12" y2="12" />
-                      </svg>
-                    </button>
+                    {/* ...share buttons... */}
                   </div>
                 </div>
               </div>

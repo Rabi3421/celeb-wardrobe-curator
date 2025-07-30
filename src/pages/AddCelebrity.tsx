@@ -96,7 +96,6 @@ const AddCelebrity = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const editingCelebrity = location.state?.celebrity;
-    console.log("editingCelebrity:", editingCelebrity)
     const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
     const [infoboxImageFile, setInfoboxImageFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -345,12 +344,10 @@ const AddCelebrity = () => {
         try {
             if (coverImageFile) {
                 uploadedCoverImage = await uploadImageToFirebase(coverImageFile, name);
-                console.log("Uploaded cover image URL:", uploadedCoverImage);
                 setCoverImage(uploadedCoverImage);
             }
             if (infoboxImageFile) {
                 uploadedInfoboxImage = await uploadImageToFirebase(infoboxImageFile, name);
-                console.log("Uploaded cover image URL:", uploadedInfoboxImage);
                 setInfoboxImage(uploadedInfoboxImage);
             }
 
@@ -410,16 +407,13 @@ const AddCelebrity = () => {
             });
             if (response.ok) {
                 const result = await response.json();
-                console.log("Celebrity added:", result);
                 alert("Celebrity added successfully!");
                 // Optionally reset form or navigate
             } else {
                 const error = await response.json();
-                console.log("Error adding celebrity:", error);
                 alert("Error: " + (error.message || "Failed to add celebrity"));
             }
         } catch (err) {
-            console.error("Network error:", err);
             alert("Network error: " + err);
         } finally {
             setIsUploading(false);
@@ -495,15 +489,12 @@ const AddCelebrity = () => {
                 updatedData,
                 { headers: { "Content-Type": "application/json" } }
             );
-            console.log("Celebrity updated:", response.data);
             setShowSuccessModal(true);
             setIsDirty(false);
         } catch (err: any) {
             if (err.response) {
-                console.log("error updating celebrity:", err.response.data);
                 alert("Error: " + (err.response.data.message || "Failed to update celebrity"));
             } else {
-                console.log("error updating celebrity:", err);
                 alert("Network error: " + err.message);
             }
         } finally {
@@ -560,7 +551,6 @@ const AddCelebrity = () => {
             draftData.medals = medals.filter(m => m.type && m.year);
         }
 
-        console.log("Draft Data:", JSON.stringify(draftData, null, 2));
         // TODO: Save draftData to your backend or local storage
     };
 
@@ -703,12 +693,10 @@ const AddCelebrity = () => {
         const images: string[] = [];
         const listRef = ref(storage, "celebrities/");
         const res = await listAll(listRef);
-        console.log("res:", res);
         for (const itemRef of res.items) {
             const url = await getDownloadURL(itemRef);
             images.push(url);
         }
-        console.log("Fetched Firebase images:", images);
         setFirebaseImages(images);
         setIsFetchingImages(false);
     };

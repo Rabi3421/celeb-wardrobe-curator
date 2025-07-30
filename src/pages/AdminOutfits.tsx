@@ -66,7 +66,7 @@ const AdminOutfits: React.FC = () => {
       return response.data.data || [];
     }
   });
-
+  console.log(outfits)
   // Mock celebrities loading
   const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
   const [isCelebritiesLoading, setIsCelebritiesLoading] = useState(false);
@@ -275,7 +275,10 @@ const AdminOutfits: React.FC = () => {
                     <TableRow key={outfit._id}>
                       <TableCell>
                         <div className="w-16 h-20 bg-secondary rounded overflow-hidden">
-                          {outfit.images && outfit.images.length > 0 && outfit.images[0].startsWith("http") ? (
+                          {Array.isArray(outfit.images) &&
+                            typeof outfit.images[0] === "string" &&
+                            outfit.images[0] &&
+                            outfit.images[0].startsWith("http") ? (
                             <img
                               src={outfit.images[0]}
                               alt={outfit.title}
@@ -336,7 +339,10 @@ const AdminOutfits: React.FC = () => {
               filteredOutfits.map((outfit: any) => (
                 <div key={outfit._id} className="bg-white rounded-xl shadow p-4 flex flex-col">
                   <div className="w-full h-40 bg-secondary rounded overflow-hidden mb-3">
-                    {outfit.images && outfit.images.length > 0 && outfit.images[0].startsWith("http") ? (
+                    {Array.isArray(outfit.images) &&
+                      typeof outfit.images[0] === "string" &&
+                      outfit.images[0] &&
+                      outfit.images[0].startsWith("http") ? (
                       <img
                         src={outfit.images[0]}
                         alt={outfit.title}
