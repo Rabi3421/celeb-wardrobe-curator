@@ -19,49 +19,49 @@ import { useNavigate } from "react-router-dom";
 import { generateOptimizedMetaDescription, generateOptimizedTitle, generateInternalLinks } from "@/utils/seoContentOptimizer";
 import { generateMockReviews } from "@/utils/socialProofSchema";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { fetchCelebritiesAsync } from "@/store/slices/celebritySlice";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { useAppSelector } from "@/hooks/useAppSelector";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { API_CONFIG } from "@/config/api";
 
 const Index: React.FC = () => {
-  const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
-  const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const dispatch = useAppDispatch();
+  const { celebrities, selectedCelebrity } = useAppSelector((state) => state.celebrities);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [affiliateProducts, setAffiliateProducts] = useState<AffiliateProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const { trackPageView } = useAnalytics();
-
+  console.log("celebrities:",celebrities)
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      const [celebritiesData, outfitsData, blogPostsData, productsData] = await Promise.all([
-        fetchCelebrities(),
-        fetchOutfits(3),
-        fetchBlogPosts(),
-        fetchAffiliateProducts()
-      ]);
+    dispatch(fetchCelebritiesAsync());
+  }, [dispatch]);
 
-      setCelebrities(celebritiesData);
-      setOutfits(outfitsData);
-      setBlogPosts(blogPostsData);
-      setAffiliateProducts(productsData);
-      setIsLoading(false);
-    };
-
-    fetchData();
-    
-    // Track homepage view
-    trackPageView("/", {
-      page: "homepage",
-      timestamp: new Date().toISOString()
-    });
-  }, [trackPageView]);
+  // Fetch outfits from your backend
+  const { data: outfits = [], isLoading: isOutfitsLoading } = useQuery({
+    queryKey: ['outfits'],
+    queryFn: async () => {
+      const response = await axios.get(
+        `${API_CONFIG.baseUrl}/outfits?page=1&limit=100`,
+        {
+          headers: {
+            api_key: API_CONFIG.websiteApiKey,
+          },
+        }
+      );
+      return response.data.data || [];
+    }
+  });
 
   // Get featured data to display
-  const featuredOutfits = outfits.slice(0, 6);
+  const featuredOutfits = outfits.slice(0, 3); // Only slice once for display
   const featuredCelebrities = celebrities.slice(0, 4);
   const recentBlogPosts = blogPosts.slice(0, 3);
 
-  // Keep the hardcoded testimonials for now, as they're not part of the core data model
+  // Testimonials, categories, spotlight, etc. (unchanged)
   const testimonials = [
     {
       id: 1,
@@ -95,9 +95,8 @@ const Index: React.FC = () => {
     { title: "Bikes", icon: "bike", link: "/category/bikes" }
   ];
 
-  // Spotlight celebrity with sample products
   const spotlightCelebrity = celebrities.length > 0 ? {
-    id: celebrities[0].id,
+    id: celebrities[0]._id || celebrities[0].id,
     name: celebrities[0].name,
     image: celebrities[0].image,
     outfit: "Latest Fashion Statement",
@@ -107,7 +106,7 @@ const Index: React.FC = () => {
       image: product.image,
       title: product.title,
       price: product.price,
-      retailer: product.retailer, 
+      retailer: product.retailer,
       affiliateLink: product.affiliateLink
     }))
   } : null;
@@ -138,7 +137,7 @@ const Index: React.FC = () => {
     }
   ];
 
-  // Enhanced SEO data
+  // SEO, FAQ, breadcrumbs, etc. (unchanged)
   const seoTitle = generateOptimizedTitle(
     "Celebrity Style Inspiration & Affordable Fashion Alternatives",
     ["celebrity fashion", "affordable style", "celebrity outfits", "fashion inspiration"]
@@ -149,7 +148,6 @@ const Index: React.FC = () => {
     "celebrity fashion"
   );
 
-  // Enhanced FAQ data for structured data
   const faqData = [
     {
       question: "How do I find celebrity outfit inspiration?",
@@ -173,7 +171,6 @@ const Index: React.FC = () => {
     }
   ];
 
-  // Enhanced breadcrumb data
   const breadcrumbData = [
     {
       name: "Home",
@@ -181,20 +178,18 @@ const Index: React.FC = () => {
     }
   ];
 
-  // ItemList schema for featured outfits
   const itemListSchema = featuredOutfits.length > 0 ? {
     name: "Celebrity Fashion Inspiration",
     description: "Trending celebrity outfits with affordable alternatives",
-    items: featuredOutfits.slice(0, 3).map(outfit => ({
+    items: featuredOutfits.map(outfit => ({
       name: outfit.title,
       description: outfit.description,
-      image: outfit.image,
-      url: `/outfit/${outfit.id}`,
-      author: outfit.celebrity
+      image: Array.isArray(outfit.images) ? outfit.images[0] : outfit.image,
+      url: `/outfit/${outfit._id || outfit.id}`,
+      author: typeof outfit.celebrity === "object" ? outfit.celebrity.name : outfit.celebrity
     }))
   } : undefined;
 
-  // Social proof metrics for homepage
   const socialProofMetrics = {
     totalViews: 1250000,
     likes: 85000,
@@ -203,13 +198,9 @@ const Index: React.FC = () => {
     saves: 15600
   };
 
-  // Mock reviews for homepage testimonials
   const reviewData = generateMockReviews("CelebrityPersona Fashion Platform", "CelebrityPersona");
-
-  // Internal links for better SEO
   const internalLinks = generateInternalLinks("all");
 
-  // Handle search submission
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
@@ -250,22 +241,22 @@ const Index: React.FC = () => {
             </p>
             <form onSubmit={handleSearch} className="relative max-w-md mb-6">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-              <Input 
+              <Input
                 type="text"
                 placeholder="Search celebrities, styles..."
                 className="pl-10 pr-20 py-6 rounded-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full px-4"
               >
                 Search
               </Button>
             </form>
             <div className="flex space-x-4">
-              <button 
+              <button
                 className="btn-primary flex items-center"
                 onClick={() => navigate('/celebrities')}
               >
@@ -293,17 +284,52 @@ const Index: React.FC = () => {
           viewAllLink="/outfits"
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredOutfits.slice(0, 3).map((outfit) => (
+          {featuredOutfits.map((outfit) => (
             <OutfitCard
-              key={outfit.id}
-              id={outfit.id}
-              image={outfit.image}
-              celebrity={outfit.celebrity}
-              celebrityId={outfit.celebrityId}
+              key={outfit._id || outfit.id}
+              id={outfit._id || outfit.id}
+              image={Array.isArray(outfit.images) ? outfit.images[0] : outfit.image}
+              celebrity={typeof outfit.celebrity === "object" ? outfit.celebrity.name : outfit.celebrity}
+              celebrityId={typeof outfit.celebrity === "object" ? outfit.celebrity._id : outfit.celebrityId}
               title={outfit.title}
               description={outfit.description}
+              price={outfit.price}
             />
           ))}
+        </div>
+      </section>
+
+      {/* Featured Celebrities Section */}F
+      <section className="py-16 bg-gradient-to-r from-white to-pastel-lavender/60">
+        <div className="container-custom">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="font-serif text-2xl md:text-3xl font-medium">
+              Celebrity Profiles
+            </h2>
+            <Button
+              variant="outline"
+              className="rounded-full px-6"
+              onClick={() => navigate("/celebrities")}
+            >
+              View All Celebrities
+            </Button>
+          </div>
+          <div className="flex gap-6 overflow-x-auto pb-2 hide-scrollbar">
+            {featuredCelebrities.map((celeb) => (
+              <div
+                key={celeb._id || celeb.id}
+                className="min-w-[220px] max-w-[220px] flex-shrink-0"
+              >
+                <CelebrityCard
+                  id={celeb._id || celeb.id}
+                  name={celeb.name}
+                  image={celeb.coverImage}
+                  bio={celeb.bio}
+                  slug={celeb.slug}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

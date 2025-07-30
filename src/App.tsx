@@ -53,14 +53,14 @@ function App() {
                 
                 {/* Celebrity routes - slug-based as primary */}
                 <Route path="/celebrity/:slug" element={<CelebrityProfile />} />
-                <Route path="/celebrity/id/:id" element={<CelebrityProfile />} />
+                <Route path="/celebrity/:id" element={<CelebrityProfile />} />
                 
                 <Route path="/add-outfit" element={<AddOutfit />} />
                 <Route path="/outfits" element={<Outfits />} />
                 
                 {/* Outfit routes - slug-based as primary */}
                 <Route path="/outfit/:slug" element={<OutfitDetail />} />
-                <Route path="/outfit/id/:id" element={<OutfitDetail />} />
+                <Route path="/outfits/:id" element={<OutfitDetail />} />
                 
                 {/* Blog routes */}
                 <Route path="/blog" element={<Blog />} />
