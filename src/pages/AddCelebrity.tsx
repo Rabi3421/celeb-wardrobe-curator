@@ -269,7 +269,10 @@ const AddCelebrity = () => {
             setGalleryImages(editingCelebrity.galleryImages || []);
             setSections(
                 editingCelebrity.sections && editingCelebrity.sections.length > 1
-                    ? editingCelebrity.sections.slice(1) // skip Biography, handled by editor
+                    ? editingCelebrity.sections.slice(1).map(section => ({
+                        ...section,
+                        content: decodeHtml(section.content || "")
+                    }))
                     : [
                         { title: 'Early Life', content: '' },
                         { title: 'Career', content: '' },
