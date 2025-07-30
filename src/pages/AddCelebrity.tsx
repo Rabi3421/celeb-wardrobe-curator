@@ -14,6 +14,7 @@ import axios from 'axios';
 import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 import ListItem from '@tiptap/extension-list-item';
+import { listAll, deleteObject } from "firebase/storage";
 
 const SectionEditor = ({
     value,
@@ -90,6 +91,7 @@ const SectionEditor = ({
     );
 };
 
+
 const AddCelebrity = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -110,6 +112,13 @@ const AddCelebrity = () => {
     const [occupation, setOccupation] = useState('');
     const [nationality, setNationality] = useState('');
     const [infoboxImage, setInfoboxImage] = useState('');
+    const [deletingImageIdx, setDeletingImageIdx] = useState<number | null>(null);
+    const [showInfoboxModal, setShowInfoboxModal] = useState(false);
+    const [showCoverModal, setShowCoverModal] = useState(false);
+    const [firebaseInfoboxImages, setFirebaseInfoboxImages] = useState<string[]>([]);
+    const [firebaseCoverImages, setFirebaseCoverImages] = useState<string[]>([]);
+    const [isFetchingInfoboxImages, setIsFetchingInfoboxImages] = useState(false);
+    const [isFetchingCoverImages, setIsFetchingCoverImages] = useState(false);
     const [facts, setFacts] = useState([
         { label: 'Born', value: '' },           // e.g. "15 March 1993 (age 32), Bombay, India"
         { label: 'Citizenship', value: '' },
@@ -141,7 +150,9 @@ const AddCelebrity = () => {
     const [metaDescription, setMetaDescription] = useState('');
     const [slug, setSlug] = useState('');
     const [coverImage, setCoverImage] = useState('');
-
+    const [showGalleryModal, setShowGalleryModal] = useState(false);
+    const [firebaseImages, setFirebaseImages] = useState<string[]>([]);
+    const [isFetchingImages, setIsFetchingImages] = useState(false);
     // Sections (for Wikipedia-style page)
     const [sections, setSections] = useState([
         { title: 'Early Life', content: '' },
@@ -298,14 +309,15 @@ const AddCelebrity = () => {
         if (!auth.currentUser) {
             await signInAnonymously(auth);
         }
-        // Generate SEO-friendly name: e.g. alia-bhatt.jpg
+        // Generate SEO-friendly and unique name: e.g. alia-bhatt-16987654321.jpg
         const ext = file.name.split('.').pop();
         const seoName = celebrityName
             .trim()
             .toLowerCase()
             .replace(/\s+/g, '-')         // spaces to hyphens
             .replace(/[^a-z0-9\-]/g, ''); // remove non-alphanumeric except hyphen
-        const fileName = `${seoName}.${ext}`;
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const fileName = `${seoName}-${uniqueSuffix}.${ext}`;
         const fileRef = ref(storage, `celebrities/${fileName}`);
         await uploadBytes(fileRef, file);
         return await getDownloadURL(fileRef);
@@ -415,7 +427,37 @@ const AddCelebrity = () => {
     const handleUpdate = async () => {
         if (!editingCelebrity?._id) return;
         setIsUploading(true);
+
+        let uploadedCoverImage = coverImage;
+        let uploadedInfoboxImage = infoboxImage;
+        // Start with existing gallery images
+        let uploadedGalleryImages: string[] = galleryImages;
+
         try {
+            // Upload new gallery images if any new files are selected
+            if (galleryFiles.length > 0) {
+                const newUploaded: string[] = [];
+                for (const file of galleryFiles) {
+                    const url = await uploadImageToFirebase(file, name);
+                    newUploaded.push(url);
+                }
+                uploadedGalleryImages = [...galleryImages, ...newUploaded];
+                setGalleryImages(uploadedGalleryImages);
+                setGalleryFiles([]); // <-- Clear after upload
+            }
+
+            // Upload new cover image if a new file is selected
+            if (coverImageFile) {
+                uploadedCoverImage = await uploadImageToFirebase(coverImageFile, name);
+                setCoverImage(uploadedCoverImage);
+            }
+
+            // Upload new infobox image if a new file is selected
+            if (infoboxImageFile) {
+                uploadedInfoboxImage = await uploadImageToFirebase(infoboxImageFile, name);
+                setInfoboxImage(uploadedInfoboxImage);
+            }
+
             const updatedData: any = {
                 name,
                 birthDate,
@@ -430,9 +472,9 @@ const AddCelebrity = () => {
                 metaTitle,
                 metaDescription,
                 slug,
-                coverImage,
-                infoboxImage,
-                galleryImages,
+                coverImage: uploadedCoverImage,
+                infoboxImage: uploadedInfoboxImage,
+                galleryImages: uploadedGalleryImages,
                 films,
                 awards,
                 matches,
@@ -444,7 +486,7 @@ const AddCelebrity = () => {
                 events,
                 medals,
             };
-            console.log("Updated Data:", updatedData);
+
             const response = await axios.put(
                 `http://localhost:5000/api/celebrities/${editingCelebrity._id}`,
                 updatedData,
@@ -652,6 +694,61 @@ const AddCelebrity = () => {
         ));
         // eslint-disable-next-line
     }, [sections.length]);
+
+    const fetchFirebaseImages = async () => {
+        setIsFetchingImages(true);
+        const images: string[] = [];
+        const listRef = ref(storage, "celebrities/");
+        const res = await listAll(listRef);
+        console.log("res:", res);
+        for (const itemRef of res.items) {
+            const url = await getDownloadURL(itemRef);
+            images.push(url);
+        }
+        console.log("Fetched Firebase images:", images);
+        setFirebaseImages(images);
+        setIsFetchingImages(false);
+    };
+    const fetchFirebaseInfoboxImages = async () => {
+        setIsFetchingInfoboxImages(true);
+        const images: string[] = [];
+        const listRef = ref(storage, "celebrities/");
+        const res = await listAll(listRef);
+        for (const itemRef of res.items) {
+            const url = await getDownloadURL(itemRef);
+            images.push(url);
+        }
+        setFirebaseInfoboxImages(images);
+        setIsFetchingInfoboxImages(false);
+    };
+
+    const fetchFirebaseCoverImages = async () => {
+        setIsFetchingCoverImages(true);
+        const images: string[] = [];
+        const listRef = ref(storage, "celebrities/");
+        const res = await listAll(listRef);
+        for (const itemRef of res.items) {
+            const url = await getDownloadURL(itemRef);
+            images.push(url);
+        }
+        setFirebaseCoverImages(images);
+        setIsFetchingCoverImages(false);
+    };
+
+    const openGalleryModal = async () => {
+        setShowGalleryModal(true);
+        await fetchFirebaseImages();
+    };
+
+    const openInfoboxModal = async () => {
+        setShowInfoboxModal(true);
+        await fetchFirebaseInfoboxImages();
+    };
+
+    const openCoverModal = async () => {
+        setShowCoverModal(true);
+        await fetchFirebaseCoverImages();
+    };
 
     return (
         <div className="min-h-screen bg-gray-900 py-10">
@@ -1282,12 +1379,13 @@ const AddCelebrity = () => {
                     </div>
                     <div className="bg-gray-800 rounded-lg shadow border border-gray-700 p-4">
                         <label className="font-semibold mb-1 block text-gray-200">Infobox Image</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleInfoboxImageChange}
-                            className="input w-full border rounded px-3 py-2 mb-2 bg-gray-900 text-gray-100 border-gray-700"
-                        />
+                        <button
+                            type="button"
+                            className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded mb-2"
+                            onClick={openInfoboxModal}
+                        >
+                            Choose Image
+                        </button>
                         {infoboxImage && (
                             <img
                                 src={infoboxImage}
@@ -1298,26 +1396,35 @@ const AddCelebrity = () => {
                     </div>
                     <div className="bg-gray-800 rounded-lg shadow border border-gray-700 p-4">
                         <label className="font-semibold mb-1 block text-gray-200">Gallery Images</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={e => {
-                                if (e.target.files) {
-                                    setIsDirty(true);
-                                    setGalleryFiles(prev => [...prev, ...Array.from(e.target.files)]);
-                                }
-                            }}
-                            className="input w-full border rounded px-3 py-2 mb-2 bg-gray-900 text-gray-100 border-gray-700"
-                        />
+                        <button
+                            type="button"
+                            className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded mb-2"
+                            onClick={openGalleryModal}
+                        >
+                            Add Image
+                        </button>
                         <div className="flex flex-wrap gap-2 mt-2">
                             {galleryImages.map((img, idx) => (
-                                <img
-                                    key={idx}
-                                    src={img}
-                                    alt={`Gallery ${idx + 1}`}
-                                    className="rounded shadow w-24 h-24 object-cover border border-gray-700"
-                                />
+                                <div key={idx} className="relative">
+                                    <img
+                                        src={img}
+                                        alt={`Gallery ${idx + 1}`}
+                                        className="rounded shadow w-24 h-24 object-cover border border-gray-700"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="absolute top-1 right-1 bg-red-600 hover:bg-red-800 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                                        onClick={() => {
+                                            setGalleryImages(prev => {
+                                                setIsDirty(true);
+                                                return prev.filter((_, i) => i !== idx);
+                                            });
+                                        }}
+                                        title="Remove"
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -1396,12 +1503,13 @@ const AddCelebrity = () => {
                     {/* Meta fields */}
                     <div className="bg-gray-800 rounded-lg shadow border border-gray-700 p-4">
                         <label className="font-semibold mb-1 block text-gray-200">Cover Image</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleCoverImageChange}
-                            className="input w-full border rounded px-3 py-2 mb-2 bg-gray-900 text-gray-100 border-gray-700"
-                        />
+                        <button
+                            type="button"
+                            className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded mb-2"
+                            onClick={openCoverModal}
+                        >
+                            Choose Image
+                        </button>
                         {coverImage && (
                             <img
                                 src={coverImage}
@@ -1490,6 +1598,201 @@ const AddCelebrity = () => {
                         >
                             Close
                         </button>
+                    </div>
+                </div>
+            )}
+            {showGalleryModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                    <div className="bg-gray-900 rounded-lg shadow-lg p-6 max-w-2xl w-full">
+                        <h2 className="text-xl font-bold text-white mb-4">Select an Image from Gallery</h2>
+                        {isFetchingImages ? (
+                            <div className="text-white">Loading images...</div>
+                        ) : (
+                            <div className="flex flex-wrap gap-3 max-h-96 overflow-y-auto mb-4">
+                                {firebaseImages.map((img, idx) => (
+                                    <div key={idx} className="relative group">
+                                        <img
+                                            src={img}
+                                            alt={`Firebase Gallery ${idx + 1}`}
+                                            className="w-24 h-24 object-cover rounded border-2 border-transparent hover:border-purple-500 cursor-pointer"
+                                            onClick={() => {
+                                                setGalleryImages(prev => {
+                                                    setIsDirty(true);
+                                                    return [...prev, img];
+                                                });
+                                                setShowGalleryModal(false);
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="absolute top-1 right-1 bg-red-600 hover:bg-red-800 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-80 group-hover:opacity-100"
+                                            title="Delete"
+                                            disabled={deletingImageIdx === idx}
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                setDeletingImageIdx(idx);
+                                                try {
+                                                    const auth = getAuth();
+                                                    if (!auth.currentUser) {
+                                                        await signInAnonymously(auth);
+                                                    }
+                                                    // Extract the path after "/o/" and before "?"
+                                                    const match = img.match(/\/o\/(.*?)\?/);
+                                                    if (match && match[1]) {
+                                                        const path = decodeURIComponent(match[1]);
+                                                        const fileRef = ref(storage, path);
+                                                        await deleteObject(fileRef);
+                                                        setFirebaseImages(prev => prev.filter((_, i) => i !== idx));
+                                                        setGalleryImages(prev => prev.filter(url => url !== img));
+                                                    } else {
+                                                        alert("Could not parse image path for deletion.");
+                                                    }
+                                                } catch (err) {
+                                                    alert("Failed to delete image from Firebase.");
+                                                    console.error(err);
+                                                } finally {
+                                                    setDeletingImageIdx(null);
+                                                }
+                                            }}
+                                        >
+                                            {deletingImageIdx === idx ? (
+                                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                                </svg>
+                                            ) : (
+                                                <>&times;</>
+                                            )}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <div className="flex gap-2">
+                            <label className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded cursor-pointer">
+                                Upload New
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={async e => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            const url = await uploadImageToFirebase(e.target.files[0], name);
+                                            setGalleryImages(prev => [...prev, url]);
+                                            setShowGalleryModal(false);
+                                        }
+                                    }}
+                                />
+                            </label>
+                            <button
+                                className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded"
+                                onClick={() => setShowGalleryModal(false)}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Infobox Image Modal */}
+            {showInfoboxModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                    <div className="bg-gray-900 rounded-lg shadow-lg p-6 max-w-2xl w-full">
+                        <h2 className="text-xl font-bold text-white mb-4">Select Infobox Image</h2>
+                        {isFetchingInfoboxImages ? (
+                            <div className="text-white">Loading images...</div>
+                        ) : (
+                            <div className="flex flex-wrap gap-3 max-h-96 overflow-y-auto mb-4">
+                                {firebaseInfoboxImages.map((img, idx) => (
+                                    <img
+                                        key={idx}
+                                        src={img}
+                                        alt={`Infobox ${idx + 1}`}
+                                        className="w-24 h-24 object-cover rounded border-2 border-transparent hover:border-purple-500 cursor-pointer"
+                                        onClick={() => {
+                                            setInfoboxImage(img);
+                                            setIsDirty(true);
+                                            setShowInfoboxModal(false);
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                        <div className="flex gap-2">
+                            <label className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded cursor-pointer">
+                                Upload New
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={async e => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            const url = await uploadImageToFirebase(e.target.files[0], name);
+                                            setInfoboxImage(url);
+                                            setIsDirty(true);
+                                            setShowInfoboxModal(false);
+                                        }
+                                    }}
+                                />
+                            </label>
+                            <button
+                                className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded"
+                                onClick={() => setShowInfoboxModal(false)}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Cover Image Modal */}
+            {showCoverModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                    <div className="bg-gray-900 rounded-lg shadow-lg p-6 max-w-2xl w-full">
+                        <h2 className="text-xl font-bold text-white mb-4">Select Cover Image</h2>
+                        {isFetchingCoverImages ? (
+                            <div className="text-white">Loading images...</div>
+                        ) : (
+                            <div className="flex flex-wrap gap-3 max-h-96 overflow-y-auto mb-4">
+                                {firebaseCoverImages.map((img, idx) => (
+                                    <img
+                                        key={idx}
+                                        src={img}
+                                        alt={`Cover ${idx + 1}`}
+                                        className="w-24 h-24 object-cover rounded border-2 border-transparent hover:border-purple-500 cursor-pointer"
+                                        onClick={() => {
+                                            setCoverImage(img);
+                                            setIsDirty(true);
+                                            setShowCoverModal(false);
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                        <div className="flex gap-2">
+                            <label className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded cursor-pointer">
+                                Upload New
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={async e => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            const url = await uploadImageToFirebase(e.target.files[0], name);
+                                            setCoverImage(url);
+                                            setIsDirty(true);
+                                            setShowCoverModal(false);
+                                        }
+                                    }}
+                                />
+                            </label>
+                            <button
+                                className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded"
+                                onClick={() => setShowCoverModal(false)}
+                            >
+                                Cancel
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
