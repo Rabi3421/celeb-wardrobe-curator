@@ -155,25 +155,7 @@ const AdminOutfits: React.FC = () => {
 
   // Handle edit
   const handleEdit = (outfit: any) => {
-    setEditOutfit(outfit);
-    setShowAddEditForm(true);
-    setMediaFiles((outfit.images || []).map((url: string, i: number) => ({
-      url,
-      type: 'image',
-      displayOrder: i,
-      isPrimary: i === 0
-    })));
-    reset({
-      title: outfit.title,
-      image: outfit.image || "",
-      celebrityId: outfit.celebrity?._id || "",
-      occasion: outfit.occasion || "",
-      description: outfit.description || "",
-      date: formatDate(outfit.date),
-      affiliateLink: outfit.affiliateLink || "",
-      tagsString: outfit.tags ? outfit.tags.join(', ') : "",
-      fullDescription: outfit.fullDescription || "",
-    });
+    navigate("/add-outfit", { state: { outfit } });
   };
 
   // Handle add
