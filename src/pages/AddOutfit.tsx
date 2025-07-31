@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import MediaUploader from "@/components/admin/MediaUploader";
 import Link from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
 import Image from "@tiptap/extension-image";
@@ -15,7 +14,6 @@ import ListItem from "@tiptap/extension-list-item";
 import { storage } from "../components/ui/firebase";
 import { getAuth, signInAnonymously } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from "firebase/storage";
-import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { API_CONFIG } from "@/config/api";
 import { useForm } from "react-hook-form";
@@ -92,15 +90,8 @@ const AddOutfit: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { outfit } = location.state || {};
-    const { register, setValue } = useForm();
+    const { setValue } = useForm();
     const mediaUploaderRef = useRef<{ uploadAllMedia: () => Promise<any[]> }>(null);
-    const [mediaFiles, setMediaFiles] = useState<any[]>([]);
-
-    // Gallery modal state
-    const [showGalleryModal, setShowGalleryModal] = useState(false);
-    const [firebaseImages, setFirebaseImages] = useState<string[]>([]);
-    const [isFetchingImages, setIsFetchingImages] = useState(false);
-    const [deletingImageIdx, setDeletingImageIdx] = useState<number | null>(null);
 
     // Main form state
     const [galleryImages, setGalleryImages] = useState<string[]>([]);
@@ -117,6 +108,13 @@ const AddOutfit: React.FC = () => {
         { title: "Style Notes", content: "" },
     ]);
     const [celebrityId, setCelebrityId] = useState("");
+    const [outfitId, setOutfitId] = useState<string>(() => outfit?.outfitId || Date.now().toString());
+
+    // Gallery modal state
+    const [showGalleryModal, setShowGalleryModal] = useState(false);
+    const [firebaseImages, setFirebaseImages] = useState<string[]>([]);
+    const [isFetchingImages, setIsFetchingImages] = useState(false);
+    const [deletingImageIdx, setDeletingImageIdx] = useState<number | null>(null);
 
     // Celebrity search state
     const [celebrityOptions, setCelebrityOptions] = useState<any[]>([]);
@@ -124,11 +122,17 @@ const AddOutfit: React.FC = () => {
     const [loadingCelebs, setLoadingCelebs] = useState(false);
     const celebInputRef = useRef<HTMLInputElement>(null);
 
-    // Firebase gallery fetch
+    // Fetch images for this outfit only
     const fetchFirebaseImages = async () => {
+        if (!celebrityId || !outfitId) {
+            toast.error("Please select a celebrity and enter an outfit title first.");
+            setFirebaseImages([]);
+            setIsFetchingImages(false);
+            return;
+        }
         setIsFetchingImages(true);
         const images: string[] = [];
-        const listRef = ref(storage, "outfits/");
+        const listRef = ref(storage, `outfits/${celebrityId}/${outfitId}/`);
         const res = await listAll(listRef);
         for (const itemRef of res.items) {
             const url = await getDownloadURL(itemRef);
@@ -138,20 +142,30 @@ const AddOutfit: React.FC = () => {
         setIsFetchingImages(false);
     };
 
-    // Upload to Firebase
-    const uploadImageToFirebase = async (file: File, outfitTitle: string) => {
+    // Upload to Firebase using outfitId
+    const uploadImageToFirebase = async (file: File) => {
         const auth = getAuth();
         if (!auth.currentUser) {
             await signInAnonymously(auth);
         }
-        const ext = file.name.split('.').pop();
-        const seoName = outfitTitle
+        // 1. Slugify celebrity name
+        const actorSlug = celebrity
             .trim()
             .toLowerCase()
             .replace(/\s+/g, '-')
             .replace(/[^a-z0-9\-]/g, '');
-        const fileName = `${seoName}-${Date.now()}.${ext}`;
-        const fileRef = ref(storage, `outfits/${fileName}`);
+
+        // 2. Get current image count in this outfit folder
+        const listRef = ref(storage, `outfits/${celebrityId}/${outfitId}/`);
+        const res = await listAll(listRef);
+        const count = res.items.length + 1;
+
+        // 3. Build file name
+        const ext = file.name.split('.').pop();
+        const fileName = `${actorSlug}-${count}.${ext}`;
+
+        // 4. Upload
+        const fileRef = ref(storage, `outfits/${celebrityId}/${outfitId}/${fileName}`);
         await uploadBytes(fileRef, file);
         return await getDownloadURL(fileRef);
     };
@@ -163,14 +177,19 @@ const AddOutfit: React.FC = () => {
             });
             setTitle(outfit.title || "");
             setDescription(outfit.description || "");
-            setTags(Array.isArray(outfit.tags) ? outfit.tags.join(", ") : (outfit.tags || ""));
+            setTags(
+                Array.isArray(outfit.tags)
+                    ? outfit.tags.join(", ")
+                    : (outfit.tags || "")
+            );
             setCelebrity(outfit.celebrity?.name || "");
             setCelebrityId(outfit.celebrity?._id || "");
             setOccasion(outfit.occasion || "");
             setBrand(outfit.brand || "");
             setPrice(outfit.price ? String(outfit.price) : "");
             setAffiliateLink(outfit.affiliateLink || "");
-            setGalleryImages(outfit.images ? outfit.images.map((url: string) => ({ url })) : []);
+            setGalleryImages(outfit.images ? outfit.images.map((url: string) => url) : []);
+            setOutfitId(outfit.outfitId || Date.now().toString());
             if (outfit.sections) setSections(outfit.sections);
         }
     }, [outfit, setValue]);
@@ -248,15 +267,24 @@ const AddOutfit: React.FC = () => {
             .filter(Boolean);
 
         const priceNumber = price && !isNaN(Number(price)) ? Number(price) : null;
+
+        const tagsArray = tags
+            .split(",")
+            .map(tag => tag.trim())
+            .filter(Boolean);
+
         const body = {
             title: title,
             description,
             celebrity: celebrityId,
             occasion,
             brand,
+            tags: tagsArray,
             price: priceNumber,
             affiliateLink,
             images,
+            outfitId,
+            sections,
         };
         try {
             await axios.post(`${API_CONFIG.baseUrl}/outfits`, body);
@@ -274,12 +302,12 @@ const AddOutfit: React.FC = () => {
         }
     };
 
-    const handleGalleryChange = (images: any[]) => {
-        setGalleryImages(images);
-    };
-
     // Open modal and fetch images
     const openGalleryModal = async () => {
+        if (!celebrityId) {
+            toast.error("Please select a celebrity first.");
+            return;
+        }
         setShowGalleryModal(true);
         await fetchFirebaseImages();
     };
@@ -288,7 +316,7 @@ const AddOutfit: React.FC = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 py-12 px-2">
             <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-10">
                 {/* Sidebar */}
-                <aside className="md:w-1/3 w-full sticky top-8 self-start">
+                <aside className="md:w-1/3 w-full md:sticky top-8 self-start min-w-0">
                     <div className="bg-gray-900 rounded-2xl shadow-lg p-8 mb-8 border border-gray-800">
                         <h1 className="text-3xl font-extrabold text-purple-400 mb-2">Add Outfit</h1>
                         <p className="text-gray-400 mb-6">Create a new fashion outfit profile. Fill in all the details and add beautiful images.</p>
