@@ -272,7 +272,7 @@ const Index: React.FC = () => {
             <div className="flex space-x-4">
               <button
                 className="btn-primary flex items-center"
-                onClick={() => navigate('/celebrities')}
+                onClick={() => navigate('/outfits')}
               >
                 Explore Celebrity Looks
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
