@@ -35,10 +35,24 @@ const Index: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const { trackPageView } = useAnalytics();
-  console.log("celebrities:",celebrities)
+  console.log("celebrities:", celebrities)
   useEffect(() => {
     dispatch(fetchCelebritiesAsync());
   }, [dispatch]);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/blogs");
+        // If your API returns { data: [...] }
+        const posts = res.data.data || res.data;
+        setBlogPosts(posts);
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+      }
+    };
+    fetchBlogs();
+  }, []);
 
   // Fetch outfits from your backend
   const { data: outfits = [], isLoading: isOutfitsLoading } = useQuery({
@@ -98,7 +112,7 @@ const Index: React.FC = () => {
   const spotlightCelebrity = celebrities.length > 0 ? {
     id: celebrities[0]._id || celebrities[0].id,
     name: celebrities[0].name,
-    image: celebrities[0].image,
+    image: celebrities[0].coverImage,
     outfit: "Latest Fashion Statement",
     event: "Recent Appearance",
     description: celebrities[0].bio || "Stunning look from one of our favorite celebrities.",
@@ -418,7 +432,7 @@ const Index: React.FC = () => {
               id={post.id}
               title={post.title}
               excerpt={post.excerpt}
-              image={post.image}
+              image={post.coverImage}
               date={post.date}
               category={post.category}
             />

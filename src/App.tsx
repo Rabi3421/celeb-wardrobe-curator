@@ -35,6 +35,7 @@ import AdminAnalytics from "./pages/AdminAnalytics";
 import AddCelebrity from "./pages/AddCelebrity";
 import ApiDocs from "./pages/ApiDocs";
 import AddOutfit from "./pages/AddOutfit";
+import AddBlogPost from "./pages/AddBlogPost";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -64,6 +65,7 @@ function App() {
                 
                 {/* Blog routes */}
                 <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/add" element={<AddBlogPost />} />
                 <Route path="/blog/:id" element={<BlogPost />} />
                 <Route path="/blog/s/:slug" element={<BlogPost />} />
                 <Route path="/blog/topics" element={<BlogTopics />} />
