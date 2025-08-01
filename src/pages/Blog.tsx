@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import SampleBlogUploader from "@/components/admin/SampleBlogUploader";
 import TopicCard from "@/components/ui/TopicCard";
 import SEO from "@/components/SEO/SEO";
+import axios from "axios";
 
 const Blog: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
@@ -21,74 +22,76 @@ const Blog: React.FC = () => {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  
+
   useEffect(() => {
     const loadBlogPosts = async () => {
       setIsLoading(true);
       try {
-        const data = await fetchBlogPosts();
-        console.log("Fetched blog posts:", data);
-        setBlogPosts(data);
+        const res = await axios.get("http://localhost:5000/api/blogs");
+        // If your API returns { data: [...] }
+        const posts = res.data.data || res.data;
+        setBlogPosts(posts);
+        console.log("Fetched blog posts:", posts);
       } catch (error) {
         console.error("Error loading blog posts:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     loadBlogPosts();
   }, []);
 
   // Get unique categories
   const categories = Array.from(new Set(blogPosts.map(post => post.category)));
-  
+
   // Filter featured posts (could be based on any criteria)
   const featuredPosts = blogPosts.filter((_, index) => index < 2);
-  
+
   // Initial posts to show
   const initialPostsCount = 3;
-  
+
   // Topics data with SEO-friendly descriptions
   const popularTopics = [
-    { 
-      name: "Red Carpet", 
-      count: 12, 
-      slug: "red-carpet", 
+    {
+      name: "Red Carpet",
+      count: 12,
+      slug: "red-carpet",
       image: "https://images.unsplash.com/photo-1612539342151-6ce47c936370",
       description: "Explore glamorous red carpet looks from your favorite celebrities"
     },
-    { 
-      name: "Street Style", 
-      count: 18, 
-      slug: "street-style", 
+    {
+      name: "Street Style",
+      count: 18,
+      slug: "street-style",
       image: "https://images.unsplash.com/photo-1516763296043-f676c1105999",
       description: "Casual and trendy everyday outfits spotted on celebrities"
     },
-    { 
-      name: "Met Gala", 
-      count: 8, 
-      slug: "met-gala", 
+    {
+      name: "Met Gala",
+      count: 8,
+      slug: "met-gala",
       image: "https://images.unsplash.com/photo-1561989954-c1ff94667d80",
       description: "Stunning and avant-garde looks from fashion's biggest night"
     },
-    { 
-      name: "Fashion Week", 
-      count: 24, 
-      slug: "fashion-week", 
+    {
+      name: "Fashion Week",
+      count: 24,
+      slug: "fashion-week",
       image: "https://images.unsplash.com/photo-1588117305388-c2631a279f82",
       description: "Runway inspirations and front-row celebrity styles"
     },
-    { 
-      name: "Award Shows", 
-      count: 10, 
-      slug: "award-shows", 
+    {
+      name: "Award Shows",
+      count: 10,
+      slug: "award-shows",
       image: "https://images.unsplash.com/photo-1555895423-09d2a58db62e",
-      description: "Elegant ensembles from Oscars, Grammys, and more" 
+      description: "Elegant ensembles from Oscars, Grammys, and more"
     },
-    { 
-      name: "Summer Looks", 
-      count: 14, 
-      slug: "summer-looks", 
+    {
+      name: "Summer Looks",
+      count: 14,
+      slug: "summer-looks",
       image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c",
       description: "Hot weather fashion inspiration from the stars"
     }
@@ -96,7 +99,7 @@ const Blog: React.FC = () => {
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email.trim()) {
       toast({
         title: "Email Required",
@@ -105,18 +108,18 @@ const Blog: React.FC = () => {
       });
       return;
     }
-    
+
     setIsSubscribing(true);
-    
+
     try {
       const result = await subscribeToNewsletter(email, "blog_page");
-      
+
       toast({
         title: result.success ? "Success" : "Error",
         description: result.message,
         variant: result.success ? "default" : "destructive"
       });
-      
+
       if (result.success) {
         setEmail("");
       }
@@ -195,7 +198,7 @@ const Blog: React.FC = () => {
                   <div className="outfit-card h-full overflow-hidden group transition-all duration-300 hover:shadow-xl">
                     <div className="relative">
                       <img
-                        src={post.image}
+                        src={post.coverImage}
                         alt={post.title}
                         className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
                       />
@@ -231,7 +234,7 @@ const Blog: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="section-title mb-0">Browse By Category</h2>
               <TabsList className="bg-transparent">
-                <TabsTrigger 
+                <TabsTrigger
                   value="all"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
@@ -279,7 +282,7 @@ const Blog: React.FC = () => {
                       id={post.id}
                       title={post.title}
                       excerpt={post.excerpt}
-                      image={post.image}
+                      image={post.coverImage}
                       date={post.date}
                       category={post.category}
                       slug={post.slug}
@@ -348,8 +351,8 @@ const Blog: React.FC = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={isSubscribing}
                       />
-                      <button 
-                        type="submit" 
+                      <button
+                        type="submit"
                         className="btn-primary whitespace-nowrap"
                         disabled={isSubscribing}
                       >
@@ -369,7 +372,7 @@ const Blog: React.FC = () => {
                   </form>
                 </CardContent>
               </div>
-              <div 
+              <div
                 className={cn(
                   "hidden md:block bg-cover bg-center",
                   "bg-[url('https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1050&q=80')]"
@@ -391,11 +394,11 @@ const Blog: React.FC = () => {
               View All →
             </Link>
           </div>
-          
+
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {popularTopics.map((topic, index) => (
-              <TopicCard 
-                key={index} 
+              <TopicCard
+                key={index}
                 name={topic.name}
                 count={topic.count}
                 slug={topic.slug}
