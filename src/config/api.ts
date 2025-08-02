@@ -1,7 +1,7 @@
 
 // API configuration
 export const API_CONFIG = {
-  baseUrl: 'http://localhost:5000/api',
+  baseUrl: 'https://api.celebritypersona.com/api',
   websiteApiKey:"c2134352b0ae669cff7496c79db4db96"
 } as const;
 
