@@ -22,6 +22,7 @@ import Paragraph from '@tiptap/extension-paragraph';
 import Text from '@tiptap/extension-text';
 import { EditorContent, useEditor } from '@tiptap/react';
 import axios from "axios";
+import { API_CONFIG } from "@/config/api";
 
 const AddBlogPost: React.FC = () => {
     const location = useLocation();
@@ -158,7 +159,7 @@ const AddBlogPost: React.FC = () => {
                 tags: data.tags ? data.tags.split(",").map((t: string) => t.trim()) : [],
             };
             console.log("blogData:", blogData);
-            const response = await axios.post("http://localhost:5000/api/blogs", blogData, {
+            const response = await axios.post(`${API_CONFIG.baseUrl}/blogs`, blogData, {
                 headers: {
                     "Content-Type": "application/json",
                 },

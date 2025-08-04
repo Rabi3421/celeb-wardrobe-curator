@@ -43,7 +43,7 @@ const Index: React.FC = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/blogs");
+        const res = await axios.get(`${API_CONFIG.baseUrl}/blogs`);
         // If your API returns { data: [...] }
         const posts = res.data.data || res.data;
         setBlogPosts(posts);

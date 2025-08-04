@@ -30,6 +30,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { convertToSlug, generateMetaDescription, generateStructuredData } from "@/utils/blogUploader";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_CONFIG } from "@/config/api";
 
 const PAGE_SIZE = 10;
 
@@ -62,7 +63,7 @@ const AdminBlog: React.FC = () => {
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
-        const res = await axios.get(`http://localhost:5000/api/blogs?page=${page}&limit=${PAGE_SIZE}`);
+        const res = await axios.get(`${API_CONFIG.baseUrl}/blogs?page=${page}&limit=${PAGE_SIZE}`);
         setBlogPosts(res.data.data || []);
         setTotal(res.data.total || 0); // Adjust according to your API's response
       } catch (err) {
@@ -78,7 +79,7 @@ const AdminBlog: React.FC = () => {
 
   const deleteBlogPost = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:5000/api/blogs/${id}`);
+      await axios.delete(`${API_CONFIG.baseUrl}/blogs/${id}`);
       setBlogPosts((prev) => prev.filter((post) => post._id !== id));
       toast({
         title: "Deleted",

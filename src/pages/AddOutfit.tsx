@@ -204,7 +204,7 @@ const AddOutfit: React.FC = () => {
             setLoadingCelebs(true);
             try {
                 const res = await axios.get(
-                    `http://localhost:5000/api/celebrities/search`,
+                    `${API_CONFIG.baseUrl}/celebrities/search`,
                     {
                         params: { name: celebrity },
                         headers: { api_key: API_CONFIG.websiteApiKey }

@@ -15,6 +15,7 @@ import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 import ListItem from '@tiptap/extension-list-item';
 import { listAll, deleteObject } from "firebase/storage";
+import { API_CONFIG } from '@/config/api';
 
 const SectionEditor = ({
     value,
@@ -398,7 +399,7 @@ const AddCelebrity = () => {
                 profileData.medals = medals.filter(m => m.type && m.year);
             }
 
-            const response = await fetch("http://localhost:5000/api/celebrities", {
+            const response = await fetch(`${API_CONFIG.baseUrl}/celebrities`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -485,7 +486,7 @@ const AddCelebrity = () => {
             };
 
             const response = await axios.put(
-                `http://localhost:5000/api/celebrities/${editingCelebrity._id}`,
+                `${API_CONFIG.baseUrl}/celebrities/${editingCelebrity._id}`,
                 updatedData,
                 { headers: { "Content-Type": "application/json" } }
             );
