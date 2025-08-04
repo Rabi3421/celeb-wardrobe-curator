@@ -272,7 +272,7 @@ export const fetchCelebrityBySlug = async (
       {
         headers: {
           "Content-Type": "application/json",
-          api_key: API_CONFIG.websiteApiKey,
+          "x-api-key": API_CONFIG.websiteApiKey,
         },
       }
     );
