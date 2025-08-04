@@ -46,34 +46,6 @@ export const fetchCelebritiesAsync = createAsyncThunk(
   }
 );
 
-// Fetch celebrities with pagination
-export const fetchCelebritiesPaginatedAsync = createAsyncThunk(
-  "celebrities/fetchCelebritiesPaginated",
-  async (
-    { page = 1, limit = 10 }: { page?: number; limit?: number },
-    { rejectWithValue }
-  ) => {
-    try {
-      const response = await axios.get(
-        `${API_CONFIG.baseUrl}/celebrities?page=${page}&limit=${limit}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            api_key: API_CONFIG.websiteApiKey,
-          },
-        }
-      );
-      // If your API returns { data: [...], total: ... }
-      return response.data;
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to fetch celebrities";
-      return rejectWithValue(message);
-    }
-  }
-);
 
 export const deleteCelebrityAsync = createAsyncThunk(
   "celebrities/deleteCelebrity",
@@ -132,26 +104,26 @@ const celebritySlice = createSlice({
         state.isLoading = false;
         state.error = action.error.message || "Failed to fetch celebrities";
       })
-      .addCase(fetchCelebritiesPaginatedAsync.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchCelebritiesPaginatedAsync.fulfilled, (state, action) => {
-        state.isLoading = false;
-        // If your API returns { data: [...], total: ... }
-        state.celebrities = action.payload.data || [];
-        state.total = action.payload.total || 0;
-        state.error = null;
-      })
-      .addCase(fetchCelebritiesPaginatedAsync.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.error.message || "Failed to fetch celebrities";
-      })
-      .addCase(deleteCelebrityAsync.fulfilled, (state, action) => {
-        state.celebrities = state.celebrities.filter(
-          (celeb) => celeb.id !== action.payload && celeb._id !== action.payload
-        );
-      });
+      // .addCase(fetchCelebritiesPaginatedAsync.pending, (state) => {
+      //   state.isLoading = true;
+      //   state.error = null;
+      // })
+      // .addCase(fetchCelebritiesPaginatedAsync.fulfilled, (state, action) => {
+      //   state.isLoading = false;
+      //   // If your API returns { data: [...], total: ... }
+      //   state.celebrities = action.payload.data || [];
+      //   state.total = action.payload.total || 0;
+      //   state.error = null;
+      // })
+1      // .addCase(fetchCelebritiesPaginatedAsync.rejected, (state, action) => {
+      //   state.isLoading = false;
+      //   state.error = action.error.message || "Failed to fetch celebrities";
+      // })
+      // .addCase(deleteCelebrityAsync.fulfilled, (state, action) => {
+      //   state.celebrities = state.celebrities.filter(
+      //     (celeb) => celeb.id !== action.payload && celeb._id !== action.payload
+      //   );
+      // });
   },
 });
 

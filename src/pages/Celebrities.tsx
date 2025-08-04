@@ -11,38 +11,38 @@ import { Celebrity } from "@/types/data";
 import CelebritySpotlight from "@/components/ui/CelebritySpotlight";
 import { Card } from "@/components/ui/card";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { fetchCelebritiesPaginatedAsync } from "@/store/slices/celebritySlice";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store"; // adjust path as needed
+import { AppDispatch, RootState } from "@/store"; // adjust path as needed
+import { fetchCelebritiesPaginated } from "@/services/celebrityApi";
 
 const Celebrities: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearchTerm = searchParams.get("search") || "";
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const {
-    celebrities,
     isLoading,
     total,
     page,
     limit,
   } = useSelector((state: RootState) => state.celebrities);
+  const [celebrities, setCelebrities] = useState<Celebrity[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  console.log("celebrities:", celebrities)
   useEffect(() => {
     const loadCelebrities = async () => {
       try {
-        const action = await dispatch(fetchCelebritiesPaginatedAsync({ page, limit }));
-        const data = action.payload;
+        const response:any = await (fetchCelebritiesPaginated({ page, limit }));
+        setCelebrities(response?.data);
       } catch (error) {
         console.error(error);
       }
     };
     loadCelebrities();
   }, [dispatch, page, limit]);
+  console.log("celebrities:", celebrities)
 
   // Update search params when search term changes
   const updateSearchParams = (newSearchTerm: string) => {
