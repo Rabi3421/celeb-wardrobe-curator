@@ -14,6 +14,7 @@ import SampleBlogUploader from "@/components/admin/SampleBlogUploader";
 import TopicCard from "@/components/ui/TopicCard";
 import SEO from "@/components/SEO/SEO";
 import axios from "axios";
+import { API_CONFIG } from "@/config/api";
 
 const Blog: React.FC = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
@@ -27,7 +28,7 @@ const Blog: React.FC = () => {
     const loadBlogPosts = async () => {
       setIsLoading(true);
       try {
-        const res = await axios.get("http://localhost:5000/api/blogs");
+        const res = await axios.get(`${API_CONFIG.baseUrl}/blogs`);
         // If your API returns { data: [...] }
         const posts = res.data.data || res.data;
         setBlogPosts(posts);

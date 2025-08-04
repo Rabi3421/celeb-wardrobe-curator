@@ -335,7 +335,7 @@ export const addCelebrity = async (
     };
 
     // Make actual API call to backend
-    const response = await fetch("http://localhost:5000/api/celebrities", {
+    const response = await fetch(`${API_CONFIG.baseUrl}/celebrities`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
