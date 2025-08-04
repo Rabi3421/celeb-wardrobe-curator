@@ -31,7 +31,7 @@ export const fetchCelebritiesAsync = createAsyncThunk(
       const response = await axios.get(`${API_CONFIG.baseUrl}/celebrities`, {
         headers: {
           "Content-Type": "application/json",
-          api_key: API_CONFIG.websiteApiKey,
+          "x-api-key": API_CONFIG.websiteApiKey,
         },
       });
       // If your API returns { data: [...] }
@@ -57,7 +57,7 @@ export const deleteCelebrityAsync = createAsyncThunk(
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            api_key: API_CONFIG.websiteApiKey,
+            "x-api-key": API_CONFIG.websiteApiKey,
           },
         }
       );
