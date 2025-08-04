@@ -95,13 +95,13 @@ const Navbar: React.FC = () => {
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
-                <NavigationMenuItem>
+                {/* <NavigationMenuItem>
                   <Link to="/api-docs">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                       API Docs
                     </NavigationMenuLink>
                   </Link>
-                </NavigationMenuItem>
+                </NavigationMenuItem> */}
               </NavigationMenuList>
             </NavigationMenu>
           </div>
