@@ -207,7 +207,10 @@ const AddOutfit: React.FC = () => {
                     `${API_CONFIG.baseUrl}/celebrities/search`,
                     {
                         params: { name: celebrity },
-                        headers: { api_key: API_CONFIG.websiteApiKey }
+                        headers: {
+                            "Content-Type": "application/json",
+                            "x-api-key": API_CONFIG.websiteApiKey,
+                        }
                     }
                 );
                 setCelebrityOptions(res.data?.data || []);
